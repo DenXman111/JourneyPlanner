@@ -5,6 +5,7 @@ to work on this project:
 1. Download the appropriate JDK 11 and JavaFX SDK for your operating.
 
 https://jdk.java.net/11/
+
 https://gluonhq.com/products/javafx/
 
 2.  Go to "File -> Project Structure -> Libraries" and add the JavaFX 11 SDK as a library to the project.
