@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="Controllers.TripMap"
-            prefHeight="400.0" prefWidth="600.0">
 
-</AnchorPane>
+<VBox fx:id="mainBox" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="Controllers.TripMap">
+    <ToolBar prefHeight="40.0" prefWidth="200.0">
+        <Button onAction="#Back" text="Back"/>
+    </ToolBar>
+    <AnchorPane prefHeight="400.0" prefWidth="600.0">
+
+    </AnchorPane>
+</VBox>
