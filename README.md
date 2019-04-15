@@ -8,7 +8,12 @@ https://jdk.java.net/11/
 
 https://gluonhq.com/products/javafx/
 
+Download PostgreSQL JDBC 4.2 Driver, 42.2.5 from
+https://jdbc.postgresql.org/download.html 
+
 2.  Go to **File -> Project Structure -> Libraries** and add the JavaFX 11 SDK as a library to the project.
+    
+    Also add postgresql-42.2.5.jar to Libraries.
 
 3. 
     In **Preferences (File -> Settings) -> Appearance & Behavior -> Path Variables**
