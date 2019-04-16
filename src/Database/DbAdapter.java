@@ -1,7 +1,5 @@
 package Database;
 
-import javafx.scene.input.Dragboard;
-
 import java.sql.*;
 
 public class DbAdapter {

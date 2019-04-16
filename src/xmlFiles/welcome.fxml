@@ -2,26 +2,36 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="mainBox" alignment="TOP_CENTER" xmlns="http://javafx.com/javafx/8.0.172-ea"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.WelcomeController">
-    <Label text="Welcome" textAlignment="CENTER"/>
-    <TextField promptText="Insert some data">
-        <font>
-          <Font size="10.0"/>
-        </font>
-    </TextField>
-    <TextField promptText="Insert more data">
-        <font>
-          <Font size="10.0"/>
-        </font>
-    </TextField>
-    <Button mnemonicParsing="false" onAction="#ShowTripIdeas" text="Show trip ideas">
-        <font>
-          <Font size="10.0"/>
-        </font>
-    </Button>
-</VBox>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="999.0" style="-fx-background-color: #bfbfbf;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.WelcomeController">
+   <children>
+      <AnchorPane prefHeight="210.0" prefWidth="999.0" style="-fx-background-color: #26692A;">
+         <children>
+            <Label layoutX="64.0" layoutY="26.0" prefHeight="158.0" prefWidth="872.0" text="Welcome to JourneyPlanner" textFill="WHITE">
+               <font>
+                  <Font name="Great Vibes" size="88.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+      <Label layoutX="64.0" layoutY="235.0" prefHeight="115.0" prefWidth="872.0" text="Hi! Here you can easily plan your trip." textAlignment="CENTER">
+         <font>
+            <Font name="Tlwg Typist" size="37.0" />
+         </font>
+      </Label>
+      <Button fx:id="WelcomeSceneStartButton" layoutX="320.0" layoutY="437.0" mnemonicParsing="false" onAction="#startButtonPressed" prefHeight="64.0" prefWidth="359.0" style="-fx-background-color: #17FC22; -fx-background-radius: 20; -fx-border-color: #45a437; -fx-border-radius: 15; -fx-border-width: 3;" text="START" textFill="#317227">
+         <font>
+            <Font name="padmaa" size="58.0" />
+         </font>
+      </Button>
+      <ImageView fitHeight="200.0" fitWidth="200.0" layoutX="762.0" layoutY="469.0">
+         <image>
+            <Image url="@../Resourses/travel.png" />
+         </image>
+      </ImageView>
+   </children>
+</AnchorPane>

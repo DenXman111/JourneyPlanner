@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane prefHeight="852.0" prefWidth="905.0" style="-fx-background-color: #616161;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.MainController">
+   <children>
+      <TextField fx:id="MainFieldCity" layoutX="207.0" layoutY="193.0" prefHeight="76.0" prefWidth="492.0" promptText="Your city" style="-fx-background-color: #616161; -fx-border-color: #E1E1E1; -fx-border-width: 3; -fx-border-radius: 20;">
+         <font>
+            <Font size="21.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="MainFieldMoney" layoutX="207.0" layoutY="275.0" prefHeight="76.0" prefWidth="492.0" promptText="How much miney you have?" style="-fx-background-color: #616161; -fx-border-color: #E1E1E1; -fx-border-width: 3; -fx-border-radius: 20;">
+         <font>
+            <Font size="21.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="MainFieldName" layoutX="207.0" layoutY="91.0" prefHeight="76.0" prefWidth="242.0" promptText="First name" style="-fx-background-color: #616161; -fx-border-color: #E1E1E1; -fx-border-width: 3; -fx-border-radius: 20;">
+         <font>
+            <Font size="21.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="MainFieldSurname" layoutX="457.0" layoutY="91.0" prefHeight="76.0" prefWidth="242.0" promptText="Second name" style="-fx-background-color: #616161; -fx-border-color: #E1E1E1; -fx-border-width: 3; -fx-border-radius: 20;">
+         <font>
+            <Font size="21.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="MainFieldFirstDate" layoutX="207.0" layoutY="357.0" prefHeight="76.0" prefWidth="242.0" promptText="Begining date" style="-fx-background-color: #616161; -fx-border-color: #E1E1E1; -fx-border-width: 3; -fx-border-radius: 20;">
+         <font>
+            <Font size="21.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="MainFieldSecondDate" layoutX="456.0" layoutY="357.0" prefHeight="76.0" prefWidth="242.0" promptText="Ending date" style="-fx-background-color: #616161; -fx-border-color: #E1E1E1; -fx-border-width: 3; -fx-border-radius: 20;">
+         <font>
+            <Font size="21.0" />
+         </font>
+      </TextField>
+   </children>
+</AnchorPane>
