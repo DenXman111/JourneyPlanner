@@ -36,8 +36,8 @@
             <Font name="Waltograph UI Bold" size="66.0" />
          </font>
       </Button>
-      <DatePicker fx:id="MainFieldFirstDate" layoutX="211.0" layoutY="594.0" prefHeight="50.0" prefWidth="242.0" promptText="Start date" />
-      <DatePicker fx:id="MainFieldSecondDate" layoutX="461.0" layoutY="594.0" prefHeight="50.0" prefWidth="242.0" promptText="Ending date" style="-fx-background-color: #616161;" />
+      <DatePicker fx:id="MainFieldStartDate" layoutX="211.0" layoutY="594.0" prefHeight="50.0" prefWidth="242.0" promptText="Start date" />
+      <DatePicker fx:id="MainFieldEndingDate" layoutX="461.0" layoutY="594.0" prefHeight="50.0" prefWidth="242.0" promptText="Ending date" style="-fx-background-color: #616161;" />
       <Text fill="#b2adad" layoutX="54.0" layoutY="75.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Fill out a small form that will allow us to find the best journey for you" textAlignment="CENTER" wrappingWidth="806.7294921875">
          <font>
             <Font name="Lucy the Cat Regular" size="67.0" />

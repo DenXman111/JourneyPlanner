@@ -38,29 +38,36 @@ public class MainController {
     private TextField MainFieldFunds;
 
     @FXML
-    private DatePicker MainFieldFirstDate;
+    private DatePicker MainFieldStartDate;
 
     @FXML
-    private DatePicker MainFieldSecondDate;
+    private DatePicker MainFieldEndingDate;
 
     @FXML
     private Button MainButtonFind;
 
     private void check() throws CheckException{
-        System.out.println(MainFieldName.getCharacters());
-        System.out.println(MainFieldSurname.getCharacters());
-        System.out.println(MainFieldCity.getCharacters());
+        if (MainFieldName.getText().isEmpty()) throw new CheckException("Write your name");
+        if (MainFieldSurname.getText().isEmpty()) throw new CheckException("Write your surname");
+        if (MainFieldCity.getText().isEmpty()) throw new CheckException("Write your city");
+        if (MainFieldFunds.getText().isEmpty()) throw new CheckException("Write your funds");
+        if (MainFieldStartDate.getValue() == null) throw new CheckException("Fill start date");
+        if (MainFieldEndingDate.getValue() == null) throw new CheckException("Fill ending date");
+//        System.out.println(MainFieldName.getCharacters());
+//        System.out.println(MainFieldSurname.getCharacters());
+//        System.out.println(MainFieldCity.getCharacters());
         try{
-            System.out.println(Integer.valueOf(MainFieldFunds.getText()));
+            Integer.valueOf(MainFieldFunds.getText());
+//            System.out.println(Integer.valueOf(MainFieldFunds.getText()));
         } catch (RuntimeException e){
             e.getStackTrace();
-            throw new CheckException("Write number to Funds");
+            throw new CheckException("Should be number in Funds");
         }
-        System.out.println(MainFieldFirstDate.getValue());
-        System.out.println(MainFieldSecondDate.getValue());
+//        System.out.println(MainFieldStartDate.getValue());
+//        System.out.println(MainFieldEndingDate.getValue());
 
-        if (LocalDate.now().isAfter(MainFieldFirstDate.getValue())) throw new CheckException("Start date should be in future");
-        if (MainFieldFirstDate.getValue().isAfter(MainFieldSecondDate.getValue())) throw new CheckException("Ending date before start date");
+        if (LocalDate.now().isAfter(MainFieldStartDate.getValue())) throw new CheckException("Start date should be in future");
+        if (MainFieldStartDate.getValue().isAfter(MainFieldEndingDate.getValue())) throw new CheckException("Ending date before start date");
     }
     @FXML
     void findButtonPressed(ActionEvent event) {
