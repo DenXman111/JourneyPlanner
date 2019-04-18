@@ -29,6 +29,7 @@ public class Main extends Application {
     public static void main(String[] args) {
         DbAdapter dbAdapter = new DbAdapter();
         dbAdapter.connect();
+        dbAdapter.create();
         launch(args);
         dbAdapter.disconnect();
     }

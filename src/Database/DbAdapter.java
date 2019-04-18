@@ -3,9 +3,9 @@ package Database;
 import java.sql.*;
 
 public class DbAdapter {
-    private String jdbUrl = "jdbc:postgresql://localhost:5432/journeyplannerdatabase";
+    private String jdbUrl = "jdbc:postgresql://localhost:5432/";
     private String usename = "postgres";
-    private String password = "postgrespassword";
+    private String password = "postgres";
 
     private Connection connection = null;
     private Statement statement = null;
@@ -18,8 +18,18 @@ public class DbAdapter {
     public void connect(){
         try {
             connection = DriverManager.getConnection(jdbUrl, usename, password);
-            System.out.println("Connected to database!!!");
         } catch (SQLException e){
+            e.printStackTrace();
+            System.exit(0);
+        }
+    }
+    public void create(){
+        try {
+            statement = connection.createStatement();
+            statement.executeUpdate("DROP DATABASE IF EXISTS JourneyPlanner");
+            statement.executeUpdate("CREATE DATABASE JourneyPlanner");
+            System.out.println("Database created successfully...");
+        }catch(Exception e){
             e.printStackTrace();
         }
     }
