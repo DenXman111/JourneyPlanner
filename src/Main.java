@@ -30,6 +30,7 @@ public class Main extends Application {
         DbAdapter dbAdapter = new DbAdapter();
         dbAdapter.connect();
         dbAdapter.create();
+        dbAdapter.create_tables("DB.sql");
         launch(args);
         dbAdapter.disconnect();
     }

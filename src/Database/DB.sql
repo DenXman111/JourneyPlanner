@@ -1,4 +1,4 @@
-drop table if exists cities;
+drop table if exists cities cascade;
 create table cities (
 id serial primary key,
 name varchar(30) unique not null,

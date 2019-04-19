@@ -1,6 +1,8 @@
 package Database;
 
+import java.io.FileInputStream;
 import java.sql.*;
+import java.util.Scanner;
 
 public class DbAdapter {
     private String jdbUrl = "jdbc:postgresql://localhost:5432/";
@@ -42,5 +44,21 @@ public class DbAdapter {
         } catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public void create_tables(String arg){
+        try{
+            statement = connection.createStatement();
+            Scanner scanner= new Scanner(new FileInputStream("src/Database/"+arg));
+            String tmp=new String();
+            while(scanner.hasNext()){
+                tmp=tmp+scanner.nextLine();
+            }
+            statement.executeUpdate(tmp);
+            System.out.println("Tables created successfully...");
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
     }
 }
