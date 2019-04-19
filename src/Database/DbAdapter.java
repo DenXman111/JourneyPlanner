@@ -50,7 +50,7 @@ public class DbAdapter {
         try{
             statement = connection.createStatement();
             Scanner scanner= new Scanner(new FileInputStream("src/Database/"+arg));
-            String tmp=new String();
+            String tmp="";
             while(scanner.hasNext()){
                 tmp=tmp+scanner.nextLine();
             }
