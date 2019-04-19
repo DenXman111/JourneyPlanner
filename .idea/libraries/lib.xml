@@ -6,6 +6,7 @@
     <JAVADOC />
     <NATIVE>
       <root url="file://$PATH_TO_FX$" />
+      <root url="file://$USER_HOME$/Downloads/openjfx-11.0.2_windows-x64_bin-sdk/javafx-sdk-11.0.2/bin" />
     </NATIVE>
     <SOURCES>
       <root url="file://$PATH_TO_FX$" />
