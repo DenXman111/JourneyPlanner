@@ -1,6 +1,6 @@
 #welcomeGrid{
     -fx-background-image: url('background.jpg');
-    -fx-background-size: 100% 100%;
+    -fx-background-size: 100%;
 }
 
 #mainButton{
@@ -12,6 +12,6 @@
 }
 
 #mainButton:hover{
-    -fx-background-color: #eeeeee;
-    -fx-border-width: 2;
+    -fx-border-color: #14a085;
+    -fx-border-width: 1.3;
 }
