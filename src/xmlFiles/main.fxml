@@ -10,43 +10,39 @@
 <?import javafx.scene.text.Text?>
 
 <AnchorPane prefHeight="933.0" prefWidth="913.0" style="-fx-background-color: #616161;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.MainController">
-   <children>
-      <TextField fx:id="MainFieldName" layoutX="211.0" layoutY="331.0" prefHeight="76.0" prefWidth="242.0" promptText="First name" style="-fx-background-color: #616161; -fx-border-color: #E1E1E1; -fx-border-width: 3; -fx-border-radius: 20;">
-         <font>
-            <Font size="21.0" />
-         </font>
-      </TextField>
-      <TextField fx:id="MainFieldSurname" layoutX="461.0" layoutY="331.0" prefHeight="76.0" prefWidth="242.0" promptText="Second name" style="-fx-background-color: #616161; -fx-border-color: #E1E1E1; -fx-border-width: 3; -fx-border-radius: 20;">
-         <font>
-            <Font size="21.0" />
-         </font>
-      </TextField>
-      <TextField fx:id="MainFieldCity" layoutX="211.0" layoutY="433.0" prefHeight="76.0" prefWidth="492.0" promptText="Your city" style="-fx-background-color: #616161; -fx-border-color: #E1E1E1; -fx-border-width: 3; -fx-border-radius: 20;">
-         <font>
-            <Font size="21.0" />
-         </font>
-      </TextField>
-      <TextField fx:id="MainFieldFunds" layoutX="211.0" layoutY="515.0" prefHeight="76.0" prefWidth="492.0" promptText="Funds (€)" style="-fx-background-color: #616161; -fx-border-color: #E1E1E1; -fx-border-width: 3; -fx-border-radius: 20;">
-         <font>
-            <Font size="21.0" />
-         </font>
-      </TextField>
-      <Button fx:id="MainButtonFind" layoutX="211.0" layoutY="739.0" mnemonicParsing="false" onAction="#findButtonPressed" prefHeight="24.0" prefWidth="372.0" style="-fx-background-color: #17FC22; -fx-background-radius: 30; -fx-border-color: #E1E1E1; -fx-border-width: 5; -fx-border-radius: 20;" text="Find it!" textFill="#2f2121">
-         <font>
-            <Font name="Waltograph UI Bold" size="66.0" />
-         </font>
-      </Button>
-      <DatePicker fx:id="MainFieldStartDate" layoutX="211.0" layoutY="594.0" prefHeight="50.0" prefWidth="242.0" promptText="Start date" />
-      <DatePicker fx:id="MainFieldEndingDate" layoutX="461.0" layoutY="594.0" prefHeight="50.0" prefWidth="242.0" promptText="Ending date" style="-fx-background-color: #616161;" />
-      <Text fill="#b2adad" layoutX="54.0" layoutY="75.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Fill out a small form that will allow us to find the best journey for you" textAlignment="CENTER" wrappingWidth="806.7294921875">
-         <font>
-            <Font name="Lucy the Cat Regular" size="67.0" />
-         </font>
-      </Text>
-      <ImageView fitHeight="200.0" fitWidth="200.0" layoutX="667.0" layoutY="695.0">
-         <image>
-            <Image url="@../Resourses/travel.png" />
-         </image>
-      </ImageView>
-   </children>
+   <TextField fx:id="MainFieldName" layoutX="211.0" layoutY="331.0" prefHeight="76.0" prefWidth="242.0" promptText="First name" style="-fx-background-color: #616161; -fx-border-color: #E1E1E1; -fx-border-width: 3; -fx-border-radius: 20;">
+      <font>
+         <Font size="21.0" />
+      </font>
+   </TextField>
+   <TextField fx:id="MainFieldSurname" layoutX="461.0" layoutY="331.0" prefHeight="76.0" prefWidth="242.0" promptText="Second name" style="-fx-background-color: #616161; -fx-border-color: #E1E1E1; -fx-border-width: 3; -fx-border-radius: 20;">
+      <font>
+         <Font size="21.0" />
+      </font>
+   </TextField>
+   <TextField fx:id="MainFieldCity" layoutX="211.0" layoutY="433.0" prefHeight="76.0" prefWidth="492.0" promptText="Your city" style="-fx-background-color: #616161; -fx-border-color: #E1E1E1; -fx-border-width: 3; -fx-border-radius: 20;">
+      <font>
+         <Font size="21.0" />
+      </font>
+   </TextField>
+   <TextField fx:id="MainFieldFunds" layoutX="211.0" layoutY="515.0" prefHeight="76.0" prefWidth="492.0" promptText="Funds (€)" style="-fx-background-color: #616161; -fx-border-color: #E1E1E1; -fx-border-width: 3; -fx-border-radius: 20;">
+      <font>
+         <Font size="21.0" />
+      </font>
+   </TextField>
+   <Button fx:id="MainButtonFind" layoutX="211.0" layoutY="739.0" mnemonicParsing="false" onAction="#findButtonPressed" prefHeight="24.0" prefWidth="372.0" style="-fx-background-color: #17FC22; -fx-background-radius: 30; -fx-border-color: #E1E1E1; -fx-border-width: 5; -fx-border-radius: 20;" text="Find it!" textFill="#2f2121">
+      <font>
+         <Font name="Waltograph UI Bold" size="66.0" />
+      </font>
+   </Button>
+   <DatePicker fx:id="MainFieldStartDate" layoutX="211.0" layoutY="594.0" prefHeight="50.0" prefWidth="242.0" promptText="Start date" />
+   <DatePicker fx:id="MainFieldEndingDate" layoutX="461.0" layoutY="594.0" prefHeight="50.0" prefWidth="242.0" promptText="Ending date" style="-fx-background-color: #616161;" />
+   <Text fill="#b2adad" layoutX="54.0" layoutY="75.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Fill out a small form that will allow us to find the best journey for you" textAlignment="CENTER" wrappingWidth="806.7294921875">
+      <font>
+         <Font name="Lucy the Cat Regular" size="67.0" />
+      </font>
+   </Text>
+   <ImageView fitHeight="200.0" fitWidth="200.0" layoutX="667.0" layoutY="695.0">
+      <Image url="@../Resources/travel.png"/>
+   </ImageView>
 </AnchorPane>

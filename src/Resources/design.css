@@ -1,0 +1,17 @@
+#welcomeGrid{
+    -fx-background-image: url('background.jpg');
+    -fx-background-size: 100% 100%;
+}
+
+#mainButton{
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 20;
+    -fx-border-color: #7c7c7c;
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+}
+
+#mainButton:hover{
+    -fx-background-color: #eeeeee;
+    -fx-border-width: 2;
+}

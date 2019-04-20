@@ -1,37 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="999.0" style="-fx-background-color: #bfbfbf;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.WelcomeController">
-   <children>
-      <AnchorPane prefHeight="210.0" prefWidth="999.0" style="-fx-background-color: #26692A;">
-         <children>
-            <Label layoutX="64.0" layoutY="26.0" prefHeight="158.0" prefWidth="872.0" text="Welcome to JourneyPlanner" textFill="WHITE">
-               <font>
-                  <Font name="Great Vibes" size="88.0" />
-               </font>
-            </Label>
-         </children>
-      </AnchorPane>
-      <Label layoutX="64.0" layoutY="235.0" prefHeight="115.0" prefWidth="872.0" text="Hi! Here you can easily plan your trip." textAlignment="CENTER">
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+      nodeOrientation="LEFT_TO_RIGHT" prefHeight="450.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.WelcomeController">
+   <HBox alignment="CENTER_LEFT" maxWidth="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT"
+         prefHeight="100.0">
+      <VBox.margin>
+         <Insets bottom="21.0" left="60.0" top="20.0"/>
+      </VBox.margin>
+      <opaqueInsets>
+         <Insets/>
+      </opaqueInsets>
+      <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+         <HBox.margin>
+            <Insets right="30.0"/>
+         </HBox.margin>
+         <Image url="@../Resources/backpack.png"/>
+      </ImageView>
+      <Label alignment="CENTER_RIGHT" contentDisplay="CENTER" text="Journey" textAlignment="CENTER"
+             textFill="#14a085" textOverrun="CLIP">
          <font>
-            <Font name="Tlwg Typist" size="37.0" />
+            <Font size="36.0"/>
          </font>
       </Label>
-      <Button fx:id="WelcomeSceneStartButton" layoutX="320.0" layoutY="437.0" mnemonicParsing="false" onAction="#startButtonPressed" prefHeight="64.0" prefWidth="359.0" style="-fx-background-color: #17FC22; -fx-background-radius: 20; -fx-border-color: #45a437; -fx-border-radius: 15; -fx-border-width: 3;" text="START" textFill="#317227">
+      <Label text="Planner">
          <font>
-            <Font name="padmaa" size="58.0" />
+            <Font size="36.0"/>
+         </font>
+         <HBox.margin>
+            <Insets right="80.0"/>
+         </HBox.margin>
+      </Label>
+   </HBox>
+   <GridPane id="welcomeGrid" alignment="CENTER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="430.0" prefWidth="800.0"
+             stylesheets="@../Resources/design.css">
+      <columnConstraints>
+         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
+      </columnConstraints>
+      <rowConstraints>
+         <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+      </rowConstraints>
+      <Button id="mainButton" fx:id="WelcomeSceneStartButton" mnemonicParsing="false" onAction="#startButtonPressed"
+              prefHeight="40.0" prefWidth="300.0" stylesheets="@../Resources/design.css" text=" Help me plan my trip"
+              GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+         <font>
+            <Font size="18.0"/>
          </font>
       </Button>
-      <ImageView fitHeight="200.0" fitWidth="200.0" layoutX="762.0" layoutY="469.0">
-         <image>
-            <Image url="@../Resourses/travel.png" />
-         </image>
-      </ImageView>
-   </children>
-</AnchorPane>
+   </GridPane>
+</VBox>
