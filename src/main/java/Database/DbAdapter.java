@@ -1,9 +1,10 @@
-package Database;
+package main.java.Database;
 
 import java.io.FileInputStream;
 import java.sql.*;
 import java.util.Scanner;
 
+@SuppressWarnings("all")
 public class DbAdapter {
     private String jdbUrl = "jdbc:postgresql://localhost:5432/";
     private String usename = "postgres";

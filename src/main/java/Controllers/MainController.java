@@ -1,4 +1,4 @@
-package Controllers;
+package main.java.Controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -15,11 +15,11 @@ import java.time.LocalDate;
 class CheckException extends Exception{
     private String massage;
 
-    public CheckException(String massage){
+    CheckException(String massage){
         this.massage = massage;
     }
 
-    public String getMassage() {
+    String getMassage() {
         return massage;
     }
 }
