@@ -47,7 +47,7 @@
       <rowConstraints>
          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
       </rowConstraints>
-      <Button id="mainButton" fx:id="WelcomeSceneStartButton" mnemonicParsing="false" onAction="#startButtonPressed" prefHeight="40.0" prefWidth="300.0" stylesheets="@../resources/design.css" text=" Help me plan my trip" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+      <Button fx:id="WelcomeSceneStartButton" mnemonicParsing="false" onAction="#startButtonPressed" prefHeight="40.0" prefWidth="300.0" styleClass="mainButton" stylesheets="@../resources/design.css" text=" Help me plan my trip" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
          <font>
             <Font size="18.0" />
          </font>

@@ -23,7 +23,7 @@ public class WelcomeController {
     public void startButtonPressed(ActionEvent event) throws IOException {
         Stage stage = new Stage();
         stage.setTitle("Main");
-        Pane myPane = FXMLLoader.load(getClass().getResource("../../xmlFiles/main.fxml"));
+        Pane myPane = FXMLLoader.load(getClass().getResource("../../xmlFiles/form.fxml"));
         Scene scene = new Scene(myPane);
         stage.setScene(scene);
 

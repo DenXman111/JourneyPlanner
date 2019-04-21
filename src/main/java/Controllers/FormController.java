@@ -24,7 +24,7 @@ class CheckException extends Exception{
     }
 }
 
-public class MainController {
+public class FormController {
     @FXML
     private TextField MainFieldName;
 
