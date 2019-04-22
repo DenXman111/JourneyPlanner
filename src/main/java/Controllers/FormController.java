@@ -2,15 +2,20 @@ package main.java.Controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import main.java.Controllers.PathControllers.Planner;
+import main.java.Controllers.PathControllers.Trip;
 
 import java.time.LocalDate;
+import java.util.List;
 
 class CheckException extends Exception{
     private String massage;
@@ -46,6 +51,9 @@ public class FormController {
     @FXML
     private Button MainButtonFind;
 
+    @FXML
+    private VBox answersVBox;
+
     private void check() throws CheckException{
         if (MainFieldName.getText().isEmpty()) throw new CheckException("Write your name");
         if (MainFieldSurname.getText().isEmpty()) throw new CheckException("Write your surname");
@@ -73,6 +81,15 @@ public class FormController {
     void findButtonPressed(ActionEvent event) {
         try{
             check();
+
+            List<Trip> propositions = Planner.plan("Krakow", 100, 10, 20);
+            assert propositions != null;
+            propositions.stream().
+                    map(Trip::display).
+                    forEach(node -> {
+                        answersVBox.getChildren().add(node);
+                        VBox.setMargin(node, new Insets(20, 10, 0, 20));
+                    });
 
         } catch (CheckException e){
             Stage errorStage = new Stage();
