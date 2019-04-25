@@ -1,6 +1,6 @@
 import java.io.FileInputStream;
 import java.sql.*;
-import java.util.Scanner;
+import java.util.*;
 
 @SuppressWarnings("all")
 public class DbAdapter {
@@ -70,5 +70,12 @@ public class DbAdapter {
             e.printStackTrace();
             return -1;
         }
+    }
+
+    public static Integer getCityID(String city){ //geting ID of city from connected DB
+        return 1;
+    }
+    public static List< ? extends Edge > getNeighbours(Integer cityID){ //geting list of cityID's neighbours
+        return new ArrayList<>();
     }
 }

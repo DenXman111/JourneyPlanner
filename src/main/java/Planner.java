@@ -10,15 +10,22 @@ public class Planner {
     /**
      *
      * @param startPoint city where user starts his journey
-     * @param founds Founds that user can spend on his trip
-     * @param startData Time where trip starts
+     * @param fund Founds that user can spend on his trip
+     * @param startDate Time where trip starts
      * @param endDate Time before which the trip has to end.
      * @return List of proposed trips
      */
     @SuppressWarnings("unused")
-    public static List<Trip> plan(String startPoint, int founds, LocalDate startData, LocalDate endDate){
+    public static List< ? extends Trip > plan(String startPoint, int fund, LocalDate startDate, LocalDate endDate){
+        TripPlans trips = new TripPlans();
 
-        String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lviv", "Warsaw", "Kra`kow"};
+        Integer startID = DbAdapter.getCityID(startPoint);
+
+        trips.findBest(startID, fund, startDate, endDate);
+        return trips.getList();
+        /*
+
+        String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lviv", "Warsaw", "Krakow"};
         List<Trip> result = new ArrayList<>();
         Random random = new Random();
         int size = random.nextInt(12) + 3;
@@ -28,5 +35,8 @@ public class Planner {
                         map(cityName -> new Edge(new City(startPoint), new City(cityName), 100, 100)).
                         collect(Collectors.toList())
         )).limit(size).collect(Collectors.toList());
+
+
+         */
     }
 }
