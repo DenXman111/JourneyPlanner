@@ -8,8 +8,8 @@ average_price numeric(3,2) not null
 drop table if exists buses cascade;
 create table buses(
 id serial primary key,
-start_city varchar(30) references cities(name) not null,
-end_city varchar(30) references cities(name) not null,
+start_city integer references cities(id) not null,
+end_city integer references cities(id) not null,
 price numeric(3,2) not null,
 trip_date date not null,
 available_spaces numeric(2) not null,
