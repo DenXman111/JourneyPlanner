@@ -1,6 +1,6 @@
 #welcomeGrid{
     -fx-background-image: url('backgroundPrague.jpg');
-    -fx-background-size: 100%;
+    -fx-background-size: cover;
 }
 
 .mainButton{
@@ -21,7 +21,8 @@
 
 #mainVBox{
     -fx-background-image: url('backgroundPrague.jpg');
-    -fx-background-size: auto 100%;
+    -fx-background-size: cover;
+    -fx-background-repeat: no-repeat;
 }
 
 .boxes{

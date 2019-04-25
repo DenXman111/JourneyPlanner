@@ -40,14 +40,14 @@
          </HBox.margin>
       </Label>
    </HBox>
-   <GridPane id="welcomeGrid" alignment="CENTER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="350.0" stylesheets="@../resources/design.css">
+   <GridPane id="welcomeGrid" alignment="CENTER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="350.0" stylesheets="@../resources/styleSheet.css">
       <columnConstraints>
          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
       </columnConstraints>
       <rowConstraints>
          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
       </rowConstraints>
-      <Button fx:id="WelcomeSceneStartButton" mnemonicParsing="false" onAction="#startButtonPressed" prefHeight="40.0" prefWidth="300.0" styleClass="mainButton" stylesheets="@../resources/design.css" text=" Help me plan my trip" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+      <Button fx:id="WelcomeSceneStartButton" mnemonicParsing="false" onAction="#startButtonPressed" prefHeight="40.0" prefWidth="300.0" styleClass="mainButton" stylesheets="@../resources/styleSheet.css" text=" Help me plan my trip" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
          <font>
             <Font size="18.0" />
          </font>

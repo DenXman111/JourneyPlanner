@@ -91,7 +91,7 @@ public class FormController {
                     map(Trip::display).
                     forEach(node -> {
                         answersVBox.getChildren().add(node);
-                        VBox.setMargin(node, new Insets(20, 10, 0, 20));
+                        VBox.setMargin(node, new Insets(20, 10, 10, 20));
                     });
 
         } catch (CheckException e){
