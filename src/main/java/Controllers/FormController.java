@@ -84,7 +84,7 @@ public class FormController {
             if (false)
                 check();
 
-            List<Trip> propositions = Planner.plan("Krakow", 100, 10, 20);
+            List<Trip> propositions = Planner.plan("Krakow", 100, MainFieldStartDate.getValue(), MainFieldEndingDate.getValue());
             assert propositions != null;
             answersVBox.getChildren().clear();
             propositions.stream().

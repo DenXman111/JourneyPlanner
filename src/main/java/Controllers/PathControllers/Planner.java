@@ -1,5 +1,6 @@
 package main.java.Controllers.PathControllers;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,14 +13,14 @@ public class Planner {
      *
      * @param startPoint city where user starts his journey
      * @param founds Founds that user can spend on his trip
-     * @param from Time where trip starts
-     * @param to Time before which the trip has to end.
+     * @param startData Time where trip starts
+     * @param endDate Time before which the trip has to end.
      * @return List of proposed trips
      */
     @SuppressWarnings("unused")
-    public static List<Trip> plan(String startPoint, int founds, double from, double to){
+    public static List<Trip> plan(String startPoint, int founds, LocalDate startData, LocalDate endDate){
 
-        String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lviv", "Warsaw", "Krakow"};
+        String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lviv", "Warsaw", "Kra`kow"};
         List<Trip> result = new ArrayList<>();
         Random random = new Random();
         int size = random.nextInt(12) + 3;
