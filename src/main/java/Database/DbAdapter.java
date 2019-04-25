@@ -47,19 +47,30 @@ public class DbAdapter {
         }
     }
 
-    public void create_tables(String arg){
-        try{
+    public void create_tables(String arg) {
+        try {
             statement = connection.createStatement();
-            Scanner scanner= new Scanner(new FileInputStream("src/Database/"+arg));
-            String tmp="";
-            while(scanner.hasNext()){
-                tmp=tmp+scanner.nextLine();
+            Scanner scanner = new Scanner(new FileInputStream("src/Database/" + arg));
+            String tmp = "";
+            while (scanner.hasNext()) {
+                tmp = tmp + scanner.nextLine();
             }
             statement.executeUpdate(tmp);
             System.out.println("Tables created successfully...");
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
+    }
+    public Integer starting_city(String name){
+        try {
+            statement = connection.createStatement();
+            String query="Select id from cities where name=''";
+            query=query+name+"''";
+            ResultSet result=statement.executeQuery(query);
+            return result.getInt("id");
+        } catch (Exception e){
+            e.printStackTrace();
+            return 0;
+        }
     }
 }
