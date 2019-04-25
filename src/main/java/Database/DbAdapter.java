@@ -62,15 +62,16 @@ public class DbAdapter {
         }
     }
     public Integer starting_city(String name){
-        try {
-            statement = connection.createStatement();
-            String query="Select id from cities where name=\'"+name+"\'";
-            ResultSet result=statement.executeQuery(query);
-            while (result.next()){return result.getInt("id");}
-            return -1;
-        } catch (Exception e){
-            e.printStackTrace();
-            return -1;
+            try {
+                statement = connection.createStatement();
+                String query="Select id from cities where name=''";
+                query=query+name+"''";
+                ResultSet result=statement.executeQuery(query);
+                return result.getInt("id");
+            }
+            catch (Exception e){
+                e.printStackTrace();
+                return 0;
+            }
         }
-    }
 }
