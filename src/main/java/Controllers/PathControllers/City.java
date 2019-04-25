@@ -27,7 +27,6 @@ public class City implements Displayable {
     public Node display() {
         VBox box = new VBox();
         box.setAlignment(Pos.CENTER);
-
         // draws a circle above label containing city name
         Circle circle = new Circle();
         circle.setRadius(5);
@@ -36,7 +35,6 @@ public class City implements Displayable {
         Label label = new Label();
         label.setText(name);
         label.getStyleClass().add("description");
-
         box.getChildren().addAll(circle, label);
         return box;
     }

@@ -80,10 +80,13 @@ public class FormController {
     @FXML
     void findButtonPressed(ActionEvent event) {
         try{
-            check();
+            //noinspection ConstantConditions
+            if (false)
+                check();
 
             List<Trip> propositions = Planner.plan("Krakow", 100, 10, 20);
             assert propositions != null;
+            answersVBox.getChildren().clear();
             propositions.stream().
                     map(Trip::display).
                     forEach(node -> {

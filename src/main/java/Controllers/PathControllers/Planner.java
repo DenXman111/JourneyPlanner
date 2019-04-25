@@ -1,8 +1,11 @@
 package main.java.Controllers.PathControllers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Planner {
 
@@ -21,12 +24,15 @@ public class Planner {
         List<Edge> plan = Arrays.stream(exemplaryCities).
                 map( cityName -> new Edge(new City(startPoint), new City(cityName), 100, 100)).
                 collect(Collectors.toList());
-        try {
-            Trip trip = new Trip(plan);
-            return Arrays.asList(trip, trip, trip);
-        } catch (EmptyPlan emptyPlan) {
-            emptyPlan.printStackTrace();
-            return null;
-        }
+        Trip trip = new Trip(plan);
+        List<Trip> result = new ArrayList<>();
+        Random random = new Random();
+        int size = random.nextInt(12) + 3;
+        return Stream.generate(() -> new Trip(
+                Stream.generate(() -> exemplaryCities[random.nextInt(exemplaryCities.length)]).
+                        limit(random.nextInt(10) + 3).
+                        map(cityName -> new Edge(new City(startPoint), new City(cityName), 100, 100)).
+                        collect(Collectors.toList())
+        )).limit(size).collect(Collectors.toList());
     }
 }
