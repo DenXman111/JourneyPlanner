@@ -33,6 +33,7 @@ public class Main extends Application {
         dbAdapter.connect();
         dbAdapter.create();
         dbAdapter.create_tables("DB.sql");
+        Integer a= dbAdapter.starting_city("a");
         launch(args);
         dbAdapter.disconnect();
     }

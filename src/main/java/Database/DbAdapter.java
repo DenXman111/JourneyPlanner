@@ -64,13 +64,13 @@ public class DbAdapter {
     public Integer starting_city(String name){
         try {
             statement = connection.createStatement();
-            String query="Select id from cities where name=''";
-            query=query+name+"''";
+            String query="Select id from cities where name=\'"+name+"\'";
             ResultSet result=statement.executeQuery(query);
-            return result.getInt("id");
+            while (result.next()){return result.getInt("id");}
+            return -1;
         } catch (Exception e){
             e.printStackTrace();
-            return 0;
+            return -1;
         }
     }
 }
