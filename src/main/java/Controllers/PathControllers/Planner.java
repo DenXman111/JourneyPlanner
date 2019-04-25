@@ -1,7 +1,6 @@
 package main.java.Controllers.PathControllers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -21,10 +20,6 @@ public class Planner {
     public static List<Trip> plan(String startPoint, int founds, double from, double to){
 
         String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lviv", "Warsaw", "Krakow"};
-        List<Edge> plan = Arrays.stream(exemplaryCities).
-                map( cityName -> new Edge(new City(startPoint), new City(cityName), 100, 100)).
-                collect(Collectors.toList());
-        Trip trip = new Trip(plan);
         List<Trip> result = new ArrayList<>();
         Random random = new Random();
         int size = random.nextInt(12) + 3;
