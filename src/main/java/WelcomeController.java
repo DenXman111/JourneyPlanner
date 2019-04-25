@@ -1,5 +1,3 @@
-package main.java.Controllers;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,7 +21,7 @@ public class WelcomeController {
     public void startButtonPressed(ActionEvent event) throws IOException {
         Stage stage = new Stage();
         stage.setTitle("Main");
-        Pane myPane = FXMLLoader.load(getClass().getResource("../../xmlFiles/form.fxml"));
+        Pane myPane = FXMLLoader.load(getClass().getResource("/xmlFiles/form.fxml"));
         Scene scene = new Scene(myPane);
         stage.setScene(scene);
 

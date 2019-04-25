@@ -1,5 +1,3 @@
-package main.java.Controllers.PathControllers;
-
 import javafx.scene.Node;
 
 public interface Displayable {

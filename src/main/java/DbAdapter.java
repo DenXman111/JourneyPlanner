@@ -1,5 +1,3 @@
-package main.java.Database;
-
 import java.io.FileInputStream;
 import java.sql.*;
 import java.util.Scanner;
@@ -50,7 +48,7 @@ public class DbAdapter {
     public void create_tables(String arg) {
         try {
             statement = connection.createStatement();
-            Scanner scanner = new Scanner(new FileInputStream("src/Database/" + arg));
+            Scanner scanner = new Scanner(new FileInputStream("src/main/Database/" + arg));
             String tmp = "";
             while (scanner.hasNext()) {
                 tmp = tmp + scanner.nextLine();

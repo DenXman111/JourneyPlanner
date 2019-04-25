@@ -10,12 +10,12 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox id="mainVBox" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="600.0" stylesheets="@../resources/styleSheet.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.Controllers.FormController">
+<VBox id="mainVBox" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="600.0" stylesheets="@../styleSheet.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FormController">
    <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity">
       <VBox.margin>
          <Insets left="20.0" top="20.0" />
       </VBox.margin>
-      <VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" styleClass="boxes" stylesheets="@../resources/styleSheet.css">
+      <VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" styleClass="boxes" stylesheets="@../styleSheet.css">
          <Label scaleShape="false" text="Please fill these form so that we could help in planning your trip." textAlignment="CENTER" textFill="#14a085" wrapText="true">
             <font>
                <Font size="14.0" />

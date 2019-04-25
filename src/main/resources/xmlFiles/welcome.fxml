@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="450.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.Controllers.WelcomeController">
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="450.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="WelcomeController">
    <HBox alignment="CENTER_LEFT" maxWidth="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="100.0">
       <VBox.margin>
          <Insets bottom="1.0" left="60.0" />
@@ -24,7 +24,7 @@
          <HBox.margin>
             <Insets right="30.0" />
          </HBox.margin>
-         <Image url="@../resources/backpack.png" />
+         <Image url="@../backpack.png" />
       </ImageView>
       <Label alignment="CENTER_RIGHT" contentDisplay="CENTER" text="Journey" textAlignment="CENTER" textFill="#14a085" textOverrun="CLIP">
          <font>
@@ -40,14 +40,14 @@
          </HBox.margin>
       </Label>
    </HBox>
-   <GridPane id="welcomeGrid" alignment="CENTER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="350.0" stylesheets="@../resources/styleSheet.css">
+   <GridPane id="welcomeGrid" alignment="CENTER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="350.0" stylesheets="@../styleSheet.css">
       <columnConstraints>
          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
       </columnConstraints>
       <rowConstraints>
          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
       </rowConstraints>
-      <Button fx:id="WelcomeSceneStartButton" mnemonicParsing="false" onAction="#startButtonPressed" prefHeight="40.0" prefWidth="300.0" styleClass="mainButton" stylesheets="@../resources/styleSheet.css" text=" Help me plan my trip" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+      <Button fx:id="WelcomeSceneStartButton" mnemonicParsing="false" onAction="#startButtonPressed" prefHeight="40.0" prefWidth="300.0" styleClass="mainButton" stylesheets="@../styleSheet.css" text=" Help me plan my trip" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
          <font>
             <Font size="18.0" />
          </font>

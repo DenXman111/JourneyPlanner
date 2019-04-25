@@ -1,5 +1,3 @@
-package main.java.Controllers.PathControllers;
-
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;

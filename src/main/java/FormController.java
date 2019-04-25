@@ -1,5 +1,3 @@
-package main.java.Controllers;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -11,8 +9,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import main.java.Controllers.PathControllers.Planner;
-import main.java.Controllers.PathControllers.Trip;
 
 import java.time.LocalDate;
 import java.util.List;

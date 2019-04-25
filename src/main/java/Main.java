@@ -1,7 +1,3 @@
-package main.java;
-
-import main.java.Controllers.WelcomeController;
-import main.java.Database.DbAdapter;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -15,7 +11,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setTitle("JourneyPlanner");
 
-        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("../xmlFiles/welcome.fxml"));
+        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
 
         Pane myPane = myLoader.load();
         WelcomeController controller = myLoader.getController();
