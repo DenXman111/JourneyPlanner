@@ -26,6 +26,8 @@ public class TripPlans {
     private void dfs(Integer nowID, int fund, LocalDate currentDate, LocalDate endingDate){
         inCurrent.add(nowID);
 
+        System.out.println("dfs in " + nowID);
+
         List < ? extends Edge > neighbours = DbAdapter.getNeighbours(nowID);
         for (Edge e : neighbours){
             if (!e.getEndingDate().isBefore(endingDate)) continue;
