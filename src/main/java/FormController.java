@@ -26,7 +26,7 @@ class CheckException extends Exception{
 }
 
 public class FormController {
-    private final static boolean debugMode = true; // true if it's debug version
+    final static boolean debugMode = true; //debugMode flag
 
     @FXML
     private TextField MainFieldName;

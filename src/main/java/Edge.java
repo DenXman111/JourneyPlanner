@@ -3,19 +3,30 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
+import jdk.vm.ci.meta.Local;
+
+import java.time.LocalDate;
+import java.util.Date;
 
 /**
  * Edge class stores information about single transit between cities.
  */
 public class Edge implements Displayable{
-    private City startCity, endCity;
-    private double startTime, duration;
 
-    Edge(City startCity, City endCity, double startTime, double duration){
+    private Integer BusID;
+    private City startCity;
+    private City endCity;
+    private LocalDate startDate;
+    private LocalDate endingDate;
+    private int price;
+
+    Edge(Integer BusID, City startCity, City endCity, int price, LocalDate startDate, LocalDate endingDate){
+        this.BusID = BusID;
         this.startCity = startCity;
         this.endCity = endCity;
-        this.startTime = startTime;
-        this.duration = duration;
+        this.price = price;
+        this.startDate = startDate;
+        this.endingDate = endingDate;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -28,12 +39,12 @@ public class Edge implements Displayable{
         return endCity;
     }
 
-    public double getStartTime() {
-        return startTime;
+    public LocalDate getStartTime() {
+        return startDate;
     }
 
-    public double getDuration() {
-        return duration;
+    public LocalDate getEndDate() {
+        return endingDate;
     }
 
     @Override

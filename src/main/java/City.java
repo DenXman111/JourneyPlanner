@@ -12,12 +12,17 @@ import javafx.scene.shape.Circle;
 public class City implements Displayable {
 
     private String name;
+    private Integer cityID;
+    private double rating;
+    private int nightPrice;
 
-    @SuppressWarnings("WeakerAccess")
-    public City(String name){
+    public City(Integer id, String name, double rating, int price){
         if (name == null)
             throw new NullPointerException();
         this.name = name;
+        this.cityID = id;
+        this.rating = rating;
+        this.nightPrice = price;
     }
 
     public String getName() { return name; }

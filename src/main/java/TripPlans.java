@@ -1,6 +1,7 @@
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -24,7 +25,10 @@ public class TripPlans {
 
     private void rec(Integer nowID, int fund, LocalDate currentDate, LocalDate endingDate){
         List < ? extends Edge > neighbours = DbAdapter.getNeighbours(nowID);
-        //...
+        for (Edge e : neighbours){
+            //if (!e.getEndDate().before(endingDate)) continue;
+
+        }
     }
     @SuppressWarnings("WeakerAccess")
     public void findBest(Integer startID, int fund, LocalDate startDate, LocalDate endingDate){
