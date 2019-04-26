@@ -99,7 +99,7 @@ public class DbAdapter {
         ArrayList<Edge> a=new ArrayList<>();
         try {
             statement = connection.createStatement();
-            String query="Select * from cities where start_city=\'"+cityID+"\'";
+            String query="Select * from buses where start_city=\'"+cityID+"\'";
             ResultSet result=statement.executeQuery(query);
             while (result.next()) {
                 City r1=getCityFromID(cityID);
