@@ -11,7 +11,6 @@ public class DbAdapter {
 
     static Connection connection = null;
     static Statement statement = null;
-    private ResultSet resultSet = null;
 
     public DbAdapter(){
 
@@ -39,7 +38,6 @@ public class DbAdapter {
     public void disconnect(){
         try {
             if (statement != null) statement.close();
-            if (resultSet != null) resultSet.close();
             if (connection != null) connection.close();
         } catch (Exception e){
             e.printStackTrace();
