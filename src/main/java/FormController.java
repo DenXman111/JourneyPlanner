@@ -51,8 +51,9 @@ public class FormController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // This should be replaced with accessing the list of every city in database
-        String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lvov", "Warsaw", "Krakow"};
-        ArrayList<String> cityList = new ArrayList<>(Arrays.asList(exemplaryCities));
+//        String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lvov", "Warsaw", "Krakow"};
+//        ArrayList<String> cityList = new ArrayList<>(Arrays.asList(exemplaryCities));
+        ArrayList<String> cityList = new ArrayList<>(DbAdapter.getCityList());
 
         ObservableList<String> observableCitiesList = FXCollections.observableArrayList(cityList);
         MainCityChoiceBox.setItems(observableCitiesList);

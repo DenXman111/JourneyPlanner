@@ -28,13 +28,13 @@ public class TripPlans {
     private void dfs(Integer nowID, int fund, LocalDate currentDate, LocalDate tripEndingDate){
         inCurrent.add(nowID);
         if (nowID.equals(start) && !current.isEmpty()){
-            System.out.println("Found trip " + nowID + " " + current.isEmpty() + " " + current.getPlan());
+//            System.out.println("Found trip " + nowID + " " + current.isEmpty() + " " + current.getPlan());
             TripsList.add(new Trip(current));
             inCurrent.remove(nowID);
             return;
         }
 
-        System.out.println("dfs in " + nowID + " " + fund + " " + currentDate);
+//        System.out.println("dfs in " + nowID + " " + fund + " " + currentDate);
 
         List < Edge > neighbours = DbAdapter.getNeighbours(nowID);
         for (Edge e : neighbours){
@@ -53,6 +53,6 @@ public class TripPlans {
     public void findBest(Integer startID, int fund, LocalDate startDate, LocalDate endingDate){
         start = startID;
         dfs(startID, fund, startDate, endingDate);
-        System.out.println("TRIPSLIST " + TripsList.toArray().length);
+//        System.out.println("TRIPSLIST " + TripsList.toArray().length);
     }
 }
