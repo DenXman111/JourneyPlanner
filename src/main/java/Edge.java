@@ -15,11 +15,11 @@ public class Edge implements Displayable{
     private Integer BusID;
     private City startCity;
     private City endCity;
-    private LocalDate startDate;
-    private LocalDate endingDate;
+    private Date startDate;
+    private Date endingDate;
     private int price;
 
-    Edge(Integer BusID, City startCity, City endCity, int price, LocalDate startDate, LocalDate endingDate){
+    Edge(Integer BusID, City startCity, City endCity, int price, Date startDate, Date endingDate){
         this.BusID = BusID;
         this.startCity = startCity;
         this.endCity = endCity;
@@ -38,11 +38,11 @@ public class Edge implements Displayable{
         return endCity;
     }
 
-    public LocalDate getStartTime() {
+    public Date getStartTime() {
         return startDate;
     }
 
-    public LocalDate getEndDate() {
+    public Date getEndDate() {
         return endingDate;
     }
 

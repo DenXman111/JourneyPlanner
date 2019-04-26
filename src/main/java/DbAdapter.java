@@ -59,7 +59,7 @@ public class DbAdapter {
             e.printStackTrace();
         }
     }
-    public Integer starting_city(String name){
+    public Integer getCityID(String name){
         try {
             statement = connection.createStatement();
             String query="Select id from cities where name=\'"+name+"\'";
@@ -71,11 +71,59 @@ public class DbAdapter {
             return -1;
         }
     }
-
-    public static Integer getCityID(String city){ //geting ID of city from connected DB
-        return 1;
+    public String getCityName(Integer ID){
+        try {
+            statement = connection.createStatement();
+            String query="Select name from cities where name=\'"+ID+"\'";
+            ResultSet result=statement.executeQuery(query);
+            while (result.next()){return result.getString("name");}
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
     }
-    public static List< ? extends Edge > getNeighbours(Integer cityID){ //geting list of cityID's neighbours
-        return new ArrayList<>();
+    public City getCityFromID(Integer ID){
+        try {
+            statement = connection.createStatement();
+            String query="Select * from cities where name=\'"+ID+"\'";
+            ResultSet result=statement.executeQuery(query);
+            while (result.next()){
+                return new City(ID,result.getString("name"),result.getDouble("rating"),result.getInt("price"));
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List< ? extends Edge > getNeighbours(Integer cityID){ //geting list of cityID's neighbours
+        ArrayList<Edge> a=new ArrayList<>();
+        try {
+            statement = connection.createStatement();
+            String query="Select * from cities where start_city=\'"+cityID+"\'";
+            ResultSet result=statement.executeQuery(query);
+            while (result.next()) {
+                City r1=getCityFromID(cityID);
+                City r2=getCityFromID(result.getInt("end_city"));
+                Edge b=new Edge(result.getInt("id"),r1,r2,result.getInt("price"),result.getDate("departure"),result.getDate("arrival"));
+                a.add(b);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return a;
+    }
+    public ArrayList<String> getCityList(){
+        ArrayList<String> a =new ArrayList<>();
+        try {
+            statement = connection.createStatement();
+            String query="Select name from cities";
+            ResultSet result=statement.executeQuery(query);
+            while (result.next()){a.add(result.getString("name"));}
+            return a;
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return a;
     }
 }
