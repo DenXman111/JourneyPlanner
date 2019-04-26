@@ -3,7 +3,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
-import jdk.vm.ci.meta.Local;
 
 import java.time.LocalDate;
 import java.util.Date;
