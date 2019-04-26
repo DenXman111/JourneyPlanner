@@ -9,8 +9,8 @@ public class DbAdapter {
     private String usename = "postgres";
     private String password = "postgres";
 
-    static Connection connection = null;
-    static Statement statement = null;
+    private static Connection connection = null;
+    private static Statement statement = null;
 
     public DbAdapter(){
 
@@ -94,8 +94,10 @@ public class DbAdapter {
                 City r1=getCityFromID(cityID);
                 City r2=getCityFromID(result.getInt("end_city"));
                 Edge b=new Edge(result.getInt("id"),r1,r2,result.getInt("price"),
-                        result.getDate("departure").toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
-                        result.getDate("arrival").toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+                        result.getDate("departure").toLocalDate(),
+                        result.getDate("arrival").toLocalDate());
+//                        result.getDate("departure").toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+//                        result.getDate("arrival").toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
                 a.add(b);
             }
         } catch (Exception e){
