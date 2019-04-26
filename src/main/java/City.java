@@ -10,6 +10,7 @@ import javafx.scene.shape.Circle;
  * @author Łukasz Selwa
  */
 public class City implements Displayable {
+
     private String name;
 
     @SuppressWarnings("WeakerAccess")
