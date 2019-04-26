@@ -5,6 +5,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 /**
  * Edge class stores information about single transit between cities.
@@ -14,11 +15,11 @@ public class Edge implements Displayable{
     private Integer BusID;
     private City startCity;
     private City endCity;
-    private Date startDate;
-    private Date endingDate;
+    private LocalDate startDate;
+    private LocalDate endingDate;
     private int price;
 
-    Edge(Integer BusID, City startCity, City endCity, int price, Date startDate, Date endingDate){
+    Edge(Integer BusID, City startCity, City endCity, int price, LocalDate startDate, LocalDate endingDate){
         this.BusID = BusID;
         this.startCity = startCity;
         this.endCity = endCity;
@@ -37,11 +38,16 @@ public class Edge implements Displayable{
         return endCity;
     }
 
-    public Date getStartTime() {
+    @SuppressWarnings("WeakerAccess")
+    public int getPrice() { return price; }
+
+    @SuppressWarnings("WeakerAccess")
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public Date getEndDate() {
+    @SuppressWarnings("WeakerAccess")
+    public LocalDate getEndingDate() {
         return endingDate;
     }
 

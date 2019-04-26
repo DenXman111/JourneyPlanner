@@ -1,5 +1,6 @@
 import java.io.FileInputStream;
 import java.sql.*;
+import java.time.ZoneId;
 import java.util.*;
 
 @SuppressWarnings("all")
@@ -59,7 +60,7 @@ public class DbAdapter {
             e.printStackTrace();
         }
     }
-    static public Integer getCityID(String name){
+    public static Integer getCityID(String name){
         try {
             statement = connection.createStatement();
             String query="Select id from cities where name=\'"+name+"\'";
@@ -71,7 +72,7 @@ public class DbAdapter {
             return -1;
         }
     }
-    static public String getCityName(Integer ID){
+    public static String getCityName(Integer ID){
         try {
             statement = connection.createStatement();
             String query="Select name from cities where name=\'"+ID+"\'";
@@ -82,7 +83,7 @@ public class DbAdapter {
         }
         return null;
     }
-    static public City getCityFromID(Integer ID){
+    public static City getCityFromID(Integer ID){
         try {
             statement = connection.createStatement();
             String query="Select * from cities where name=\'"+ID+"\'";
@@ -96,7 +97,7 @@ public class DbAdapter {
         return null;
     }
 
-    static public List< ? extends Edge > getNeighbours(Integer cityID){ //geting list of cityID's neighbours
+    public static List< ? extends Edge > getNeighbours(Integer cityID){ //geting list of cityID's neighbours
         ArrayList<Edge> a=new ArrayList<>();
         try {
             statement = connection.createStatement();
@@ -105,7 +106,9 @@ public class DbAdapter {
             while (result.next()) {
                 City r1=getCityFromID(cityID);
                 City r2=getCityFromID(result.getInt("end_city"));
-                Edge b=new Edge(result.getInt("id"),r1,r2,result.getInt("price"),result.getDate("departure"),result.getDate("arrival"));
+                Edge b=new Edge(result.getInt("id"),r1,r2,result.getInt("price"),
+                        result.getDate("departure").toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+                        result.getDate("arrival").toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
                 a.add(b);
             }
         } catch (Exception e){
@@ -113,7 +116,7 @@ public class DbAdapter {
         }
         return a;
     }
-    static public ArrayList<String> getCityList(){
+    public static ArrayList<String> getCityList(){
         ArrayList<String> a =new ArrayList<>();
         try {
             statement = connection.createStatement();
