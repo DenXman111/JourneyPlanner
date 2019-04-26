@@ -1,10 +1,12 @@
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -12,6 +14,7 @@ public class Trip implements Displayable{
     private List<Edge> plan;
     private double rating;
     private int daysInTrip;
+    private HBox createdBox;
 
     @SuppressWarnings("WeakerAccess")
     public Trip() {
@@ -26,6 +29,13 @@ public class Trip implements Displayable{
         this.plan = new ArrayList<>(obj.plan);
         this.rating = obj.rating;
         this.daysInTrip = obj.daysInTrip;
+        this.createdBox = null;
+    }
+
+    public Trip(List<Edge> plan){
+        this.plan = plan;
+        rating = 0;
+        daysInTrip = 0;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -62,7 +72,6 @@ public class Trip implements Displayable{
         return plan.isEmpty();
     }
 
-    @SuppressWarnings("WeakerAccess")
     public Trip getTrip(){
         return this;
     }
@@ -72,7 +81,6 @@ public class Trip implements Displayable{
         return rating;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public List<Edge> getPlan(){
         return plan;
     }
@@ -81,16 +89,44 @@ public class Trip implements Displayable{
         this.rating = rating;
     }
 
+    @SuppressWarnings("WeakerAccess")
+    public boolean allowToMergeEdges(int index){
+        return 0 <= index && index < plan.size() - 1 && plan.get(index).getBusId() == plan.get(index + 1).getBusId();
+    }
+
+    void removeCityWithIndex(int index){
+        // doesn't allow to remove the last edge
+        if (!allowToMergeEdges(index)) return;
+        // allows to remove only if its the same bus
+        plan.set(index + 1, Edge.mergeEdges(plan.get(index), plan.get(index + 1)));
+        ListIterator<Edge> iterator = plan.listIterator(index);
+        iterator.next();
+        iterator.remove();
+        if (createdBox != null) fillHBox(createdBox);
+    }
+
     @Override
     public Node display() {
+        return createdBox != null ? createdBox : createNode();
+    }
+
+    private void fillHBox(Pane pane){
+        pane.getChildren().clear();
+        if (!plan.isEmpty()) pane.getChildren().add(plan.get(0).getStartCity().display(-1, this));
+        int index = 0;
+        for (Edge edge : plan)
+            pane.getChildren().addAll(edge.display(), edge.getEndCity().display(index++, this));
+    }
+
+    private Node createNode(){
         // display all information about trip in HBox
         HBox hbox = new HBox();
         hbox.setAlignment(Pos.CENTER_LEFT);
         hbox.setMaxWidth(Region.USE_PREF_SIZE);
         hbox.setPrefHeight(60);
         hbox.getStyleClass().add("boxes");
-        if (!plan.isEmpty()) hbox.getChildren().add(plan.get(0).getStartCity().display());
-        plan.forEach(edge -> hbox.getChildren().addAll(edge.display(), edge.getEndCity().display()) );
+        fillHBox(hbox);
+        createdBox = hbox;
         return hbox;
     }
 }

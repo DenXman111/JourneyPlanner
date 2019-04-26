@@ -35,9 +35,15 @@ public class Planner {
         Random random = new Random();
         int size = random.nextInt(12) + 3;
         return Stream.generate(() -> new Trip(
-                Stream.generate(() -> exemplaryCities[random.nextInt(exemplaryCities.length)]).
-                        limit(random.nextInt(10) + 3).
-                        map(cityName -> new Edge(new City(startPoint), new City(cityName), 100, 100)).
+                Stream.generate( () -> exemplaryCities[random.nextInt(exemplaryCities.length)]).
+                        limit(random.nextInt(2) + 3).
+                        map(cityName -> new Edge(
+                                0,
+                                new City(0, startPoint, 0, 0),
+                                new City(0,cityName, 0, 0),
+                                100,
+                                LocalDate.now(),
+                                LocalDate.now())).
                         collect(Collectors.toList())
         )).limit(size).collect(Collectors.toList());
          */

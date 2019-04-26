@@ -16,8 +16,6 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -50,12 +48,7 @@ public class FormController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // This should be replaced with accessing the list of every city in database
-//        String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lvov", "Warsaw", "Krakow"};
-//        ArrayList<String> cityList = new ArrayList<>(Arrays.asList(exemplaryCities));
-        ArrayList<String> cityList = new ArrayList<>(DbAdapter.getCityList());
-
-        ObservableList<String> observableCitiesList = FXCollections.observableArrayList(cityList);
+        ObservableList<String> observableCitiesList = FXCollections.observableArrayList(DbAdapter.getCityList());
         MainCityChoiceBox.setItems(observableCitiesList);
     }
 

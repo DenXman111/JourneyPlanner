@@ -4,7 +4,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 
-import java.sql.Date;
 import java.time.LocalDate;
 
 /**
@@ -12,15 +11,15 @@ import java.time.LocalDate;
  */
 public class Edge implements Displayable{
 
-    private Integer BusID;
+    private Integer busID;
     private City startCity;
     private City endCity;
     private LocalDate startDate;
     private LocalDate endingDate;
     private int price;
 
-    Edge(Integer BusID, City startCity, City endCity, int price, LocalDate startDate, LocalDate endingDate){
-        this.BusID = BusID;
+    Edge(Integer busID, City startCity, City endCity, int price, LocalDate startDate, LocalDate endingDate){
+        this.busID = busID;
         this.startCity = startCity;
         this.endCity = endCity;
         this.price = price;
@@ -51,6 +50,9 @@ public class Edge implements Displayable{
         return endingDate;
     }
 
+    @SuppressWarnings("WeakerAccess")
+    public int getBusId() {return busID; }
+
     @Override
     public Node display() {
         VBox box = new VBox();
@@ -58,10 +60,16 @@ public class Edge implements Displayable{
         //draws line with description
         Line line = new Line(-50, 0, 50, 0);
         line.getStyleClass().add("line");
-        Label label = new Label("Bus");
+        Label label = new Label("Bus " + busID);
         label.getStyleClass().add("description");
 
         box.getChildren().addAll(line, label);
         return box;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static Edge mergeEdges(Edge first, Edge second){
+        return new Edge(first.busID, first.startCity, second.endCity,
+                first.price + second.price, first.startDate, second.endingDate);
     }
 }

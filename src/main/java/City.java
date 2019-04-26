@@ -1,13 +1,16 @@
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
+import javafx.util.Duration;
 
 /**
  * City class stores all data about cites read from database.
- * For now it oly stores city name.
- * @author Łukasz Selwa
  */
 public class City implements Displayable {
 
@@ -29,28 +32,56 @@ public class City implements Displayable {
     @SuppressWarnings("WeakerAccess")
     public Integer getID() { return cityID; }
 
-    @SuppressWarnings("WeakerAccess")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public double getRating() { return rating; }
 
-    @SuppressWarnings("WeakerAccess")
+    @SuppressWarnings("unused")
     public int getNightPrice() { return nightPrice; }
 
-    @SuppressWarnings("WeakerAccess")
+    @SuppressWarnings("unused")
     public String getName() { return name; }
 
     @Override
-    public Node display() {
+    public Pane display() {
         VBox box = new VBox();
         box.setAlignment(Pos.CENTER);
         // draws a circle above label containing city name
+
         Circle circle = new Circle();
         circle.setRadius(5);
         circle.getStyleClass().add("point");
 
+        // displays additional information when user moves cursor above circle
+        Tooltip tooltip = new Tooltip();
+        tooltip.setText("Rating: " + rating + "\nNight price: " + nightPrice);
+        tooltip.setShowDelay(Duration.ZERO);
+        Tooltip.install(circle, tooltip);
+
+
         Label label = new Label();
         label.setText(name);
         label.getStyleClass().add("description");
+
         box.getChildren().addAll(circle, label);
+        return box;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public Node display(int indexInTrip, Trip trip){
+        Pane box = display();
+
+        ImageView deleteIcon = new ImageView("delete.png");
+        deleteIcon.setFitHeight(10);
+        deleteIcon.setFitWidth(10);
+        deleteIcon.setOpacity(0.0);
+        if (trip.allowToMergeEdges(indexInTrip)) {
+            deleteIcon.setOnMouseClicked(mouseEvent -> trip.removeCityWithIndex(indexInTrip));
+            VBox.setMargin(deleteIcon, new Insets(5, 0, 0, 0));
+
+            box.setOnMouseEntered(mouseEvent -> deleteIcon.setOpacity(0.4));
+            box.setOnMouseExited(mouseEvent -> deleteIcon.setOpacity(0.0));
+        }
+        box.getChildren().add(deleteIcon);
         return box;
     }
 }
