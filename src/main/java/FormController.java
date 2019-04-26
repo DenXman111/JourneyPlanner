@@ -88,7 +88,7 @@ public class FormController implements Initializable {
         try {
             if (!debugMode) check(); //without checking for debug
 
-            List<? extends Trip> propositions = Planner.
+            List<Trip> propositions = Planner.
                     plan(   MainCityChoiceBox.getValue(),
                             Integer.valueOf(MainFieldFunds.getText()),
                             MainFieldStartDate.getValue(),

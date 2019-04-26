@@ -7,22 +7,59 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Trip implements Displayable{
-    private List<? extends Edge> plan;
+    private List<Edge> plan;
     private double rating;
+    private int daysInTrip;
 
     @SuppressWarnings("WeakerAccess")
     public Trip() {
         plan = new ArrayList<>();
         rating = 0;
+        daysInTrip = 0;
     }
 
-    public Trip(List<? extends Edge> plan) {
-        this.plan = plan;
-        rating = Rating.count(plan);
+
+    @SuppressWarnings("WeakerAccess")
+    public Trip(Trip obj) {
+        this.plan = new ArrayList<>(obj.plan);
+        this.rating = obj.rating;
+        this.daysInTrip = obj.daysInTrip;
     }
 
+    @SuppressWarnings("WeakerAccess")
+    public void pushEdge(Edge e){
+        System.out.println("----");
+        System.out.println("Wanna add edge " + e.getStartCity().getID() + " " + e.getEndCity().getID());
+        System.out.println(plan.size());
+        plan.add(e);
+        System.out.println(plan.size());
+        //calculate new rating
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public void removeLastEdge(){
+        //calculate new rating
+        plan.remove(plan.get(plan.size() - 1));
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public boolean isEmpty(){
+        return plan.isEmpty();
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public Trip getTrip(){
+        return this;
+    }
+
+    @SuppressWarnings("WeakerAccess")
     public double getRating(){
         return rating;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public List<Edge> getPlan(){
+        return plan;
     }
 
     public void setRating(double rating){
@@ -37,7 +74,7 @@ public class Trip implements Displayable{
         hbox.setMaxWidth(Region.USE_PREF_SIZE);
         hbox.setPrefHeight(60);
         hbox.getStyleClass().add("boxes");
-        hbox.getChildren().add(plan.get(0).getStartCity().display());
+        if (!plan.isEmpty()) hbox.getChildren().add(plan.get(0).getStartCity().display());
         plan.forEach(edge -> hbox.getChildren().addAll(edge.display(), edge.getEndCity().display()) );
         return hbox;
     }

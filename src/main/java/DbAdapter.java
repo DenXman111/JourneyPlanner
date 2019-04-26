@@ -84,7 +84,7 @@ public class DbAdapter {
         return null;
     }
 
-    public static List< ? extends Edge > getNeighbours(Integer cityID){ //geting list of cityID's neighbours
+    public static List< Edge > getNeighbours(Integer cityID){ //geting list of cityID's neighbours
         ArrayList<Edge> a=new ArrayList<>();
         try {
             statement = connection.createStatement();

@@ -13,13 +13,15 @@ public class Planner {
      * @return List of proposed trips
      */
     @SuppressWarnings({"unused", "WeakerAccess"})
-    public static List< ? extends Trip > plan(String startPoint, int fund, LocalDate startDate, LocalDate endDate){
+    public static List<Trip > plan(String startPoint, int fund, LocalDate startDate, LocalDate endDate){
         TripPlans trips = new TripPlans();
 
         Integer startID = DbAdapter.getCityID(startPoint);
 
         trips.findBest(startID, fund, startDate, endDate);
-        return new ArrayList<>(trips.getSet());
+        List < Trip > result = new ArrayList<>(trips.getSet());
+        System.out.println("RESULT: " + result.get(0).isEmpty());
+        return result;
         /*
 
         String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lvov", "Warsaw", "Krakow"};

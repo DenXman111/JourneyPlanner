@@ -8,8 +8,10 @@ import java.util.*;
  */
 public class TripPlans {
     Set < Integer > inCurrent;
-    private Set< ? extends Trip > TripsList;
+    private Set< Trip > TripsList;
     private Trip current;
+
+    private Integer start; //used in dfs to remember startID
 
     @SuppressWarnings("WeakerAccess")
     public TripPlans(){
@@ -19,27 +21,38 @@ public class TripPlans {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public Set < ? extends Trip > getSet(){
+    public Set < Trip > getSet(){
         return TripsList;
     }
 
-    private void dfs(Integer nowID, int fund, LocalDate currentDate, LocalDate endingDate){
+    private void dfs(Integer nowID, int fund, LocalDate currentDate, LocalDate tripEndingDate){
         inCurrent.add(nowID);
+        if (nowID.equals(start) && !current.isEmpty()){
+            System.out.println("Found trip " + nowID + " " + current.isEmpty() + " " + current.getPlan());
+            TripsList.add(new Trip(current));
+            inCurrent.remove(nowID);
+            return;
+        }
 
-        System.out.println("dfs in " + nowID);
+        System.out.println("dfs in " + nowID + " " + fund + " " + currentDate);
 
-        List < ? extends Edge > neighbours = DbAdapter.getNeighbours(nowID);
+        List < Edge > neighbours = DbAdapter.getNeighbours(nowID);
         for (Edge e : neighbours){
-            if (!e.getEndingDate().isBefore(endingDate)) continue;
+            if (e.getEndingDate().isAfter(tripEndingDate)) continue;
+            if (!e.getStartDate().isAfter(currentDate)) continue;
             if (e.getPrice() > fund) continue;
-            if (inCurrent.contains(e.getEndCity().getID())) continue;
-            dfs(e.getEndCity().getID(), fund - e.getPrice(), e.getEndingDate(), endingDate);
+            if (inCurrent.contains(e.getEndCity().getID()) && !e.getEndCity().getID().equals(start)) continue;
+            current.pushEdge(e);
+            dfs(e.getEndCity().getID(), fund - e.getPrice(), e.getEndingDate(), tripEndingDate);
+            current.removeLastEdge();
         }
 
         inCurrent.remove(nowID);
     }
     @SuppressWarnings("WeakerAccess")
     public void findBest(Integer startID, int fund, LocalDate startDate, LocalDate endingDate){
+        start = startID;
         dfs(startID, fund, startDate, endingDate);
+        System.out.println("TRIPSLIST " + TripsList.toArray().length);
     }
 }
