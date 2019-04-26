@@ -1,38 +1,43 @@
 import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 
 /**
  * Class have list of best trips and fill it.
  */
 public class TripPlans {
-    private List< ? extends Trip > TripsList;
+    Set < Integer > inCurrent;
+    private Set< ? extends Trip > TripsList;
     private Trip current;
 
     @SuppressWarnings("WeakerAccess")
     public TripPlans(){
-        TripsList = new ArrayList<>();
+        inCurrent = new TreeSet<>();
+        TripsList = new TreeSet<>(Comparator.comparingDouble(Trip::getRating));
         current = new Trip();
     }
 
     @SuppressWarnings("WeakerAccess")
-    public List < ? extends Trip > getList(){
+    public Set < ? extends Trip > getSet(){
         return TripsList;
     }
 
-    private void rec(Integer nowID, int fund, LocalDate currentDate, LocalDate endingDate){
+    private void dfs(Integer nowID, int fund, LocalDate currentDate, LocalDate endingDate){
+        inCurrent.add(nowID);
+
         List < ? extends Edge > neighbours = DbAdapter.getNeighbours(nowID);
         for (Edge e : neighbours){
             if (!e.getEndingDate().isBefore(endingDate)) continue;
             if (e.getPrice() > fund) continue;
-
+            if (inCurrent.contains(e.getEndCity().getID())) continue;
+            dfs(e.getEndCity().getID(), fund - e.getPrice(), e.getEndingDate(), endingDate);
         }
+
+        inCurrent.remove(nowID);
     }
     @SuppressWarnings("WeakerAccess")
     public void findBest(Integer startID, int fund, LocalDate startDate, LocalDate endingDate){
-        rec(startID, fund, startDate, endingDate);
+        dfs(startID, fund, startDate, endingDate);
     }
 }

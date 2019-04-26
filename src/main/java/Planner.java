@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Planner {
@@ -15,10 +16,10 @@ public class Planner {
     public static List< ? extends Trip > plan(String startPoint, int fund, LocalDate startDate, LocalDate endDate){
         TripPlans trips = new TripPlans();
 
-        //Integer startID = DbAdapter.getCityID(startPoint);
+        Integer startID = DbAdapter.getCityID(startPoint);
 
-        //trips.findBest(startID, fund, startDate, endDate);
-        return trips.getList();
+        trips.findBest(startID, fund, startDate, endDate);
+        return new ArrayList<>(trips.getSet());
         /*
 
         String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lvov", "Warsaw", "Krakow"};

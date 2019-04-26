@@ -16,6 +16,7 @@ public class City implements Displayable {
     private double rating;
     private int nightPrice;
 
+    @SuppressWarnings("WeakerAccess")
     public City(Integer id, String name, double rating, int price){
         if (name == null)
             throw new NullPointerException();
@@ -25,6 +26,16 @@ public class City implements Displayable {
         this.nightPrice = price;
     }
 
+    @SuppressWarnings("WeakerAccess")
+    public Integer getID() { return cityID; }
+
+    @SuppressWarnings("WeakerAccess")
+    public double getRating() { return rating; }
+
+    @SuppressWarnings("WeakerAccess")
+    public int getNightPrice() { return nightPrice; }
+
+    @SuppressWarnings("WeakerAccess")
     public String getName() { return name; }
 
     @Override
