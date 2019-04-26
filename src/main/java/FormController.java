@@ -21,18 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
-class CheckException extends Exception{
-    private String massage;
-
-    CheckException(String massage){
-        this.massage = massage;
-    }
-
-    String getMassage() {
-        return massage;
-    }
-}
-
 public class FormController implements Initializable {
     private final static boolean debugMode = false; //debugMode flag
 
@@ -70,13 +58,13 @@ public class FormController implements Initializable {
         MainCityChoiceBox.setItems(observableCitiesList);
     }
 
-    private void check() throws CheckException{
-        if (MainFieldName.getText().isEmpty()) throw new CheckException("Write your name");
-        if (MainFieldSurname.getText().isEmpty()) throw new CheckException("Write your surname");
-        if (MainCityChoiceBox.getSelectionModel().isEmpty()) throw new CheckException("Choose any city");
-        if (MainFieldFunds.getText().isEmpty()) throw new CheckException("Write your funds");
-        if (MainFieldStartDate.getValue() == null) throw new CheckException("Fill start date");
-        if (MainFieldEndingDate.getValue() == null) throw new CheckException("Fill ending date");
+    private void check() throws FormsCheckException{
+        if (MainFieldName.getText().isEmpty()) throw new FormsCheckException("Write your name");
+        if (MainFieldSurname.getText().isEmpty()) throw new FormsCheckException("Write your surname");
+        if (MainCityChoiceBox.getSelectionModel().isEmpty()) throw new FormsCheckException("Choose any city");
+        if (MainFieldFunds.getText().isEmpty()) throw new FormsCheckException("Write your funds");
+        if (MainFieldStartDate.getValue() == null) throw new FormsCheckException("Fill start date");
+        if (MainFieldEndingDate.getValue() == null) throw new FormsCheckException("Fill ending date");
 //        System.out.println(MainFieldName.getCharacters());
 //        System.out.println(MainFieldSurname.getCharacters());
 //        System.out.println(MainFieldCity.getCharacters());
@@ -85,15 +73,15 @@ public class FormController implements Initializable {
 //            System.out.println(Integer.valueOf(MainFieldFunds.getText()));
         } catch (RuntimeException e){
             e.getStackTrace();
-            throw new CheckException("Should be number in Funds");
+            throw new FormsCheckException("Should be number in Funds");
         }
 //        System.out.println(MainFieldStartDate.getValue());
 //        System.out.println(MainFieldEndingDate.getValue());
 
         if (LocalDate.now().isAfter(MainFieldStartDate.getValue()))
-            throw new CheckException("Start date should be in future");
+            throw new FormsCheckException("Start date should be in future");
         if (MainFieldStartDate.getValue().isAfter(MainFieldEndingDate.getValue()))
-            throw new CheckException("Ending date before start date");
+            throw new FormsCheckException("Ending date before start date");
     }
     @FXML
     void findButtonPressed(ActionEvent event) {
@@ -116,7 +104,7 @@ public class FormController implements Initializable {
 
             MainButtonFind.setPrefWidth(170);
 
-        } catch (CheckException e){
+        } catch (FormsCheckException e){
             Stage errorStage = new Stage();
             StackPane pane = new StackPane();
             Text text = new Text(e.getMassage());

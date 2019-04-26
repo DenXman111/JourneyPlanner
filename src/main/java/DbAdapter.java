@@ -70,18 +70,7 @@ public class DbAdapter {
             return -1;
         }
     }
-    public static String getCityName(Integer ID){
-        try {
-            statement = connection.createStatement();
-            String query="Select name from cities where name=\'"+ID+"\'";
-            ResultSet result=statement.executeQuery(query);
-            while (result.next()){return result.getString("name");}
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        return null;
-    }
-    public static City getCityFromID(Integer ID){
+    public static City getCityFromID(Integer ID) throws DatabaseException{
         try {
             statement = connection.createStatement();
             String query="Select * from cities where name=\'"+ID+"\'";
