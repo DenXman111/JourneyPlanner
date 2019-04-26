@@ -26,7 +26,7 @@ class CheckException extends Exception{
 }
 
 public class FormController {
-    final static boolean debugMode = true; // true if it's debug version
+    private final static boolean debugMode = true; // true if it's debug version
 
     @FXML
     private TextField MainFieldName;
@@ -80,7 +80,7 @@ public class FormController {
         try {
             if (!debugMode) check(); //without checking for debug
 
-            List<Trip> propositions = Planner.plan("Krakow", 100, MainFieldStartDate.getValue(), MainFieldEndingDate.getValue());
+            List<? extends Trip> propositions = Planner.plan("Krakow", 100, MainFieldStartDate.getValue(), MainFieldEndingDate.getValue());
             assert propositions != null;
             answersVBox.getChildren().clear();
             propositions.stream().

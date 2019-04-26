@@ -39,17 +39,6 @@ public class Trip implements Displayable{
         hbox.getStyleClass().add("boxes");
         hbox.getChildren().add(plan.get(0).getStartCity().display());
         plan.forEach(edge -> hbox.getChildren().addAll(edge.display(), edge.getEndCity().display()) );
-        //wrap HBox in ScrollPane
-        /*ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setFitToHeight(true);
-        scrollPane.setContent(hbox);
-        //Wrap in grid
-        GridPane grid = new GridPane();
-        grid.setMaxWidth(Control.USE_PREF_SIZE);
-        grid.add(scrollPane, 1,1);
-        grid.getStyleClass().add("boxes");*/
         return hbox;
     }
 }
