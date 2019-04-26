@@ -6,6 +6,8 @@ import javafx.scene.layout.Region;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+
 public class Trip implements Displayable{
     private List<Edge> plan;
     private double rating;
@@ -28,18 +30,31 @@ public class Trip implements Displayable{
 
     @SuppressWarnings("WeakerAccess")
     public void pushEdge(Edge e){
-        System.out.println("----");
-        System.out.println("Wanna add edge " + e.getStartCity().getID() + " " + e.getEndCity().getID());
-        System.out.println(plan.size());
+        if (!plan.isEmpty()){
+            Edge last = plan.get(plan.size() - 1);
+            int days = (int)DAYS.between(last.getEndingDate(), e.getStartDate()) - 1;
+            this.rating = this.rating * this.daysInTrip + e.getStartCity().getRating() * days;
+            this.daysInTrip += days;
+            this.rating /= this.daysInTrip;
+        }
+
         plan.add(e);
-        System.out.println(plan.size());
-        //calculate new rating
+        //System.out.println("----");
+        //System.out.println("Wanna add edge " + e.getStartCity().getID() + " " + e.getEndCity().getID());
+        //System.out.println(plan.size());
     }
 
     @SuppressWarnings("WeakerAccess")
     public void removeLastEdge(){
-        //calculate new rating
-        plan.remove(plan.get(plan.size() - 1));
+        if (plan.size() > 1) {
+            Edge last = plan.get(plan.size() - 1);
+            Edge prev = plan.get(plan.size() - 2);
+            int days = (int)DAYS.between(prev.getEndingDate(), last.getStartDate()) - 1;
+            this.rating *= this.daysInTrip;
+            this.daysInTrip -= days;
+            this.rating -= last.getStartCity().getRating() * days;
+        }
+        if (!plan.isEmpty()) plan.remove(plan.get(plan.size() - 1));
     }
 
     @SuppressWarnings("WeakerAccess")

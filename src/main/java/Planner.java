@@ -23,9 +23,13 @@ public class Planner {
         List < Trip > result = new ArrayList<>(trips.getSet());
         Collections.reverse(result);
         while (result.size() > 25) result.remove(result.size() - 1);
+        for (Trip tr : result){
+            System.out.println("Rating of trip: " + tr.getRating());
+        }
         return result;
-        /*
 
+
+        /*
         String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lvov", "Warsaw", "Krakow"};
         List<Trip> result = new ArrayList<>();
         Random random = new Random();
@@ -36,8 +40,6 @@ public class Planner {
                         map(cityName -> new Edge(new City(startPoint), new City(cityName), 100, 100)).
                         collect(Collectors.toList())
         )).limit(size).collect(Collectors.toList());
-
-
          */
     }
 }
