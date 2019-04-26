@@ -1,8 +1,12 @@
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
@@ -10,8 +14,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.net.URL;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 
 class CheckException extends Exception{
     private String massage;
@@ -25,8 +33,8 @@ class CheckException extends Exception{
     }
 }
 
-public class FormController {
-    final static boolean debugMode = true; //debugMode flag
+public class FormController implements Initializable {
+    private final static boolean debugMode = false; //debugMode flag
 
     @FXML
     private TextField MainFieldName;
@@ -35,7 +43,7 @@ public class FormController {
     private TextField MainFieldSurname;
 
     @FXML
-    private TextField MainFieldCity;
+    private ChoiceBox<String> MainCityChoiceBox;
 
     @FXML
     private TextField MainFieldFunds;
@@ -52,10 +60,20 @@ public class FormController {
     @FXML
     private VBox answersVBox;
 
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        // This should be replaced with accessing the list of every city in database
+        String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lvov", "Warsaw", "Krakow"};
+        ArrayList<String> cityList = new ArrayList<>(Arrays.asList(exemplaryCities));
+
+        ObservableList<String> observableCitiesList = FXCollections.observableArrayList(cityList);
+        MainCityChoiceBox.setItems(observableCitiesList);
+    }
+
     private void check() throws CheckException{
         if (MainFieldName.getText().isEmpty()) throw new CheckException("Write your name");
         if (MainFieldSurname.getText().isEmpty()) throw new CheckException("Write your surname");
-        if (MainFieldCity.getText().isEmpty()) throw new CheckException("Write your city");
+        if (MainCityChoiceBox.getSelectionModel().isEmpty()) throw new CheckException("Choose any city");
         if (MainFieldFunds.getText().isEmpty()) throw new CheckException("Write your funds");
         if (MainFieldStartDate.getValue() == null) throw new CheckException("Fill start date");
         if (MainFieldEndingDate.getValue() == null) throw new CheckException("Fill ending date");
@@ -72,15 +90,21 @@ public class FormController {
 //        System.out.println(MainFieldStartDate.getValue());
 //        System.out.println(MainFieldEndingDate.getValue());
 
-        if (LocalDate.now().isAfter(MainFieldStartDate.getValue())) throw new CheckException("Start date should be in future");
-        if (MainFieldStartDate.getValue().isAfter(MainFieldEndingDate.getValue())) throw new CheckException("Ending date before start date");
+        if (LocalDate.now().isAfter(MainFieldStartDate.getValue()))
+            throw new CheckException("Start date should be in future");
+        if (MainFieldStartDate.getValue().isAfter(MainFieldEndingDate.getValue()))
+            throw new CheckException("Ending date before start date");
     }
     @FXML
     void findButtonPressed(ActionEvent event) {
         try {
             if (!debugMode) check(); //without checking for debug
 
-            List<? extends Trip> propositions = Planner.plan("Krakow", 100, MainFieldStartDate.getValue(), MainFieldEndingDate.getValue());
+            List<? extends Trip> propositions = Planner.
+                    plan(   MainCityChoiceBox.getValue(),
+                            Integer.valueOf(MainFieldFunds.getText()),
+                            MainFieldStartDate.getValue(),
+                            MainFieldEndingDate.getValue() );
             assert propositions != null;
             answersVBox.getChildren().clear();
             propositions.stream().
@@ -89,6 +113,8 @@ public class FormController {
                         answersVBox.getChildren().add(node);
                         VBox.setMargin(node, new Insets(20, 10, 10, 20));
                     });
+
+            MainButtonFind.setPrefWidth(170);
 
         } catch (CheckException e){
             Stage errorStage = new Stage();

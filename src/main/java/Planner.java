@@ -1,10 +1,5 @@
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Planner {
 
@@ -16,7 +11,7 @@ public class Planner {
      * @param endDate Time before which the trip has to end.
      * @return List of proposed trips
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public static List< ? extends Trip > plan(String startPoint, int fund, LocalDate startDate, LocalDate endDate){
         TripPlans trips = new TripPlans();
 
@@ -26,7 +21,7 @@ public class Planner {
         return trips.getList();
         /*
 
-        String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lviv", "Warsaw", "Krakow"};
+        String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lvov", "Warsaw", "Krakow"};
         List<Trip> result = new ArrayList<>();
         Random random = new Random();
         int size = random.nextInt(12) + 3;
