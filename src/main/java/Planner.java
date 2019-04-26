@@ -1,5 +1,6 @@
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Planner {
@@ -20,7 +21,8 @@ public class Planner {
 
         trips.findBest(startID, fund, startDate, endDate);
         List < Trip > result = new ArrayList<>(trips.getSet());
-        System.out.println("RESULT: " + result.get(0).isEmpty());
+        Collections.reverse(result);
+        while (result.size() > 25) result.remove(result.size() - 1);
         return result;
         /*
 
