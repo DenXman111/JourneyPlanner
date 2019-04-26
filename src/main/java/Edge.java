@@ -4,7 +4,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 
-import java.time.LocalDate;
+import java.sql.Date;
 
 /**
  * Edge class stores information about single transit between cities.

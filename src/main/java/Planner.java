@@ -15,9 +15,9 @@ public class Planner {
     public static List< ? extends Trip > plan(String startPoint, int fund, LocalDate startDate, LocalDate endDate){
         TripPlans trips = new TripPlans();
 
-        Integer startID = DbAdapter.getCityID(startPoint);
+        //Integer startID = DbAdapter.getCityID(startPoint);
 
-        trips.findBest(startID, fund, startDate, endDate);
+        //trips.findBest(startID, fund, startDate, endDate);
         return trips.getList();
         /*
 
