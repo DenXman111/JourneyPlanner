@@ -73,10 +73,10 @@ public class DbAdapter {
     public static City getCityFromID(Integer ID) throws DatabaseException{
         try {
             statement = connection.createStatement();
-            String query="Select * from cities where name=\'"+ID+"\'";
+            String query="Select * from cities where id=\'"+ID+"\'";
             ResultSet result=statement.executeQuery(query);
             while (result.next()){
-                return new City(ID,result.getString("name"),result.getDouble("rating"),result.getInt("price"));
+                return new City(ID,result.getString("name"),result.getDouble("rating"),result.getInt("average_price"));
             }
         } catch (Exception e){
             e.printStackTrace();
