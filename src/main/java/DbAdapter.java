@@ -8,8 +8,8 @@ public class DbAdapter {
     private String usename = "postgres";
     private String password = "postgres";
 
-    private Connection connection = null;
-    private Statement statement = null;
+    static Connection connection = null;
+    static Statement statement = null;
     private ResultSet resultSet = null;
 
     public DbAdapter(){
@@ -59,7 +59,7 @@ public class DbAdapter {
             e.printStackTrace();
         }
     }
-    public Integer getCityID(String name){
+    static public Integer getCityID(String name){
         try {
             statement = connection.createStatement();
             String query="Select id from cities where name=\'"+name+"\'";
@@ -71,7 +71,7 @@ public class DbAdapter {
             return -1;
         }
     }
-    public String getCityName(Integer ID){
+    static public String getCityName(Integer ID){
         try {
             statement = connection.createStatement();
             String query="Select name from cities where name=\'"+ID+"\'";
@@ -82,7 +82,7 @@ public class DbAdapter {
         }
         return null;
     }
-    public City getCityFromID(Integer ID){
+    static public City getCityFromID(Integer ID){
         try {
             statement = connection.createStatement();
             String query="Select * from cities where name=\'"+ID+"\'";
@@ -96,7 +96,7 @@ public class DbAdapter {
         return null;
     }
 
-    public List< ? extends Edge > getNeighbours(Integer cityID){ //geting list of cityID's neighbours
+    static public List< ? extends Edge > getNeighbours(Integer cityID){ //geting list of cityID's neighbours
         ArrayList<Edge> a=new ArrayList<>();
         try {
             statement = connection.createStatement();
@@ -113,7 +113,7 @@ public class DbAdapter {
         }
         return a;
     }
-    public ArrayList<String> getCityList(){
+    static public ArrayList<String> getCityList(){
         ArrayList<String> a =new ArrayList<>();
         try {
             statement = connection.createStatement();
