@@ -49,7 +49,7 @@ insert into cities values
 (6, 'Gdansk', 3.20, 50, 'Poland'),
 (7, 'Szczecin', 2.40, 44, 'Poland'),
 (8, 'Bydgoszcz', 2.10, 44, 'Poland'),
-(9, ' Lublin', 3.12, 46, 'Poland'),
+(9, 'Lublin', 3.12, 46, 'Poland'),
 (10, 'Bialystok', 2.4, 41, 'Poland'),
 (11, 'Wroclaw', 3.03, 42, 'Poland'),
 (12, 'Vienna', 4.12, 110, 'Austria'),

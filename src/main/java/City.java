@@ -38,7 +38,7 @@ public class City implements Displayable {
     @SuppressWarnings("unused")
     public int getNightPrice() { return nightPrice; }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public String getName() { return name; }
 
     @Override
@@ -73,15 +73,13 @@ public class City implements Displayable {
         ImageView deleteIcon = new ImageView("delete.png");
         deleteIcon.setFitHeight(10);
         deleteIcon.setFitWidth(10);
-        deleteIcon.setOpacity(0.0);
+        deleteIcon.getStyleClass().add("icon");
+        deleteIcon.setVisible(false);
         if (trip.allowToMergeEdges(indexInTrip)) {
-            deleteIcon.setOpacity(0.1);
+            deleteIcon.setVisible(true);
             deleteIcon.setOnMouseClicked(mouseEvent -> trip.removeCityWithIndex(indexInTrip));
-            VBox.setMargin(deleteIcon, new Insets(5, 0, 0, 0));
-
-            box.setOnMouseEntered(mouseEvent -> deleteIcon.setOpacity(0.8));
-            box.setOnMouseExited(mouseEvent -> deleteIcon.setOpacity(0.1));
         }
+        VBox.setMargin(deleteIcon, new Insets(5, 0, 0, 0));
         box.getChildren().add(deleteIcon);
         return box;
     }

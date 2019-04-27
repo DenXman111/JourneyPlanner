@@ -32,6 +32,7 @@ public class Trip implements Displayable{
         this.createdBox = null;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public Trip(List<Edge> plan){
         this.plan = plan;
         rating = 0;
@@ -105,6 +106,14 @@ public class Trip implements Displayable{
         if (createdBox != null) fillHBox(createdBox);
     }
 
+    void insertEdges(int index, Edge first, Edge second){
+        if (index < 0 ||  plan.size() <= index || first == null || second == null) return;
+
+        plan.set(index, first);
+        plan.add(index + 1, second);
+        if (createdBox != null) fillHBox(createdBox);
+    }
+
     @Override
     public Node display() {
         return createdBox != null ? createdBox : createNode();
@@ -115,7 +124,9 @@ public class Trip implements Displayable{
         if (!plan.isEmpty()) pane.getChildren().add(plan.get(0).getStartCity().display(-1, this));
         int index = 0;
         for (Edge edge : plan)
-            pane.getChildren().addAll(edge.display(), edge.getEndCity().display(index++, this));
+            pane.getChildren().addAll(
+                    edge.display(this, index, EdgesInOut.possibleInserts(edge)),
+                    edge.getEndCity().display(index++, this));
     }
 
     private Node createNode(){

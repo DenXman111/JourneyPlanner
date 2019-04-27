@@ -1,7 +1,9 @@
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Planner {
 
@@ -15,7 +17,7 @@ public class Planner {
      */
     @SuppressWarnings({"unused", "WeakerAccess"})
     public static List<Trip > plan(String startPoint, int fund, LocalDate startDate, LocalDate endDate){
-        TripPlans trips = new TripPlans();
+        /*TripPlans trips = new TripPlans();
 
         Integer startID = DbAdapter.getCityID(startPoint);
 
@@ -26,9 +28,9 @@ public class Planner {
         for (Trip tr : result){
             System.out.println("Rating of trip: " + tr.getRating());
         }
-        return result;
+        return result;*/
 
-        /*String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lvov", "Warsaw", "Krakow"};
+        String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lvov", "Warsaw", "Krakow"};
         List<Trip> result = new ArrayList<>();
         Random random = new Random();
         int size = random.nextInt(12) + 3;
@@ -43,6 +45,6 @@ public class Planner {
                                 LocalDate.now(),
                                 LocalDate.now())).
                         collect(Collectors.toList())
-        )).limit(size).collect(Collectors.toList());*/
+        )).limit(size).collect(Collectors.toList());
     }
 }

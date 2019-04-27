@@ -61,3 +61,11 @@
 .description{
     -fx-text-fill: #14a085;
 }
+
+.icon{
+    -fx-opacity: 0.3;
+}
+
+.icon:hover{
+    -fx-opacity: 0.9;
+}
