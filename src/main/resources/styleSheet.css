@@ -60,6 +60,12 @@
 
 .description{
     -fx-text-fill: #14a085;
+    -fx-font-size: 13px;
+}
+
+.grey-text{
+    -fx-text-fill: #6e6e6e;
+    -fx-font-size: 10px;
 }
 
 .icon{

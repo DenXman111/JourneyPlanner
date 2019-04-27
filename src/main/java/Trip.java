@@ -1,8 +1,13 @@
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +19,8 @@ public class Trip implements Displayable{
     private List<Edge> plan;
     private double rating;
     private int daysInTrip;
-    private HBox createdBox;
+    private HBox createdTripBox;
+    private Pane mainPane;
 
     @SuppressWarnings("WeakerAccess")
     public Trip() {
@@ -29,8 +35,17 @@ public class Trip implements Displayable{
         this.plan = new ArrayList<>(obj.plan);
         this.rating = obj.rating;
         this.daysInTrip = obj.daysInTrip;
-        this.createdBox = null;
+        this.createdTripBox = null;
+        this.mainPane = null;
     }
+
+    /*
+    // Used for generating random trips during testing trip.display
+    public Trip(List<Edge> plan){
+        this.plan = plan;
+        rating = new Random().nextInt(500) / 100.0;
+    }
+    */
 
     @SuppressWarnings("WeakerAccess")
     public void pushEdge(Edge edge){
@@ -85,7 +100,6 @@ public class Trip implements Displayable{
         return edge.getStartCity().getNightPrice() * days;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public List<Edge> getPlan(){
         return plan;
     }
@@ -107,7 +121,7 @@ public class Trip implements Displayable{
         ListIterator<Edge> iterator = plan.listIterator(index);
         iterator.next();
         iterator.remove();
-        if (createdBox != null) fillHBox(createdBox);
+        if (createdTripBox != null) fillHBox(createdTripBox);
     }
 
     void insertEdges(int index, Edge first, Edge second){
@@ -115,12 +129,12 @@ public class Trip implements Displayable{
 
         plan.set(index, first);
         plan.add(index + 1, second);
-        if (createdBox != null) fillHBox(createdBox);
+        if (createdTripBox != null) fillHBox(createdTripBox);
     }
 
     @Override
     public Node display() {
-        return createdBox != null ? createdBox : createNode();
+        return mainPane != null ? mainPane : createNode();
     }
 
     private void fillHBox(Pane pane){
@@ -134,14 +148,42 @@ public class Trip implements Displayable{
     }
 
     private Node createNode(){
+        //box wraps rating and drawn trip plan
+        VBox box = new VBox();
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.setMaxWidth(Region.USE_PREF_SIZE);
+        box.getStyleClass().add("boxes");
+
+        HBox informationBox = new HBox();
+        informationBox.setAlignment(Pos.BOTTOM_LEFT);
+
+        Label ratingLabel = new Label("Rating: ");
+        ratingLabel.getStyleClass().add("description");
+        HBox.setMargin(ratingLabel, new Insets(0, 5, 0, 10));
+
+        ImageView stars = new ImageView("stars.png");
+        stars.setFitHeight(10);
+        stars.setPreserveRatio(true);
+
+        Rectangle2D crop = new Rectangle2D(0, 0 , 1280 * rating / 5 + 1, 256);
+        stars.setViewport(crop);
+
+        HBox.setMargin(stars, new Insets(0, 5, 3, 0));
+
+        Label numberLabel = new Label(String.valueOf(rating));
+        numberLabel.getStyleClass().add("grey-text");
+
+        informationBox.getChildren().addAll( ratingLabel, stars, numberLabel);
+
         // display all information about trip in HBox
-        HBox hbox = new HBox();
-        hbox.setAlignment(Pos.CENTER_LEFT);
-        hbox.setMaxWidth(Region.USE_PREF_SIZE);
-        hbox.setPrefHeight(60);
-        hbox.getStyleClass().add("boxes");
-        fillHBox(hbox);
-        createdBox = hbox;
-        return hbox;
+        HBox tripBox = new HBox();
+        tripBox.setAlignment(Pos.CENTER_LEFT);
+        tripBox.setMaxWidth(Region.USE_PREF_SIZE);
+        tripBox.setPrefHeight(60);
+        fillHBox(tripBox);
+        createdTripBox = tripBox;
+
+        box.getChildren().addAll(informationBox, tripBox);
+        return box;
     }
 }
