@@ -47,6 +47,7 @@ public class Trip implements Displayable{
             this.rating = this.rating * this.daysInTrip + e.getStartCity().getRating() * days;
             this.daysInTrip += days;
             if (this.daysInTrip > 0) this.rating /= this.daysInTrip; else this.rating = 0;
+            //this.rating = Math.round(this.rating * 100) / 100;
         }
 
         plan.add(e);
@@ -64,6 +65,7 @@ public class Trip implements Displayable{
             this.rating *= this.daysInTrip;
             this.daysInTrip -= days;
             this.rating -= last.getStartCity().getRating() * days;
+            if (this.daysInTrip > 0) this.rating /= this.daysInTrip; else this.rating = 0;
         }
         if (!plan.isEmpty()) plan.remove(plan.get(plan.size() - 1));
     }
