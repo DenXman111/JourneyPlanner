@@ -36,6 +36,12 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 30, 0, 0, 8);
 }
 
+.rating-box{
+    -fx-background-color: #14a085;
+    -fx-background-radius: 15;
+    -fx-padding: 7 7 7 7;
+}
+
 .scroll-pane{
     -fx-background: white;
     -fx-background-color: white;
@@ -63,8 +69,13 @@
     -fx-font-size: 13px;
 }
 
+.rating-text{
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12px;
+}
+
 .grey-text{
-    -fx-text-fill: #6e6e6e;
+    -fx-text-fill: #dadada;
     -fx-font-size: 10px;
 }
 

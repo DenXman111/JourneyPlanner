@@ -152,14 +152,16 @@ public class Trip implements Displayable{
         VBox box = new VBox();
         box.setAlignment(Pos.CENTER_LEFT);
         box.setMaxWidth(Region.USE_PREF_SIZE);
-        box.getStyleClass().add("boxes");
 
         HBox informationBox = new HBox();
         informationBox.setAlignment(Pos.BOTTOM_LEFT);
+        informationBox.setMaxWidth(Region.USE_PREF_SIZE);
+        informationBox.getStyleClass().add("rating-box");
+        VBox.setMargin(informationBox, new Insets(0, 0, 5, 0));
 
         Label ratingLabel = new Label("Rating: ");
-        ratingLabel.getStyleClass().add("description");
-        HBox.setMargin(ratingLabel, new Insets(0, 5, 0, 10));
+        ratingLabel.getStyleClass().add("rating-text");
+        HBox.setMargin(ratingLabel, new Insets(0, 2, 0, 10));
 
         ImageView stars = new ImageView("stars.png");
         stars.setFitHeight(10);
@@ -167,11 +169,11 @@ public class Trip implements Displayable{
 
         Rectangle2D crop = new Rectangle2D(0, 0 , 1280 * rating / 5 + 1, 256);
         stars.setViewport(crop);
-
         HBox.setMargin(stars, new Insets(0, 5, 3, 0));
 
-        Label numberLabel = new Label(String.valueOf(rating));
+        Label numberLabel = new Label(String.format("%.2f", rating));
         numberLabel.getStyleClass().add("grey-text");
+        HBox.setMargin(numberLabel, new Insets(0, 5, 0, 0));
 
         informationBox.getChildren().addAll( ratingLabel, stars, numberLabel);
 
@@ -180,6 +182,7 @@ public class Trip implements Displayable{
         tripBox.setAlignment(Pos.CENTER_LEFT);
         tripBox.setMaxWidth(Region.USE_PREF_SIZE);
         tripBox.setPrefHeight(60);
+        tripBox.getStyleClass().add("boxes");
         fillHBox(tripBox);
         createdTripBox = tripBox;
 
