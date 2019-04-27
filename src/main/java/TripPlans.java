@@ -6,8 +6,9 @@ import java.util.*;
 /**
  * Class have list of best trips and fill it.
  */
+@SuppressWarnings("WeakerAccess")
 public class TripPlans {
-    Set < Integer > inCurrent;
+    private Set < Integer > inCurrent;
     private Set< Trip > TripsList;
     private Trip current;
 
@@ -42,8 +43,10 @@ public class TripPlans {
             if (!e.getStartDate().isAfter(currentDate)) continue;
             if (e.getPrice() > fund) continue;
             if (inCurrent.contains(e.getEndCity().getID()) && !e.getEndCity().getID().equals(start)) continue;
+            int livingPrice = current.getLivingPrice(e);
+            if (fund < e.getPrice() + livingPrice) continue;
             current.pushEdge(e);
-            dfs(e.getEndCity().getID(), fund - e.getPrice(), e.getEndingDate(), tripEndingDate);
+            dfs(e.getEndCity().getID(), fund - e.getPrice() - livingPrice, e.getEndingDate(), tripEndingDate);
             current.removeLastEdge();
         }
 

@@ -33,24 +33,17 @@ public class Trip implements Displayable{
     }
 
     @SuppressWarnings("WeakerAccess")
-    public Trip(List<Edge> plan){
-        this.plan = plan;
-        rating = 0;
-        daysInTrip = 0;
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public void pushEdge(Edge e){
+    public void pushEdge(Edge edge){
         if (!plan.isEmpty()){
             Edge last = plan.get(plan.size() - 1);
-            int days = (int)DAYS.between(last.getEndingDate(), e.getStartDate()) - 1;
-            this.rating = this.rating * this.daysInTrip + e.getStartCity().getRating() * days;
+            int days = (int)DAYS.between(last.getEndingDate(), edge.getStartDate()) - 1;
+            this.rating = this.rating * this.daysInTrip + edge.getStartCity().getRating() * days;
             this.daysInTrip += days;
             if (this.daysInTrip > 0) this.rating /= this.daysInTrip; else this.rating = 0;
             //this.rating = Math.round(this.rating * 100) / 100;
         }
 
-        plan.add(e);
+        plan.add(edge);
         //System.out.println("----");
         //System.out.println("Wanna add edge " + e.getStartCity().getID() + " " + e.getEndCity().getID());
         //System.out.println(plan.size());
@@ -84,6 +77,15 @@ public class Trip implements Displayable{
         return rating;
     }
 
+    @SuppressWarnings("WeakerAccess")
+    public int getLivingPrice(Edge edge){
+        if (plan.isEmpty()) return 0;
+        Edge last = plan.get(plan.size() - 1);
+        int days = (int)DAYS.between(last.getEndingDate(), edge.getStartDate());
+        return edge.getStartCity().getNightPrice() * days;
+    }
+
+    @SuppressWarnings("WeakerAccess")
     public List<Edge> getPlan(){
         return plan;
     }
