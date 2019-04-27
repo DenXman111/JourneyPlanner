@@ -28,9 +28,7 @@ public class Planner {
         }
         return result;
 
-
-        /*
-        String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lvov", "Warsaw", "Krakow"};
+        /*String[] exemplaryCities = new String[] {"Brno", "Prague", "Bratislava", "Lvov", "Warsaw", "Krakow"};
         List<Trip> result = new ArrayList<>();
         Random random = new Random();
         int size = random.nextInt(12) + 3;
@@ -45,7 +43,6 @@ public class Planner {
                                 LocalDate.now(),
                                 LocalDate.now())).
                         collect(Collectors.toList())
-        )).limit(size).collect(Collectors.toList());
-         */
+        )).limit(size).collect(Collectors.toList());*/
     }
 }

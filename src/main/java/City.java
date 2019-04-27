@@ -75,11 +75,12 @@ public class City implements Displayable {
         deleteIcon.setFitWidth(10);
         deleteIcon.setOpacity(0.0);
         if (trip.allowToMergeEdges(indexInTrip)) {
+            deleteIcon.setOpacity(0.1);
             deleteIcon.setOnMouseClicked(mouseEvent -> trip.removeCityWithIndex(indexInTrip));
             VBox.setMargin(deleteIcon, new Insets(5, 0, 0, 0));
 
-            box.setOnMouseEntered(mouseEvent -> deleteIcon.setOpacity(0.4));
-            box.setOnMouseExited(mouseEvent -> deleteIcon.setOpacity(0.0));
+            box.setOnMouseEntered(mouseEvent -> deleteIcon.setOpacity(0.8));
+            box.setOnMouseExited(mouseEvent -> deleteIcon.setOpacity(0.1));
         }
         box.getChildren().add(deleteIcon);
         return box;
