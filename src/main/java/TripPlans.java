@@ -29,7 +29,7 @@ public class TripPlans {
     private void dfs(Integer nowID, int fund, LocalDate currentDate, LocalDate tripEndingDate){
         inCurrent.add(nowID);
         if (nowID.equals(start) && !current.isEmpty()){
-            System.out.println("Found trip " + nowID + " " + current.getRating() + " " + current.getPlan());
+//            System.out.println("Found trip " + nowID + " " + current.getRating() + " " + current.getPlan());
             TripsList.add(new Trip(current));
             inCurrent.remove(nowID);
             return;

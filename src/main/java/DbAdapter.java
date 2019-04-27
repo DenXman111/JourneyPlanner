@@ -112,11 +112,12 @@ public class DbAdapter {
             String query="Select name from cities";
             ResultSet result=statement.executeQuery(query);
             while (result.next()){a.add(result.getString("name"));}
+            Collections.sort(a);
             return a;
         } catch (Exception e){
             e.printStackTrace();
         }
-        a.sort((s1, s2) -> (s1.compareTo(s2)));
+        Collections.sort(a);
         return a;
     }
 }
