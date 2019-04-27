@@ -35,18 +35,23 @@ public class City implements Displayable {
     @SuppressWarnings({"unused", "WeakerAccess"})
     public double getRating() { return rating; }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public int getNightPrice() { return nightPrice; }
 
     @SuppressWarnings({"unused", "WeakerAccess"})
     public String getName() { return name; }
 
+    /**
+     * Wraps small circle and city name in VBox.
+     * Displays additional information about the city when cursor is over the circle
+     * @return Pane with dot and city name
+     */
     @Override
     public Pane display() {
         VBox box = new VBox();
         box.setAlignment(Pos.CENTER);
-        // draws a circle above label containing city name
 
+        // draws a circle above label containing city name
         Circle circle = new Circle();
         circle.setRadius(5);
         circle.getStyleClass().add("point");
@@ -57,7 +62,7 @@ public class City implements Displayable {
         tooltip.setShowDelay(Duration.ZERO);
         Tooltip.install(circle, tooltip);
 
-
+        // Displays label with city name
         Label label = new Label();
         label.setText(name);
         label.getStyleClass().add("description");
@@ -66,10 +71,18 @@ public class City implements Displayable {
         return box;
     }
 
+    /**
+     *
+     * @param indexInTrip index of this city in trip.plan
+     * @param trip trip in which the city is contained
+     * @return result of display() with additional button used to remove the city from trip
+     */
     @SuppressWarnings("WeakerAccess")
     public Node display(int indexInTrip, Trip trip){
         Pane box = display();
+        if (trip == null) return box;
 
+        // displays delete icon
         ImageView deleteIcon = new ImageView("delete.png");
         deleteIcon.setFitHeight(10);
         deleteIcon.setFitWidth(10);
