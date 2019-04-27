@@ -46,7 +46,7 @@ public class Trip implements Displayable{
             int days = (int)DAYS.between(last.getEndingDate(), e.getStartDate()) - 1;
             this.rating = this.rating * this.daysInTrip + e.getStartCity().getRating() * days;
             this.daysInTrip += days;
-            this.rating /= this.daysInTrip;
+            if (this.daysInTrip > 0) this.rating /= this.daysInTrip; else this.rating = 0;
         }
 
         plan.add(e);

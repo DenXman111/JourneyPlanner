@@ -116,6 +116,7 @@ public class DbAdapter {
         } catch (Exception e){
             e.printStackTrace();
         }
+        a.sort((s1, s2) -> (s1.compareTo(s2)));
         return a;
     }
 }

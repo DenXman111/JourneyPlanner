@@ -28,13 +28,13 @@ public class TripPlans {
     private void dfs(Integer nowID, int fund, LocalDate currentDate, LocalDate tripEndingDate){
         inCurrent.add(nowID);
         if (nowID.equals(start) && !current.isEmpty()){
-//            System.out.println("Found trip " + nowID + " " + current.isEmpty() + " " + current.getPlan());
+//            System.out.println("Found trip " + nowID + " " + current.getRating() + " " + current.getPlan());
             TripsList.add(new Trip(current));
             inCurrent.remove(nowID);
             return;
         }
 
-//        System.out.println("dfs in " + nowID + " " + fund + " " + currentDate);
+//        System.out.println("dfs in " + nowID + " " + fund + " " + currentDate + " " + current.getRating());
 
         List < Edge > neighbours = DbAdapter.getNeighbours(nowID);
         for (Edge e : neighbours){
