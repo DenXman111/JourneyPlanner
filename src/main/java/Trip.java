@@ -19,7 +19,7 @@ public class Trip implements Displayable{
     private List<Edge> plan;
     private double rating;
     private int daysInTrip;
-    private HBox createdTripBox;
+    private HBox createdTripBox, createdInformationBox;
     private Pane mainPane;
 
     @SuppressWarnings("WeakerAccess")
@@ -37,6 +37,7 @@ public class Trip implements Displayable{
         this.daysInTrip = obj.daysInTrip;
         this.createdTripBox = null;
         this.mainPane = null;
+        this.createdInformationBox = null;
     }
 
     /*
@@ -108,20 +109,20 @@ public class Trip implements Displayable{
         this.rating = rating;
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public boolean allowToMergeEdges(int index){
-        return 0 <= index && index < plan.size() - 1 && plan.get(index).getBusId() == plan.get(index + 1).getBusId();
-    }
+    /**
+     * Removes from plan two consecutive edges and inserts new edge bypassing their common city
+     * @param index index of edge in the plan list whose endCity is to be removed
+     * @param newEdge edge bypassing removed city
+     */
+    void removeCityWithIndex(int index, Edge newEdge){
+        if (index < 0 || plan.size() - 1 <= index || newEdge == null) return;
 
-    void removeCityWithIndex(int index){
-        // doesn't allow to remove the last edge
-        if (!allowToMergeEdges(index)) return;
-        // allows to remove only if its the same bus
-        plan.set(index + 1, Edge.mergeEdges(plan.get(index), plan.get(index + 1)));
+        plan.set(index + 1, newEdge);
         ListIterator<Edge> iterator = plan.listIterator(index);
         iterator.next();
         iterator.remove();
         if (createdTripBox != null) fillHBox(createdTripBox);
+        if (createdInformationBox != null) fillRatingPane(createdInformationBox);
     }
 
     void insertEdges(int index, Edge first, Edge second){
@@ -139,26 +140,20 @@ public class Trip implements Displayable{
 
     private void fillHBox(Pane pane){
         pane.getChildren().clear();
-        if (!plan.isEmpty()) pane.getChildren().add(plan.get(0).getStartCity().display(-1, this));
+        if (!plan.isEmpty()) pane.getChildren().add(plan.get(0).getStartCity().display(-1, this, null));
         int index = 0;
-        for (Edge edge : plan)
+        for (int i = 0; i < plan.size(); i++) {
+            Edge edge = plan.get(i);
+            Edge nextEdge = i < plan.size() - 1 ? plan.get(i + 1) : null;
             pane.getChildren().addAll(
                     edge.display(this, index, EdgesInOut.possibleInserts(edge)),
-                    edge.getEndCity().display(index++, this));
+                    edge.getEndCity().display(index++, this, Edge.mergeEdges(edge, nextEdge))
+            );
+        }
     }
 
-    private Node createNode(){
-        //box wraps rating and drawn trip plan
-        VBox box = new VBox();
-        box.setAlignment(Pos.CENTER_LEFT);
-        box.setMaxWidth(Region.USE_PREF_SIZE);
-
-        HBox informationBox = new HBox();
-        informationBox.setAlignment(Pos.BOTTOM_LEFT);
-        informationBox.setMaxWidth(Region.USE_PREF_SIZE);
-        informationBox.getStyleClass().add("rating-box");
-        VBox.setMargin(informationBox, new Insets(0, 0, 5, 0));
-
+    @SuppressWarnings("WeakerAccess")
+    public void fillRatingPane(Pane ratingPane){
         Label ratingLabel = new Label("Rating: ");
         ratingLabel.getStyleClass().add("rating-text");
         HBox.setMargin(ratingLabel, new Insets(0, 2, 0, 10));
@@ -175,7 +170,24 @@ public class Trip implements Displayable{
         numberLabel.getStyleClass().add("grey-text");
         HBox.setMargin(numberLabel, new Insets(0, 5, 0, 0));
 
-        informationBox.getChildren().addAll( ratingLabel, stars, numberLabel);
+        ratingPane.getChildren().addAll(ratingLabel, stars, numberLabel);
+    }
+
+    private Node createNode(){
+        //box wraps rating and drawn trip plan
+        VBox box = new VBox();
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.setMaxWidth(Region.USE_PREF_SIZE);
+
+        HBox informationBox = new HBox();
+        informationBox.setAlignment(Pos.BOTTOM_LEFT);
+        informationBox.setMaxWidth(Region.USE_PREF_SIZE);
+        informationBox.getStyleClass().add("rating-box");
+        VBox.setMargin(informationBox, new Insets(0, 0, 5, 5));
+
+        fillRatingPane(informationBox);
+
+        createdInformationBox = informationBox;
 
         // display all information about trip in HBox
         HBox tripBox = new HBox();

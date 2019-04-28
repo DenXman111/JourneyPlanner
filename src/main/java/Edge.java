@@ -57,7 +57,6 @@ public class Edge implements Displayable{
         return endingDate;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public int getBusId() {return busID; }
 
     @Override
@@ -102,7 +101,11 @@ public class Edge implements Displayable{
 
     @SuppressWarnings("WeakerAccess")
     public static Edge mergeEdges(Edge first, Edge second){
-        return new Edge(first.busID, first.startCity, second.endCity,
-                first.price + second.price, first.startDate, second.endingDate);
+        if (first == null || second == null) return null;
+        Integer startId = first.getStartCity().getID(), endId = second.getEndCity().getID();
+        List<Edge> options = DbAdapter.getNeighbours(startId);
+        for (Edge option : options)
+            if (option.getEndCity().getID().equals(endId)) return option;
+        return null;
     }
 }

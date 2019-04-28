@@ -78,9 +78,8 @@ public class City implements Displayable {
      * @return result of display() with additional button used to remove the city from trip
      */
     @SuppressWarnings("WeakerAccess")
-    public Node display(int indexInTrip, Trip trip){
+    public Node display(int indexInTrip, Trip trip, Edge replaceEdge){
         Pane box = display();
-        if (trip == null) return box;
 
         // displays delete icon
         ImageView deleteIcon = new ImageView("delete.png");
@@ -88,9 +87,9 @@ public class City implements Displayable {
         deleteIcon.setFitWidth(10);
         deleteIcon.getStyleClass().add("icon");
         deleteIcon.setVisible(false);
-        if (trip.allowToMergeEdges(indexInTrip)) {
+        if (trip != null && replaceEdge != null) {
             deleteIcon.setVisible(true);
-            deleteIcon.setOnMouseClicked(mouseEvent -> trip.removeCityWithIndex(indexInTrip));
+            deleteIcon.setOnMouseClicked(mouseEvent -> trip.removeCityWithIndex(indexInTrip, replaceEdge));
         }
         VBox.setMargin(deleteIcon, new Insets(5, 0, 0, 0));
         box.getChildren().add(deleteIcon);
