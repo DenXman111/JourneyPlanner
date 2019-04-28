@@ -48,7 +48,23 @@ public class Trip implements Displayable{
     }
     */
 
-    @SuppressWarnings("WeakerAccess")
+    @SuppressWarnings({"WeakerAccess", "Duplicates"})
+    public void countRating(){
+        this.rating = 0;
+        this.daysInTrip = 0;
+        Edge prev = null;
+        for (Edge now : plan){
+            if (prev != null){
+                int days = (int)DAYS.between(prev.getEndingDate(), now.getStartDate()) - 1;
+                this.rating = this.rating * this.daysInTrip + now.getStartCity().getRating() * days;
+                this.daysInTrip += days;
+                if (this.daysInTrip > 0) this.rating /= this.daysInTrip; else this.rating = 0;
+            }
+            prev = now;
+        }
+    }
+
+    @SuppressWarnings({"WeakerAccess", "Duplicates"})
     public void pushEdge(Edge edge){
         if (!plan.isEmpty()){
             Edge last = plan.get(plan.size() - 1);
@@ -101,6 +117,7 @@ public class Trip implements Displayable{
         return edge.getStartCity().getNightPrice() * days;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public List<Edge> getPlan(){
         return plan;
     }
