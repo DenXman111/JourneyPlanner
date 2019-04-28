@@ -120,4 +120,28 @@ public class DbAdapter {
         Collections.sort(a);
         return a;
     }
+    public static List< EdgesInOut > getCitiesBetween(Integer prev_cityID,Integer next_cityID){
+        ArrayList<EdgesInOut> a=new ArrayList<>();
+        try {
+            statement = connection.createStatement();
+            String query="Select * from( select end_city as ec1, id as id1, price as p1, departure as d1, arrival as a1 from buses where start_city=\'"+prev_cityID+"\') b1 join (select start_city as sc2, end_city as ec2, id as id2, price as p2, departure as d2, arrival as a2 from buses where end_city=\'"+next_cityID+"\') b2 on ec1=sc2";
+            ResultSet result=statement.executeQuery(query);
+            while (result.next()) {
+                City r1=getCityFromID(prev_cityID);
+                City r2=getCityFromID(result.getInt("ec1"));
+                Edge b=new Edge(result.getInt("id1"),r1,r2,result.getInt("p1"),
+                        result.getDate("d1").toLocalDate(),
+                        result.getDate("a1").toLocalDate());
+                City r3=getCityFromID(next_cityID);
+                Edge c=new Edge(result.getInt("id2"),r2,r3,result.getInt("p2"),
+                        result.getDate("d2").toLocalDate(),
+                        result.getDate("a2").toLocalDate());
+                EdgesInOut d=new EdgesInOut(b,c);
+                a.add(d);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return a;
+    }
 }
