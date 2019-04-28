@@ -9,6 +9,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -21,6 +22,7 @@ public class Trip implements Displayable{
     private int daysInTrip;
     private HBox createdTripBox, createdInformationBox;
     private Pane mainPane;
+    private LocalDate beginDate, endDate;
 
     @SuppressWarnings("WeakerAccess")
     public Trip() {
@@ -35,6 +37,8 @@ public class Trip implements Displayable{
         this.plan = new ArrayList<>(obj.plan);
         this.rating = obj.rating;
         this.daysInTrip = obj.daysInTrip;
+        this.beginDate = obj.beginDate;
+        this.endDate = obj.endDate;
         this.createdTripBox = null;
         this.mainPane = null;
         this.createdInformationBox = null;
@@ -159,14 +163,18 @@ public class Trip implements Displayable{
     }
 
     private void fillHBox(Pane pane){
+        beginDate = beginDate == null && !plan.isEmpty() ? plan.get(0).getStartDate() : beginDate;
+        endDate = endDate == null && !plan.isEmpty() ? plan.get(plan.size() - 1).getEndingDate() : endDate;
         pane.getChildren().clear();
         if (!plan.isEmpty()) pane.getChildren().add(plan.get(0).getStartCity().display(-1, this, null));
         int index = 0;
         for (int i = 0; i < plan.size(); i++) {
             Edge edge = plan.get(i);
             Edge nextEdge = i < plan.size() - 1 ? plan.get(i + 1) : null;
+            LocalDate begin = 0 < i ? plan.get(i - 1).getEndingDate() : beginDate.minusDays(1);
+            LocalDate end = nextEdge != null  ? nextEdge.getStartDate() : endDate.plusDays(1);
             pane.getChildren().addAll(
-                    edge.display(this, index, EdgesInOut.possibleInserts(edge)),
+                    edge.display(this, index, EdgesInOut.possibleInserts(edge, begin, end)),
                     edge.getEndCity().display(index++, this, Edge.mergeEdges(edge, nextEdge))
             );
         }

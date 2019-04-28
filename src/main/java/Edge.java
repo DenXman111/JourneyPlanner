@@ -34,6 +34,15 @@ public class Edge implements Displayable{
         this.endingDate = endingDate;
     }
 
+    private Edge(Edge edge){
+        this.busID = edge.busID;
+        this.startCity = edge.startCity;
+        this.endCity = edge.endCity;
+        this.startDate = edge.startDate;
+        this.endingDate = edge.endingDate;
+        this.price = edge.price;
+    }
+
     @SuppressWarnings("WeakerAccess")
     public City getStartCity() {
         return startCity;
@@ -57,6 +66,7 @@ public class Edge implements Displayable{
         return endingDate;
     }
 
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public int getBusId() {return busID; }
 
     @Override
@@ -81,7 +91,7 @@ public class Edge implements Displayable{
         addIcon.setFitHeight(12);
         addIcon.setFitWidth(12);
         addIcon.getStyleClass().add("icon");
-        VBox.setMargin(addIcon, new Insets(5, 0, 0, 0));
+        VBox.setMargin(addIcon, new Insets(7, 0, 0, 0));
         addIcon.setVisible(false);
         if (trip != null && edges != null && !edges.isEmpty()) {
             addIcon.setVisible(true);
@@ -102,7 +112,7 @@ public class Edge implements Displayable{
     }
 
     private boolean isBetween(LocalDate begin, LocalDate end){
-        return begin.isBefore(startDate) && end.isAfter(endingDate);
+        return !begin.isAfter(startDate) && !end.isBefore(endingDate);
     }
     /*
      * Function requires improvement
@@ -113,10 +123,10 @@ public class Edge implements Displayable{
     public static Edge mergeEdges(Edge first, Edge second){
         if (first == null || second == null) return null;
         Integer startId = first.getStartCity().getID(), endId = second.getEndCity().getID();
-        List<Edge> options = DbAdapter.getNeighbours(startId).
-                stream().filter( edge -> edge.isBetween(first.startDate, second.endingDate)).collect(Collectors.toList());
-        for (Edge option : options)
-            if (option.getEndCity().getID().equals(endId)) return option;
-        return null;
+        List<Edge> options = DbAdapter.getNeighbours(startId)
+                .stream()
+                .filter( edge -> edge.getEndCity().getID().equals(endId) && edge.isBetween(first.startDate, second.endingDate))
+                .collect(Collectors.toList());
+        return !options.isEmpty() ? options.get(0) : null;
     }
 }
