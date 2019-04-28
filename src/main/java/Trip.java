@@ -139,7 +139,7 @@ public class Trip implements Displayable{
         iterator.remove();
         countRating();
         if (createdTripBox != null) fillHBox(createdTripBox);
-        if (createdInformationBox != null) fillRatingPane(createdInformationBox);
+        if (createdInformationBox != null) fillInformationPane(createdInformationBox);
     }
 
     void insertEdges(int index, Edge first, Edge second){
@@ -150,7 +150,7 @@ public class Trip implements Displayable{
 
         countRating();
         if (createdTripBox != null) fillHBox(createdTripBox);
-        if (createdInformationBox != null) fillRatingPane(createdInformationBox);
+        if (createdInformationBox != null) fillInformationPane(createdInformationBox);
     }
 
     @Override
@@ -173,7 +173,7 @@ public class Trip implements Displayable{
     }
 
     @SuppressWarnings("WeakerAccess")
-    public void fillRatingPane(Pane ratingPane){
+    public void fillInformationPane(Pane ratingPane){
         ratingPane.getChildren().clear();
 
         Label ratingLabel = new Label("Rating: ");
@@ -190,9 +190,13 @@ public class Trip implements Displayable{
 
         Label numberLabel = new Label(String.format("%.2f", rating));
         numberLabel.getStyleClass().add("grey-text");
-        HBox.setMargin(numberLabel, new Insets(0, 5, 0, 0));
+        HBox.setMargin(numberLabel, new Insets(0, 10, 0, 0));
 
-        ratingPane.getChildren().addAll(ratingLabel, stars, numberLabel);
+        Label travelTimeLabel = new Label( "Travel time: " + daysInTrip +  ( daysInTrip > 1 ? " days" : "day"));
+        travelTimeLabel.getStyleClass().add("rating-text");
+        HBox.setMargin(travelTimeLabel, new Insets(0, 5, 0, 0));
+
+        ratingPane.getChildren().addAll(ratingLabel, stars, numberLabel, travelTimeLabel);
     }
 
     private Node createNode(){
@@ -207,7 +211,7 @@ public class Trip implements Displayable{
         informationBox.getStyleClass().add("rating-box");
         VBox.setMargin(informationBox, new Insets(0, 0, 5, 5));
 
-        fillRatingPane(informationBox);
+        fillInformationPane(informationBox);
 
         createdInformationBox = informationBox;
 
