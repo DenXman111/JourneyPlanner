@@ -76,34 +76,45 @@ public class Edge implements Displayable{
     @SuppressWarnings("WeakerAccess")
     public Pane display(Trip trip, int index, List<EdgesInOut> edges){
         Pane box = display();
-        if (trip == null ||  edges == null || edges.isEmpty()) return box;
 
         ImageView addIcon = new ImageView("plus-sign.png");
         addIcon.setFitHeight(12);
         addIcon.setFitWidth(12);
         addIcon.getStyleClass().add("icon");
         VBox.setMargin(addIcon, new Insets(5, 0, 0, 0));
-        ContextMenu citiesMenu = new ContextMenu();
+        addIcon.setVisible(false);
+        if (trip != null && edges != null && !edges.isEmpty()) {
+            addIcon.setVisible(true);
+            ContextMenu citiesMenu = new ContextMenu();
 
-        Stream<MenuItem> itemsStream = edges.stream().map(inOut -> {
-            MenuItem item = new MenuItem(inOut.getMiddleCity().getName());
-            item.setOnAction(actionEvent -> trip.insertEdges(index, inOut.getInEdge(), inOut.getOutEdge()));
-            return item;
-        });
+            Stream<MenuItem> itemsStream = edges.stream().map(inOut -> {
+                MenuItem item = new MenuItem(inOut.getMiddleCity().getName());
+                item.setOnAction(actionEvent -> trip.insertEdges(index, inOut.getInEdge(), inOut.getOutEdge()));
+                return item;
+            });
 
-        citiesMenu.getItems().addAll( itemsStream.collect(Collectors.toList()));
+            citiesMenu.getItems().addAll(itemsStream.collect(Collectors.toList()));
 
-        addIcon.setOnMouseClicked(mouseEvent -> citiesMenu.show(box, mouseEvent.getScreenX(), mouseEvent.getScreenY()));
-
+            addIcon.setOnMouseClicked(mouseEvent -> citiesMenu.show(box, mouseEvent.getScreenX(), mouseEvent.getScreenY()));
+        }
         box.getChildren().add(addIcon);
         return box;
     }
 
+    private boolean isBetween(LocalDate begin, LocalDate end){
+        return begin.isBefore(startDate) && end.isAfter(endingDate);
+    }
+    /*
+     * Function requires improvement
+     *      |
+     *      V
+     */
     @SuppressWarnings("WeakerAccess")
     public static Edge mergeEdges(Edge first, Edge second){
         if (first == null || second == null) return null;
         Integer startId = first.getStartCity().getID(), endId = second.getEndCity().getID();
-        List<Edge> options = DbAdapter.getNeighbours(startId);
+        List<Edge> options = DbAdapter.getNeighbours(startId).
+                stream().filter( edge -> edge.isBetween(first.startDate, second.endingDate)).collect(Collectors.toList());
         for (Edge option : options)
             if (option.getEndCity().getID().equals(endId)) return option;
         return null;

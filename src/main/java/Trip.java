@@ -117,7 +117,6 @@ public class Trip implements Displayable{
         return edge.getStartCity().getNightPrice() * days;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public List<Edge> getPlan(){
         return plan;
     }
@@ -138,6 +137,7 @@ public class Trip implements Displayable{
         ListIterator<Edge> iterator = plan.listIterator(index);
         iterator.next();
         iterator.remove();
+        countRating();
         if (createdTripBox != null) fillHBox(createdTripBox);
         if (createdInformationBox != null) fillRatingPane(createdInformationBox);
     }
@@ -147,7 +147,10 @@ public class Trip implements Displayable{
 
         plan.set(index, first);
         plan.add(index + 1, second);
+
+        countRating();
         if (createdTripBox != null) fillHBox(createdTripBox);
+        if (createdInformationBox != null) fillRatingPane(createdInformationBox);
     }
 
     @Override
@@ -171,6 +174,8 @@ public class Trip implements Displayable{
 
     @SuppressWarnings("WeakerAccess")
     public void fillRatingPane(Pane ratingPane){
+        ratingPane.getChildren().clear();
+
         Label ratingLabel = new Label("Rating: ");
         ratingLabel.getStyleClass().add("rating-text");
         HBox.setMargin(ratingLabel, new Insets(0, 2, 0, 10));

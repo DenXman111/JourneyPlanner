@@ -1,12 +1,15 @@
-import java.util.Arrays;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * Wrapper over pair of edges, inEdge should lead to the city where outEdge starts.
  * Class used during modification of user's trips
  */
 @SuppressWarnings("WeakerAccess")
-public class EdgesInOut {
+public class EdgesInOut implements Comparable<EdgesInOut>{
     private final Edge inEdge, outEdge;
 
     @SuppressWarnings("WeakerAccess")
@@ -32,18 +35,27 @@ public class EdgesInOut {
         return inEdge.getEndCity();
     }
 
+    private boolean isBetween(LocalDate begin, LocalDate end){
+        return begin.isBefore(inEdge.getStartDate()) && end.isAfter(outEdge.getEndingDate());
+    }
+    /*
+     * Function requires improvement
+     *      |
+     *      V
+     */
     @SuppressWarnings("WeakerAccess")
     public static List<EdgesInOut> possibleInserts(Edge edge){
-        // Only for example, should be replaced with searching possible city to insert in database
-        return Arrays.asList(
-                new EdgesInOut(
-                    new Edge(0, edge.getStartCity() ,new City(21, "Krakow", 37, 420), 20, edge.getStartDate(), edge.getEndingDate()),
-                    new Edge(0, new City(21, "Krakow", 37, 420), edge.getEndCity(), 20, edge.getStartDate(), edge.getEndingDate())
-                ),
-                new EdgesInOut(
-                        new Edge(0, edge.getStartCity() ,new City(21, "Warszawa", 37, 420), 20, edge.getStartDate(), edge.getEndingDate()),
-                        new Edge(0, new City(21, "Warszawa", 37, 420), edge.getEndCity(), 20, edge.getStartDate(), edge.getEndingDate())
-                )
-        );
+        List<EdgesInOut> listAll = DbAdapter.getCitiesBetween(edge.getStartCity().getID(), edge.getEndCity().getID());
+        listAll = listAll.stream().
+                filter( edgesInOut -> edgesInOut.isBetween(edge.getStartDate(), edge.getEndingDate())).
+                collect(Collectors.toList());
+        //remove duplicates
+        TreeSet<EdgesInOut> set = new TreeSet<>(listAll);
+        return new ArrayList<>(set);
+    }
+
+    @Override
+    public int compareTo(EdgesInOut o) {
+        return this.getMiddleCity().getName().compareTo(o.getMiddleCity().getName());
     }
 }
