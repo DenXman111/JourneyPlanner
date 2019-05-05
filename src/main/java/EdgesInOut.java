@@ -48,11 +48,13 @@ public class EdgesInOut implements Comparable<EdgesInOut>{
      *      |
      *      V
      */
-    @SuppressWarnings("WeakerAccess")
     public static List<EdgesInOut> possibleInserts(Edge edge, LocalDate begin, LocalDate end){
         if (edge == null || begin == null || end == null) return null;
         List<EdgesInOut> listAll = DbAdapter.getCitiesBetween(edge.getStartCity().getID(), edge.getEndCity().getID())
                 .stream().filter(EdgesInOut::dateIsProper).collect(Collectors.toList());
+        /*
+         * In future we are should add here checking repeats cites
+         */
         listAll = listAll.stream().
                 filter( edgesInOut ->
                         edgesInOut.isBetween(begin, end) && edgesInOut.dateIsProper()).

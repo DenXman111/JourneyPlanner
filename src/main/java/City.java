@@ -53,7 +53,7 @@ public class City implements Displayable {
 
         // draws a circle above label containing city name
         Circle circle = new Circle();
-        circle.setRadius(5);
+        circle.setRadius(7);
         circle.getStyleClass().add("point");
 
         // displays additional information when user moves cursor above circle
