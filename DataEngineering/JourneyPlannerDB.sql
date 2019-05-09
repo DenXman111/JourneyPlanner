@@ -24,7 +24,10 @@ CREATE TABLE cities (
     rating int  NOT NULL,
     average_price int  NOT NULL,
     country varchar(63)  NOT NULL,
-    CONSTRAINT cities_pk PRIMARY KEY (id)
+    CONSTRAINT cities_pk PRIMARY KEY (id),
+    constraint rating_range check (rating>=0 and rating<=5),
+    constraint min_price check (average_price>0),
+    constraint name check (average_price>0)
 );
 
 -- Table: departure_time
