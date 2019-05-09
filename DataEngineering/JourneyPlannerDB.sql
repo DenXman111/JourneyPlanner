@@ -36,11 +36,32 @@ CREATE TABLE departure_time (
 );
 
 -- Table: exceptions
-CREATE TABLE exceptions (
+CREATE TABLE breaks (
     date date  NOT NULL,
-    intervals_id int  NOT NULL,
-    CONSTRAINT exceptions_pk PRIMARY KEY (date,intervals_id)
+    interval_id int  NOT NULL,
+    CONSTRAINT exceptions_pk PRIMARY KEY (date,interval_id)
 );
+
+-- Trigger: breaks
+-- returns null if break is not contained in indicated interval
+CREATE OR REPLACE FUNCTION exception_check() RETURNS TRIGGER AS
+    $exception_check$
+    declare
+        rec record;
+    begin
+        if NEW.date is null or new.interval_id is null then
+            return null;
+        end if;
+        for rec in SELECT begin_date, end_date from intervals WHERE id = NEW.interval_id loop
+            if new.date between begin_date and end_date then
+                return new;
+            end if;
+        end loop;
+        return null;
+    end;
+    $exception_check$ LANGUAGE plpgsql;
+CREATE TRIGGER exception_check BEFORE INSERT OR UPDATE ON breaks
+    FOR EACH ROW EXECUTE PROCEDURE exception_check();
 
 -- Table: intervals
 CREATE TABLE intervals (
@@ -48,7 +69,8 @@ CREATE TABLE intervals (
     begin_date date  NOT NULL,
     end_date date  NOT NULL,
     transit int  NOT NULL,
-    CONSTRAINT intervals_pk PRIMARY KEY (id)
+    CONSTRAINT intervals_pk PRIMARY KEY (id),
+    CONSTRAINT correct_interval CHECK ( begin_date <= end_date )
 );
 
 -- Table: reservations
@@ -78,14 +100,20 @@ CREATE TABLE transits (
     CONSTRAINT transits_pk PRIMARY KEY (id_transit)
 );
 
+-- email type, copied from stack overflow: "https://dba.stackexchange.com/questions/68266/what-is-the-best-way-to-store-an-email-address-in-postgresql"
+CREATE EXTENSION citext;
+CREATE DOMAIN email AS citext
+  CHECK ( value ~ '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$' );
+
 -- Table: users
-CREATE TABLE users (
+CREATE TABLE  users (
     username varchar(20)  NOT NULL,
-    email varchar(320)  NOT NULL,
+    email email NOT NULL,
     password bigint  NOT NULL,
     name varchar(63)  NOT NULL,
     surname varchar(63)  NOT NULL,
-    CONSTRAINT users_pk PRIMARY KEY (username)
+    CONSTRAINT users_pk PRIMARY KEY (username),
+    constraint unique_email UNIQUE (email)
 );
 
 -- views
