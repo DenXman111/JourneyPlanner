@@ -70,6 +70,7 @@ public class DbAdapter {
             return -1;
         }
     }
+
     public static City getCityFromID(Integer ID) throws DatabaseException{
         try {
             statement = connection.createStatement();
@@ -82,6 +83,23 @@ public class DbAdapter {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static void addNewUser(String username, int password, String email, String name, String surname) throws SQLException{
+//        try {
+            statement = connection.createStatement();
+//            String query="INSERT INTO users VALUES(" + username + ", " + password + ", " + email + ", " + name + ", " + surname + ")";
+            String query="INSERT INTO users(username, password, email, name, surname) VALUES(?, ?, ?, ?, ?)";
+            PreparedStatement pst = connection.prepareStatement(query);
+            pst.setString(1, username);
+            pst.setInt(2, password);
+            pst.setString(3, email);
+            pst.setString(4, name);
+            pst.setString(5, surname);
+            pst.executeUpdate();
+//        } catch (SQLException e){
+//            e.printStackTrace();
+//        }
     }
 
     public static List< Edge > getNeighbours(Integer cityID){ //geting list of cityID's neighbours

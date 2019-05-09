@@ -61,7 +61,7 @@
             </DatePicker>
          </FlowPane>
       </VBox>
-      <Button fx:id="MainButtonFind" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" onAction="#findButtonPressed" prefHeight="40.0" prefWidth="110.0" style="-fx-background-radius: 20;" styleClass="mainButton" text="Search again..." textFill="#14a085">
+      <Button fx:id="MainButtonFind" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" onAction="#findButtonPressed" prefHeight="40.0" prefWidth="111.0" style="-fx-background-radius: 20; -fx-background-insets: 0, 1, 1;" styleClass="mainButton" text="Search again..." textFill="#14a085">
          <font>
             <Font size="18.0" />
          </font>

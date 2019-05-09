@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
@@ -12,42 +13,76 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="450.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="WelcomeController">
-   <HBox alignment="CENTER_LEFT" maxWidth="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="100.0">
+<VBox alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="450.0" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="WelcomeController">
+   <GridPane>
+      <columnConstraints>
+         <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" />
+         <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="10.0" prefWidth="100.0" />
+      </columnConstraints>
+      <rowConstraints>
+         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+      </rowConstraints>
+      <children>
+         <HBox alignment="CENTER" maxWidth="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="100.0" prefWidth="481.0">
+            <opaqueInsets>
+               <Insets left="15.0" />
+            </opaqueInsets>
+            <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+               <HBox.margin>
+                  <Insets right="30.0" />
+               </HBox.margin>
+               <Image url="@../backpack.png" />
+            </ImageView>
+            <Label alignment="CENTER_RIGHT" contentDisplay="CENTER" text="Journey" textAlignment="CENTER" textFill="#14a085" textOverrun="CLIP">
+               <font>
+                  <Font size="36.0" />
+               </font>
+            </Label>
+            <Label text="Planner">
+               <font>
+                  <Font size="36.0" />
+               </font>
+               <HBox.margin>
+                  <Insets right="80.0" />
+               </HBox.margin>
+            </Label>
+         </HBox>
+         <VBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="120.0" spacing="5.0" GridPane.columnIndex="1">
+            <children>
+               <Button fx:id="Login" mnemonicParsing="false" onAction="#loginPressed" prefWidth="95.0" style="-fx-background-color: linear-gradient(#ffd65b, #e68400),        linear-gradient(#ffef84, #f2ba44),        linear-gradient(#ffea6a, #efaa22),        linear-gradient(#ffe657 0%, #f8c202 50%, #eea10b 100%),        linear-gradient(from 0% 0% to 15% 50%, rgba(255,255,255,0.9), rgba(255,255,255,0)); -fx-background-radius: 30; -fx-background-insets: 0, 1, 2, 3, 0; -fx-font-weight: bold; -fx-font-size: 14; -fx-padding: 5 10 5 10;" text="Login">
+                  <font>
+                     <Font size="18.0" />
+                  </font>
+                  <opaqueInsets>
+                     <Insets />
+                  </opaqueInsets>
+               </Button>
+               <Button fx:id="SignUp" mnemonicParsing="false" onAction="#signUpPressed" prefWidth="95.0" style="-fx-background-color: linear-gradient(#ffd65b, #e68400),        linear-gradient(#ffef84, #f2ba44),        linear-gradient(#ffea6a, #efaa22),        linear-gradient(#ffe657 0%, #f8c202 50%, #eea10b 100%),        linear-gradient(from 0% 0% to 15% 50%, rgba(255,255,255,0.9), rgba(255,255,255,0)); -fx-background-radius: 30; -fx-background-insets: 0, 1, 2, 3, 0; -fx-font-weight: bold; -fx-font-size: 14; -fx-padding: 5 10 5 10;" text="Sign up">
+                  <font>
+                     <Font size="18.0" />
+                  </font>
+               </Button>
+            </children>
+            <opaqueInsets>
+               <Insets />
+            </opaqueInsets>
+            <cursor>
+               <Cursor fx:constant="MOVE" />
+            </cursor>
+         </VBox>
+      </children>
       <VBox.margin>
-         <Insets bottom="1.0" left="60.0" />
+         <Insets left="15.0" right="5.0" />
       </VBox.margin>
-      <opaqueInsets>
-         <Insets />
-      </opaqueInsets>
-      <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-         <HBox.margin>
-            <Insets right="30.0" />
-         </HBox.margin>
-         <Image url="@../backpack.png" />
-      </ImageView>
-      <Label alignment="CENTER_RIGHT" contentDisplay="CENTER" text="Journey" textAlignment="CENTER" textFill="#14a085" textOverrun="CLIP">
-         <font>
-            <Font size="36.0" />
-         </font>
-      </Label>
-      <Label text="Planner">
-         <font>
-            <Font size="36.0" />
-         </font>
-         <HBox.margin>
-            <Insets right="80.0" />
-         </HBox.margin>
-      </Label>
-   </HBox>
-   <GridPane id="welcomeGrid" alignment="CENTER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="350.0" stylesheets="@../styleSheet.css">
+   </GridPane>
+   <GridPane id="welcomeGrid" alignment="CENTER" maxHeight="1.7976931348623157E308" minHeight="350.0" nodeOrientation="LEFT_TO_RIGHT" stylesheets="@../styleSheet.css">
       <columnConstraints>
          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
       </columnConstraints>
       <rowConstraints>
          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
       </rowConstraints>
-      <Button fx:id="WelcomeSceneStartButton" mnemonicParsing="false" onAction="#startButtonPressed" prefHeight="40.0" prefWidth="300.0" styleClass="mainButton" stylesheets="@../styleSheet.css" text="Plan my trip" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+      <Button fx:id="WelcomeSceneStartButton" mnemonicParsing="false" onAction="#startButtonPressed" prefHeight="40.0" prefWidth="300.0" style="-fx-background-color: #c3c4c4,        linear-gradient(#d6d6d6 50%, white 100%),        radial-gradient(center 50% -40%, radius 200%, #e6e6e6 45%, rgba(230,230,230,0) 50%); -fx-background-radius: 30; -fx-background-insets: 0 1 1; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 3, 0.0 , 0 , 1 );" styleClass="mainButton" stylesheets="@../styleSheet.css" text="Plan my trip" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
          <font>
             <Font size="18.0" />
          </font>

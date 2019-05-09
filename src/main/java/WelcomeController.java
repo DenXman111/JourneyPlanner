@@ -11,13 +11,12 @@ import java.io.IOException;
 public class WelcomeController {
 
     private Stage prevStage;
-    @FXML
-    private Button WelcomeSceneStartButton;
 
     public void setPrevStage(Stage stage){
         this.prevStage = stage;
     }
 
+    @FXML
     public void startButtonPressed(ActionEvent event) throws IOException {
         Stage stage = new Stage();
         stage.setTitle("Main");
@@ -27,5 +26,28 @@ public class WelcomeController {
 
         prevStage.close();
         stage.show();
+    }
+    @FXML
+    public void loginPressed(ActionEvent event) throws IOException{
+        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/login.fxml"));
+
+        Pane myPane = myLoader.load();
+        LoginController controller = myLoader.getController();
+        controller.setPrevStage(prevStage);
+
+        Scene myScene = new Scene(myPane);
+        prevStage.setScene(myScene);
+    }
+
+    @FXML
+    public void signUpPressed(ActionEvent event) throws IOException{
+        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/signUp.fxml"));
+
+        Pane myPane = myLoader.load();
+        SignUpController controller = myLoader.getController();
+        controller.setPrevStage(prevStage);
+
+        Scene myScene = new Scene(myPane);
+        prevStage.setScene(myScene);
     }
 }
