@@ -243,7 +243,7 @@ END;
 $have_free_seat_check$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS have_free_seat_check ON seat_reservation;
-CREATE TRIGGER have_free_seat_check BEFORE INSERT OR UPDATE ON seat_reservation;
+CREATE TRIGGER have_free_seat_check BEFORE INSERT OR UPDATE ON seat_reservation
     FOR EACH ROW EXECUTE PROCEDURE have_free_seat_check();
 
 -- sequences
