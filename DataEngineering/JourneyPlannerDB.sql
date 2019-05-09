@@ -27,12 +27,14 @@ CREATE TABLE cities (
     CONSTRAINT cities_pk PRIMARY KEY (id)
 );
 
+CREATE TYPE day AS ENUM ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Everyday');
+
 -- Table: departure_time
 CREATE TABLE departure_time (
     departure time  NOT NULL,
     time interval  NOT NULL,
     interval int  NOT NULL,
-    day_of_the_week int  NULL,
+    day_of_the_week day  NOT NULL,
     CONSTRAINT departure_time_pk PRIMARY KEY (departure,interval)
 );
 
@@ -40,13 +42,13 @@ CREATE TABLE departure_time (
 CREATE TABLE breaks (
     date date  NOT NULL,
     interval_id int  NOT NULL,
-    CONSTRAINT exceptions_pk PRIMARY KEY (date,interval_id)
+    CONSTRAINT break_pk PRIMARY KEY (date,interval_id)
 );
 
 -- Trigger: breaks
 -- returns null if break is not contained in indicated interval
-CREATE OR REPLACE FUNCTION exception_check() RETURNS TRIGGER AS
-    $exception_check$
+CREATE OR REPLACE FUNCTION break_check() RETURNS TRIGGER AS
+    $break_check$
     declare
         rec record;
     begin
@@ -60,9 +62,9 @@ CREATE OR REPLACE FUNCTION exception_check() RETURNS TRIGGER AS
         end loop;
         return null;
     end;
-    $exception_check$ LANGUAGE plpgsql;
-CREATE TRIGGER exception_check BEFORE INSERT OR UPDATE ON breaks
-    FOR EACH ROW EXECUTE PROCEDURE exception_check();
+    $break_check$ LANGUAGE plpgsql;
+CREATE TRIGGER break_check BEFORE INSERT OR UPDATE ON breaks
+    FOR EACH ROW EXECUTE PROCEDURE break_check();
 
 -- Table: intervals
 CREATE TABLE intervals (
@@ -73,6 +75,26 @@ CREATE TABLE intervals (
     CONSTRAINT intervals_pk PRIMARY KEY (id),
     CONSTRAINT correct_interval CHECK ( begin_date <= end_date )
 );
+
+-- Trigger: intervals
+-- after modifying or deleting interval remove all breaks that will not be contained
+CREATE OR REPLACE FUNCTION remove_breaks_after_delete() RETURNS TRIGGER AS
+    $remove_breaks$
+    begin
+        DELETE FROM breaks WHERE interval_id = OLD.id AND date BETWEEN OLD.begin_date AND OLD.end_date;
+    end;
+    $remove_breaks$ LANGUAGE plpgsql;
+CREATE TRIGGER remove_breaks_after_delete AFTER DELETE ON intervals
+    FOR EACH ROW EXECUTE PROCEDURE remove_breaks_after_delete();
+
+CREATE OR REPLACE FUNCTION remove_breaks_after_update() RETURNS TRIGGER AS
+    $remove_breaks_update$
+    begin
+        DELETE FROM breaks WHERE interval_id = NEW.id AND date NOT BETWEEN NEW.begin_date AND NEW.end_date;
+    end;
+    $remove_breaks_update$ LANGUAGE plpgsql;
+CREATE TRIGGER remove_breaks_after_update AFTER UPDATE ON intervals
+    FOR EACH ROW EXECUTE PROCEDURE remove_breaks_after_update();
 
 -- Table: reservations
 CREATE TABLE reservations (
