@@ -3,23 +3,24 @@
 -- tables
 -- Table: bus_stops
 CREATE TABLE bus_stops (
-    id int  NOT NULL,
+    id numeric  NOT NULL,
     stop_name varchar(127)  NOT NULL,
-    city int  NOT NULL,
-    CONSTRAINT bus_stops_pk PRIMARY KEY (id)
+    city numeric  NOT NULL,
+    CONSTRAINT bus_stops_pk PRIMARY KEY (id),
+    CONSTRAINT city_fk FOREIGN KEY (city) REFERENCES cities (id)
 );
 
 -- Table: buses_models
 CREATE TABLE buses_models (
-    id int  NOT NULL,
-    seats int  NOT NULL,
+    id numeric  NOT NULL,
+    seats numeric(3)  NOT NULL CHECK (1 <= seats AND seats <= 300),
     CONSTRAINT buses_models_pk PRIMARY KEY (id)
 );
 
 -- Table: cities
 CREATE TABLE cities (
     id int  NOT NULL,
-    name varchar(63)  NOT NULL CHECK (not null),
+    name varchar(63)  NOT NULL,
     rating int  NOT NULL,
     average_price int  NOT NULL,
     country varchar(63)  NOT NULL,
@@ -53,29 +54,34 @@ CREATE TABLE intervals (
 
 -- Table: reservations
 CREATE TABLE reservations (
-    id int  NOT NULL,
+    id numeric  NOT NULL,
     "user" varchar(20)  NOT NULL,
     date_reservation timestamp  NOT NULL,
-    CONSTRAINT reservations_pk PRIMARY KEY (id)
+    CONSTRAINT reservations_pk PRIMARY KEY (id),
+    CONSTRAINT user_fk FOREIGN KEY ("user") REFERENCES users (username)
+
 );
 
 -- Table: seat_reservation
 CREATE TABLE seat_reservation (
-    seat int  NOT NULL,
-    reservation int  NOT NULL,
-    transit int  NOT NULL,
+    seat numeric(3)  NOT NULL CHECK (1 <= seats AND seats <= 300),
+    reservation numeric  NOT NULL,
+    transit numeric  NOT NULL,
     departure_date timestamp  NOT NULL,
     CONSTRAINT seat_reservation_pk PRIMARY KEY (seat,transit)
 );
 
 -- Table: transits
 CREATE TABLE transits (
-    id_transit int  NOT NULL,
-    departure_stop int  NOT NULL,
-    arrival_stop int  NOT NULL,
-    price int  NOT NULL,
-    bus_model int  NOT NULL,
-    CONSTRAINT transits_pk PRIMARY KEY (id_transit)
+    id_transit numeric  NOT NULL,
+    departure_stop numeric  NOT NULL,
+    arrival_stop numeric  NOT NULL,
+    price numeric(4, 2)  NOT NULL CHECK (0 <= price AND price <= 10000),
+    bus_model numeric  NOT NULL,
+    CONSTRAINT transits_pk PRIMARY KEY (id_transit),
+    CONSTRAINT bus_model_fk FOREIGN KEY (bus_model) REFERENCES buses_models (id),
+    CONSTRAINT arrival_stop_fk FOREIGN KEY (arrival_stop) REFERENCES bus_stops (id),
+    CONSTRAINT departure_stop_fk FOREIGN KEY (departure_stop) REFERENCES bus_stops (id)
 );
 
 -- Table: users
@@ -103,14 +109,6 @@ CREATE VIEW lines AS
 select departure_stop, arrival_stop from transits group by departure_stop, arrival_stop;
 
 -- foreign keys
--- Reference: buses_reservation_buses_model (table: transits)
-ALTER TABLE transits ADD CONSTRAINT buses_reservation_buses_model
-    FOREIGN KEY (bus_model)
-    REFERENCES buses_models (id)  
-    NOT DEFERRABLE 
-    INITIALLY IMMEDIATE
-;
-
 -- Reference: departure_time_intervals (table: departure_time)
 ALTER TABLE departure_time ADD CONSTRAINT departure_time_intervals
     FOREIGN KEY (interval)
@@ -151,37 +149,20 @@ ALTER TABLE seat_reservation ADD CONSTRAINT reservation_users_reservations
     INITIALLY IMMEDIATE
 ;
 
--- Reference: reservations_users (table: reservations)
-ALTER TABLE reservations ADD CONSTRAINT reservations_users
-    FOREIGN KEY ("user")
-    REFERENCES users (username)  
-    NOT DEFERRABLE 
-    INITIALLY IMMEDIATE
-;
+--triggers
+--trigger in seat_reservation checks [have bus with true departure_date]
+CREATE OR REPLACE FUNCTION seat_reservation_departure_date_check() RETURNS trigger AS $seat_reservation_departure_date_check$
+BEGIN
+    IF (SELECT count(*) FROM buses WHERE departure = NEW.departure_date AND id_transit = NEW.transit) = 0 THEN
+        RAISE EXCEPTION 'Have not bus in this departure_date';
+    END IF;
+    return NEW;
+END;
+$seat_reservation_departure_date_check$ LANGUAGE plpgsql;
 
--- Reference: stations_cities (table: bus_stops)
-ALTER TABLE bus_stops ADD CONSTRAINT stations_cities
-    FOREIGN KEY (city)
-    REFERENCES cities (id)  
-    NOT DEFERRABLE 
-    INITIALLY IMMEDIATE
-;
-
--- Reference: transits_bus_stops (table: transits)
-ALTER TABLE transits ADD CONSTRAINT transits_bus_stops
-    FOREIGN KEY (arrival_stop)
-    REFERENCES bus_stops (id)  
-    NOT DEFERRABLE 
-    INITIALLY IMMEDIATE
-;
-
--- Reference: transits_departure_stops (table: transits)
-ALTER TABLE transits ADD CONSTRAINT transits_departure_stops
-    FOREIGN KEY (departure_stop)
-    REFERENCES bus_stops (id)  
-    NOT DEFERRABLE 
-    INITIALLY IMMEDIATE
-;
+DROP TRIGGER IF EXISTS seat_reservation_departure_date_check ON seat_reservation;
+CREATE TRIGGER seat_reservation_departure_date_check BEFORE INSERT OR UPDATE ON seat_reservation
+    FOR EACH ROW EXECUTE PROCEDURE seat_reservation_departure_date_check();
 
 -- sequences
 -- Sequence: reservation_id
