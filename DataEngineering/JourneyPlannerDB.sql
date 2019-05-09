@@ -125,7 +125,7 @@ CREATE TABLE  users (
 -- views
 -- View: buses
 CREATE VIEW buses AS
-select res.start_city, res.end_city, res.price, res.departure, res.arrival
+select res.id_transit, res.start_city, res.end_city, res.price, res.departure, res.arrival
 from buses_reservation res;
 
 -- View: countries
@@ -178,7 +178,7 @@ ALTER TABLE seat_reservation ADD CONSTRAINT reservation_users_reservations
 ;
 
 --triggers
---trigger in seat_reservation checks [have bus with true departure_date]
+--trigger on seat_reservation checks [have bus with true departure_date]
 CREATE OR REPLACE FUNCTION seat_reservation_departure_date_check() RETURNS trigger AS $seat_reservation_departure_date_check$
 BEGIN
     IF (SELECT count(*) FROM buses WHERE departure = NEW.departure_date AND id_transit = NEW.transit) = 0 THEN
@@ -191,6 +191,38 @@ $seat_reservation_departure_date_check$ LANGUAGE plpgsql;
 DROP TRIGGER IF EXISTS seat_reservation_departure_date_check ON seat_reservation;
 CREATE TRIGGER seat_reservation_departure_date_check BEFORE INSERT OR UPDATE ON seat_reservation
     FOR EACH ROW EXECUTE PROCEDURE seat_reservation_departure_date_check();
+
+
+--trigger on reservations checks [date_reservation before all buses]
+CREATE OR REPLACE FUNCTION date_reservation_check() RETURNS trigger AS $date_reservation_check$
+BEGIN
+    IF (SELECT min(departure_date) FROM seat_reservation WHERE transit = NEW.id) < NEW.date_reservation THEN
+        RAISE EXCEPTION 'some departure_date in reservation is before date_reservation';
+    END IF;
+    return NEW;
+END;
+$date_reservation_check$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS date_reservation_check ON reservations;
+CREATE TRIGGER date_reservation_check BEFORE INSERT OR UPDATE ON reservations
+    FOR EACH ROW EXECUTE PROCEDURE date_reservation_check();
+
+
+--trigger on seat_reservation checks that number of reserved seats < all seats when somebody try make bus reservation
+CREATE OR REPLACE FUNCTION have_free_seat_check() RETURNS trigger AS $have_free_seat_check$
+BEGIN
+    IF (SELECT min(seats) FROM buses b JOIN transits t ON t.id_transit = b.id_transit JOIN buses_models bm ON t.bus_model = bm.id WHERE NEW.depatrure_date = b.departure AND NEW.transit = b.id_transit)
+        = (SELECT count(*) FROM seat_reservation WHERE NEW.transit = transit AND NEW.departure_date = departure_date)
+    THEN
+        RAISE EXCEPTION 'No free places in bus';
+    END IF;
+    return NEW;
+END;
+$have_free_seat_check$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS have_free_seat_check ON seat_reservation;
+CREATE TRIGGER have_free_seat_check BEFORE INSERT OR UPDATE ON seat_reservation;
+    FOR EACH ROW EXECUTE PROCEDURE have_free_seat_check();
 
 -- sequences
 -- Sequence: reservation_id
