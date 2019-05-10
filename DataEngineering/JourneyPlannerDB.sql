@@ -56,36 +56,36 @@ CREATE TABLE transits (
     CONSTRAINT departure_stop_fk FOREIGN KEY (departure_stop) REFERENCES bus_stops (id)
 );
 
--- Table: intervals
-CREATE TABLE intervals (
+-- Table: spans
+CREATE TABLE spans (
     id int  NOT NULL,
     begin_date date  NOT NULL,
     end_date date  NOT NULL,
     transit int  NOT NULL,
-    CONSTRAINT intervals_pk PRIMARY KEY (id),
-    CONSTRAINT correct_interval CHECK ( begin_date <= end_date )
+    CONSTRAINT spans_pk PRIMARY KEY (id),
+    CONSTRAINT correct_span CHECK ( begin_date <= end_date )
 );
 
 -- Table: departure_time
 CREATE TABLE departure_time (
     departure time  NOT NULL,
     time interval  NOT NULL,
-    interval int  NOT NULL,
+    span int  NOT NULL,
     day_of_the_week day  NOT NULL,
-    CONSTRAINT departure_time_pk PRIMARY KEY (departure,interval)
+    CONSTRAINT departure_time_pk PRIMARY KEY (departure, span)
 );
 
 -- Table: exceptions
 CREATE TABLE breaks (
     date date  NOT NULL,
-    interval_id int  NOT NULL,
-    CONSTRAINT break_pk PRIMARY KEY (date,interval_id)
+    span_id int  NOT NULL,
+    CONSTRAINT break_pk PRIMARY KEY (date, span_id)
 );
 
 -- Table: users
 CREATE TABLE  users (
     username varchar(20)  NOT NULL,
-    email email NOT NULL,
+    email email NOT NULL UNIQUE,
     password bigint  NOT NULL,
     name varchar(63)  NOT NULL,
     surname varchar(63)  NOT NULL,
@@ -95,21 +95,27 @@ CREATE TABLE  users (
 
 -- Table: reservations
 CREATE TABLE reservations (
-    id numeric  NOT NULL,
+    id int  NOT NULL,
     "user" varchar(20)  NOT NULL,
     date_reservation timestamp  NOT NULL,
-    CONSTRAINT reservations_pk PRIMARY KEY (id),
-    CONSTRAINT user_fk FOREIGN KEY ("user") REFERENCES users (username)
+    CONSTRAINT reservations_pk PRIMARY KEY (id)
+);
 
+-- Table: transit_reservation
+CREATE TABLE transit_reservation (
+    id int  NOT NULL,
+    transit int  NOT NULL,
+    departure_date timestamp  NOT NULL,
+    reservation int  NOT NULL,
+    CONSTRAINT transit_reservation_pk PRIMARY KEY (id)
 );
 
 -- Table: seat_reservation
+-- Table: seat_reservation
 CREATE TABLE seat_reservation (
-    seat numeric(3)  NOT NULL CHECK (1 <= seat AND seat <= 300),
-    reservation numeric  NOT NULL,
-    transit numeric  NOT NULL,
-    departure_date timestamp  NOT NULL,
-    CONSTRAINT seat_reservation_pk PRIMARY KEY (seat,transit)
+    seat int  NOT NULL CHECK (1 <= seat AND seat <= 300),
+    transit_reservation_id int  NOT NULL,
+    CONSTRAINT seat_reservation_pk PRIMARY KEY (seat,transit_reservation_id)
 );
 
 -- tough view to write, left for later
@@ -128,77 +134,112 @@ CREATE VIEW lines AS
 select departure_stop, arrival_stop from transits group by departure_stop, arrival_stop;
 
 -- foreign keys
--- Reference: departure_time_intervals (table: departure_time)
-ALTER TABLE departure_time ADD CONSTRAINT departure_time_intervals
-    FOREIGN KEY (interval)
-    REFERENCES intervals (id)  
+-- Reference: departure_time_spans (table: departure_time)
+ALTER TABLE departure_time ADD CONSTRAINT departure_time_spans
+    FOREIGN KEY (span)
+    REFERENCES spans (id)
     NOT DEFERRABLE 
     INITIALLY IMMEDIATE
 ;
 
--- Reference: exceptions_intervals (table: exceptions)
-ALTER TABLE breaks ADD CONSTRAINT breaks_intervals
-    FOREIGN KEY (interval_id)
-    REFERENCES intervals (id)  
+-- Reference: breaks_spans (table: exceptions)
+ALTER TABLE breaks ADD CONSTRAINT breaks_spans
+    FOREIGN KEY (span_id)
+    REFERENCES spans (id)
     NOT DEFERRABLE 
     INITIALLY IMMEDIATE
 ;
 
--- Reference: intervals_transits (table: intervals)
-ALTER TABLE intervals ADD CONSTRAINT intervals_transits
+-- Reference: spans_transits (table: spans)
+ALTER TABLE spans ADD CONSTRAINT spans_transits
     FOREIGN KEY (transit)
-    REFERENCES transits (id_transit)  
-    NOT DEFERRABLE 
+    REFERENCES transits (id_transit)
+    NOT DEFERRABLE
     INITIALLY IMMEDIATE
 ;
 
--- Reference: reservation_buses_reservation (table: seat_reservation)
-ALTER TABLE seat_reservation ADD CONSTRAINT reservation_buses_reservation
-    FOREIGN KEY (transit)
-    REFERENCES transits (id_transit)  
-    NOT DEFERRABLE 
-    INITIALLY IMMEDIATE
-;
-
--- Reference: reservation_users_reservations (table: seat_reservation)
-ALTER TABLE seat_reservation ADD CONSTRAINT reservation_users_reservations
+-- Reference: transit_reservations (table: transit_reservation)
+ALTER TABLE transit_reservation ADD CONSTRAINT transit_reservations
     FOREIGN KEY (reservation)
-    REFERENCES reservations (id)  
-    NOT DEFERRABLE 
+    REFERENCES reservations (id)
+    NOT DEFERRABLE
     INITIALLY IMMEDIATE
 ;
 
--- Trigger: intervals
--- after modifying or deleting interval remove all breaks that will not be contained
+-- Reference: transit_reservation_ref (table: transit_reservation)
+ALTER TABLE transit_reservation ADD CONSTRAINT transit_reservation_ref
+    FOREIGN KEY (transit)
+    REFERENCES transits (id_transit)
+    NOT DEFERRABLE
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: reservations_users (table: reservations)
+ALTER TABLE reservations ADD CONSTRAINT reservations_users
+    FOREIGN KEY ("user")
+    REFERENCES users (username)
+    NOT DEFERRABLE
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: seat_transit_reservation (table: seat_reservation)
+ALTER TABLE seat_reservation ADD CONSTRAINT seat_transit_reservation
+    FOREIGN KEY (transit_reservation_id)
+    REFERENCES transit_reservation (id)
+    NOT DEFERRABLE
+    INITIALLY IMMEDIATE
+;
+
+
+
+-- Trigger: spans
+-- after modifying or deleting spans remove all breaks that will not be contained
 CREATE OR REPLACE FUNCTION remove_breaks_after_delete() RETURNS TRIGGER AS
     $remove_breaks$
     begin
-        DELETE FROM breaks WHERE interval_id = OLD.id AND date BETWEEN OLD.begin_date AND OLD.end_date;
+        DELETE FROM breaks WHERE spans_id = OLD.id AND date BETWEEN OLD.begin_date AND OLD.end_date;
     end;
     $remove_breaks$ LANGUAGE plpgsql;
-CREATE TRIGGER remove_breaks_after_delete AFTER DELETE ON intervals
+CREATE TRIGGER remove_breaks_after_delete AFTER DELETE ON spans
     FOR EACH ROW EXECUTE PROCEDURE remove_breaks_after_delete();
 
 CREATE OR REPLACE FUNCTION remove_breaks_after_update() RETURNS TRIGGER AS
     $remove_breaks_update$
     begin
-        DELETE FROM breaks WHERE interval_id = NEW.id AND date NOT BETWEEN NEW.begin_date AND NEW.end_date;
+        DELETE FROM breaks WHERE span_id = NEW.id AND date NOT BETWEEN NEW.begin_date AND NEW.end_date;
     end;
     $remove_breaks_update$ LANGUAGE plpgsql;
-CREATE TRIGGER remove_breaks_after_update AFTER UPDATE ON intervals
+CREATE TRIGGER remove_breaks_after_update AFTER UPDATE ON spans
     FOR EACH ROW EXECUTE PROCEDURE remove_breaks_after_update();
 
+-- before inserting span check if it does not overlap other span with the same transit_id
+CREATE OR REPLACE FUNCTION check_span_overlap() RETURNS TRIGGER AS
+    $check_span_overlap$
+    declare
+        rec record;
+    begin
+        for rec in select id ,begin_date, end_date from spans where transit = new.transit loop
+            if GREATEST(rec.begin_date, rec.end_date) <= LEAST(rec.end_date, new.end_date) then
+                raise exception 'new span overlaps with other span';
+            end if;
+        end loop;
+        return new;
+    end;
+    $check_span_overlap$ LANGUAGE plpgsql;
+CREATE TRIGGER check_span_overlap BEFORE INSERT ON spans
+    FOR EACH ROW EXECUTE PROCEDURE check_span_overlap();
+
 -- Trigger: breaks
--- returns null if break is not contained in indicated interval
+-- returns null if break is not contained in indicated span
 CREATE OR REPLACE FUNCTION break_check() RETURNS TRIGGER AS
     $break_check$
     declare
         rec record;
     begin
-        if NEW.date is null or new.interval_id is null then
+        if NEW.date is null or new.span_id is null then
             return null;
         end if;
-        for rec in SELECT begin_date, end_date from intervals WHERE id = NEW.interval_id loop
+        for rec in SELECT begin_date, end_date from spans WHERE id = NEW.span_id loop
             if new.date between begin_date and end_date then
                 return new;
             end if;
