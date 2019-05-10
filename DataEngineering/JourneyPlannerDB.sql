@@ -1,5 +1,16 @@
 -- noinspection SqlResolveForFile
 
+-- types
+-- day used in departure_time table
+CREATE TYPE day AS ENUM ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Everyday');
+
+-- email used in users table
+-- email type, copied from stack overflow: "https://dba.stackexchange.com/questions/68266/what-is-the-best-way-to-store-an-email-address-in-postgresql"
+CREATE EXTENSION citext;
+CREATE DOMAIN email AS citext
+  CHECK ( value ~ '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$' );
+
+
 -- tables
 -- Table: cities
 CREATE TABLE cities (
@@ -50,8 +61,6 @@ CREATE TABLE intervals (
     CONSTRAINT correct_interval CHECK ( begin_date <= end_date )
 );
 
-CREATE TYPE day AS ENUM ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Everyday');
-
 -- Table: departure_time
 CREATE TABLE departure_time (
     departure time  NOT NULL,
@@ -67,11 +76,6 @@ CREATE TABLE breaks (
     interval_id int  NOT NULL,
     CONSTRAINT break_pk PRIMARY KEY (date,interval_id)
 );
-
--- email type, copied from stack overflow: "https://dba.stackexchange.com/questions/68266/what-is-the-best-way-to-store-an-email-address-in-postgresql"
-CREATE EXTENSION citext;
-CREATE DOMAIN email AS citext
-  CHECK ( value ~ '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$' );
 
 -- Table: users
 CREATE TABLE  users (
