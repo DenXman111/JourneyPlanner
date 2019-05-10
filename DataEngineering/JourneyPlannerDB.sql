@@ -115,7 +115,7 @@ CREATE TABLE departure_time (
     time interval  NOT NULL,
     span int  NOT NULL,
     day_of_the_week day  NOT NULL,
-    CONSTRAINT departure_time_pk PRIMARY KEY (departure, span)
+    CONSTRAINT departure_time_pk PRIMARY KEY (departure, span, day_of_the_week, time)
 );
 
 -- Table: exceptions
