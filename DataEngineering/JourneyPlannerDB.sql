@@ -22,7 +22,8 @@ CREATE TABLE cities (
     CONSTRAINT cities_pk PRIMARY KEY (id),
     constraint rating_range check (rating>=0 and rating<=5),
     constraint minimum_price check (average_price>=0),
-    constraint proper_name check (name similar to '[A-Z][a-z]*((-| )[A-Z][a-z]*)*')
+    constraint proper_name check (name similar to '[A-Z][a-z]*((-| )[A-Z][a-z]*)*'),
+    constraint proper_country check (name similar to '[A-Z][a-z]*((-| )[A-Z][a-z]*)*')
 );
 
 -- Table: bus_stops
