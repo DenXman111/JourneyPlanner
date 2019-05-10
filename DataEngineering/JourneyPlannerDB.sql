@@ -1,9 +1,19 @@
 -- noinspection SqlResolveForFile
 
 -- tables
+-- Table: cities
+CREATE TABLE cities (
+    id NUMERIC  NOT NULL,
+    name varchar(63)  NOT NULL,
+    rating int  NOT NULL,
+    average_price int  NOT NULL,
+    country varchar(63)  NOT NULL,
+    CONSTRAINT cities_pk PRIMARY KEY (id)
+);
+
 -- Table: bus_stops
 CREATE TABLE bus_stops (
-    id numeric  NOT NULL,
+    id NUMERIC  NOT NULL,
     stop_name varchar(127)  NOT NULL,
     city numeric  NOT NULL,
     CONSTRAINT bus_stops_pk PRIMARY KEY (id),
@@ -17,14 +27,27 @@ CREATE TABLE buses_models (
     CONSTRAINT buses_models_pk PRIMARY KEY (id)
 );
 
--- Table: cities
-CREATE TABLE cities (
+-- Table: transits
+CREATE TABLE transits (
+    id_transit numeric  NOT NULL,
+    departure_stop numeric  NOT NULL,
+    arrival_stop numeric  NOT NULL,
+    price numeric(4, 2)  NOT NULL CHECK (0 <= price AND price <= 10000),
+    bus_model numeric  NOT NULL,
+    CONSTRAINT transits_pk PRIMARY KEY (id_transit),
+    CONSTRAINT bus_model_fk FOREIGN KEY (bus_model) REFERENCES buses_models (id),
+    CONSTRAINT arrival_stop_fk FOREIGN KEY (arrival_stop) REFERENCES bus_stops (id),
+    CONSTRAINT departure_stop_fk FOREIGN KEY (departure_stop) REFERENCES bus_stops (id)
+);
+
+-- Table: intervals
+CREATE TABLE intervals (
     id int  NOT NULL,
-    name varchar(63)  NOT NULL,
-    rating int  NOT NULL,
-    average_price int  NOT NULL,
-    country varchar(63)  NOT NULL,
-    CONSTRAINT cities_pk PRIMARY KEY (id)
+    begin_date date  NOT NULL,
+    end_date date  NOT NULL,
+    transit int  NOT NULL,
+    CONSTRAINT intervals_pk PRIMARY KEY (id),
+    CONSTRAINT correct_interval CHECK ( begin_date <= end_date )
 );
 
 CREATE TYPE day AS ENUM ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Everyday');
@@ -45,89 +68,6 @@ CREATE TABLE breaks (
     CONSTRAINT break_pk PRIMARY KEY (date,interval_id)
 );
 
--- Trigger: breaks
--- returns null if break is not contained in indicated interval
-CREATE OR REPLACE FUNCTION break_check() RETURNS TRIGGER AS
-    $break_check$
-    declare
-        rec record;
-    begin
-        if NEW.date is null or new.interval_id is null then
-            return null;
-        end if;
-        for rec in SELECT begin_date, end_date from intervals WHERE id = NEW.interval_id loop
-            if new.date between begin_date and end_date then
-                return new;
-            end if;
-        end loop;
-        return null;
-    end;
-    $break_check$ LANGUAGE plpgsql;
-CREATE TRIGGER break_check BEFORE INSERT OR UPDATE ON breaks
-    FOR EACH ROW EXECUTE PROCEDURE break_check();
-
--- Table: intervals
-CREATE TABLE intervals (
-    id int  NOT NULL,
-    begin_date date  NOT NULL,
-    end_date date  NOT NULL,
-    transit int  NOT NULL,
-    CONSTRAINT intervals_pk PRIMARY KEY (id),
-    CONSTRAINT correct_interval CHECK ( begin_date <= end_date )
-);
-
--- Trigger: intervals
--- after modifying or deleting interval remove all breaks that will not be contained
-CREATE OR REPLACE FUNCTION remove_breaks_after_delete() RETURNS TRIGGER AS
-    $remove_breaks$
-    begin
-        DELETE FROM breaks WHERE interval_id = OLD.id AND date BETWEEN OLD.begin_date AND OLD.end_date;
-    end;
-    $remove_breaks$ LANGUAGE plpgsql;
-CREATE TRIGGER remove_breaks_after_delete AFTER DELETE ON intervals
-    FOR EACH ROW EXECUTE PROCEDURE remove_breaks_after_delete();
-
-CREATE OR REPLACE FUNCTION remove_breaks_after_update() RETURNS TRIGGER AS
-    $remove_breaks_update$
-    begin
-        DELETE FROM breaks WHERE interval_id = NEW.id AND date NOT BETWEEN NEW.begin_date AND NEW.end_date;
-    end;
-    $remove_breaks_update$ LANGUAGE plpgsql;
-CREATE TRIGGER remove_breaks_after_update AFTER UPDATE ON intervals
-    FOR EACH ROW EXECUTE PROCEDURE remove_breaks_after_update();
-
--- Table: reservations
-CREATE TABLE reservations (
-    id numeric  NOT NULL,
-    "user" varchar(20)  NOT NULL,
-    date_reservation timestamp  NOT NULL,
-    CONSTRAINT reservations_pk PRIMARY KEY (id),
-    CONSTRAINT user_fk FOREIGN KEY ("user") REFERENCES users (username)
-
-);
-
--- Table: seat_reservation
-CREATE TABLE seat_reservation (
-    seat numeric(3)  NOT NULL CHECK (1 <= seats AND seats <= 300),
-    reservation numeric  NOT NULL,
-    transit numeric  NOT NULL,
-    departure_date timestamp  NOT NULL,
-    CONSTRAINT seat_reservation_pk PRIMARY KEY (seat,transit)
-);
-
--- Table: transits
-CREATE TABLE transits (
-    id_transit numeric  NOT NULL,
-    departure_stop numeric  NOT NULL,
-    arrival_stop numeric  NOT NULL,
-    price numeric(4, 2)  NOT NULL CHECK (0 <= price AND price <= 10000),
-    bus_model numeric  NOT NULL,
-    CONSTRAINT transits_pk PRIMARY KEY (id_transit),
-    CONSTRAINT bus_model_fk FOREIGN KEY (bus_model) REFERENCES buses_models (id),
-    CONSTRAINT arrival_stop_fk FOREIGN KEY (arrival_stop) REFERENCES bus_stops (id),
-    CONSTRAINT departure_stop_fk FOREIGN KEY (departure_stop) REFERENCES bus_stops (id)
-);
-
 -- email type, copied from stack overflow: "https://dba.stackexchange.com/questions/68266/what-is-the-best-way-to-store-an-email-address-in-postgresql"
 CREATE EXTENSION citext;
 CREATE DOMAIN email AS citext
@@ -144,11 +84,31 @@ CREATE TABLE  users (
     constraint unique_email UNIQUE (email)
 );
 
--- views
--- View: buses
-CREATE VIEW buses AS
-select res.id_transit, res.start_city, res.end_city, res.price, res.departure, res.arrival
-from buses_reservation res;
+-- Table: reservations
+CREATE TABLE reservations (
+    id numeric  NOT NULL,
+    "user" varchar(20)  NOT NULL,
+    date_reservation timestamp  NOT NULL,
+    CONSTRAINT reservations_pk PRIMARY KEY (id),
+    CONSTRAINT user_fk FOREIGN KEY ("user") REFERENCES users (username)
+
+);
+
+-- Table: seat_reservation
+CREATE TABLE seat_reservation (
+    seat numeric(3)  NOT NULL CHECK (1 <= seat AND seat <= 300),
+    reservation numeric  NOT NULL,
+    transit numeric  NOT NULL,
+    departure_date timestamp  NOT NULL,
+    CONSTRAINT seat_reservation_pk PRIMARY KEY (seat,transit)
+);
+
+-- tough view to write, left for later
+-- -- views
+-- -- View: buses
+-- CREATE VIEW buses AS
+-- select res.id_transit, res.start_city, res.end_city, res.price, res.departure, res.arrival
+-- from buses_reservation res;
 
 -- View: countries
 CREATE VIEW countries AS
@@ -168,8 +128,8 @@ ALTER TABLE departure_time ADD CONSTRAINT departure_time_intervals
 ;
 
 -- Reference: exceptions_intervals (table: exceptions)
-ALTER TABLE exceptions ADD CONSTRAINT exceptions_intervals
-    FOREIGN KEY (intervals_id)
+ALTER TABLE breaks ADD CONSTRAINT breaks_intervals
+    FOREIGN KEY (interval_id)
     REFERENCES intervals (id)  
     NOT DEFERRABLE 
     INITIALLY IMMEDIATE
@@ -198,6 +158,47 @@ ALTER TABLE seat_reservation ADD CONSTRAINT reservation_users_reservations
     NOT DEFERRABLE 
     INITIALLY IMMEDIATE
 ;
+
+-- Trigger: intervals
+-- after modifying or deleting interval remove all breaks that will not be contained
+CREATE OR REPLACE FUNCTION remove_breaks_after_delete() RETURNS TRIGGER AS
+    $remove_breaks$
+    begin
+        DELETE FROM breaks WHERE interval_id = OLD.id AND date BETWEEN OLD.begin_date AND OLD.end_date;
+    end;
+    $remove_breaks$ LANGUAGE plpgsql;
+CREATE TRIGGER remove_breaks_after_delete AFTER DELETE ON intervals
+    FOR EACH ROW EXECUTE PROCEDURE remove_breaks_after_delete();
+
+CREATE OR REPLACE FUNCTION remove_breaks_after_update() RETURNS TRIGGER AS
+    $remove_breaks_update$
+    begin
+        DELETE FROM breaks WHERE interval_id = NEW.id AND date NOT BETWEEN NEW.begin_date AND NEW.end_date;
+    end;
+    $remove_breaks_update$ LANGUAGE plpgsql;
+CREATE TRIGGER remove_breaks_after_update AFTER UPDATE ON intervals
+    FOR EACH ROW EXECUTE PROCEDURE remove_breaks_after_update();
+
+-- Trigger: breaks
+-- returns null if break is not contained in indicated interval
+CREATE OR REPLACE FUNCTION break_check() RETURNS TRIGGER AS
+    $break_check$
+    declare
+        rec record;
+    begin
+        if NEW.date is null or new.interval_id is null then
+            return null;
+        end if;
+        for rec in SELECT begin_date, end_date from intervals WHERE id = NEW.interval_id loop
+            if new.date between begin_date and end_date then
+                return new;
+            end if;
+        end loop;
+        return null;
+    end;
+    $break_check$ LANGUAGE plpgsql;
+CREATE TRIGGER break_check BEFORE INSERT OR UPDATE ON breaks
+    FOR EACH ROW EXECUTE PROCEDURE break_check();
 
 --triggers
 --trigger on seat_reservation checks [have bus with true departure_date]
