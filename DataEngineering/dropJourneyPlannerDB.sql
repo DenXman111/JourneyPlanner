@@ -14,6 +14,8 @@ DROP VIEW IF EXISTS countries;
 DROP VIEW IF EXISTS lines;
 
 DROP SEQUENCE IF EXISTS reservation_id;
+drop sequence if exists transit_id;
+drop sequence if exists span_id;
 
 DROP TYPE IF EXISTS day;
 DROP DOMAIN IF EXISTS email;

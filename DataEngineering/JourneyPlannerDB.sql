@@ -33,7 +33,7 @@ CREATE TABLE bus_stops (
     city numeric  NOT NULL,
     CONSTRAINT bus_stops_pk PRIMARY KEY (id),
     CONSTRAINT city_fk FOREIGN KEY (city) REFERENCES cities (id),
-    constraint proper_name check (name similar to '[A-Z][a-z]*((: |-| |\. )[A-Z][a-z]*)*')
+    constraint proper_name check (stop_name similar to '[A-Z][a-z]*((: |-| |\. )[A-Z][a-z]*)*')
 );
 
 -- Table: buses_models
@@ -256,6 +256,21 @@ DROP TRIGGER IF EXISTS have_free_seat_check ON seat_reservation;
 CREATE TRIGGER have_free_seat_check BEFORE INSERT OR UPDATE ON seat_reservation
     FOR EACH ROW EXECUTE PROCEDURE have_free_seat_check();
 
+create or replace function add_bus(dep_stop int, arr_stop int, price int, bus_model int,bg_dt date, ed_dt date, dep time, leg interval, weekday day) returns numeric as
+$$
+begin
+if ((select count(*)from bus_stops where dep_stop=id)=0 or (select count(*)from bus_stops where arr_stop=id)=0 or price<=0 or (select count(*) from buses_models where id=bus_model)=0 or bg_dt>ed_dt)
+then
+raise exception 'Incorrect input';
+end if;
+insert into transits values (nextval('transit_id'),dep_stop,arr_stop,price,bus_model);
+insert into intervals values (nextval('span_id'),bg_dt,ed_dt,currval('transit_id'));
+insert into departure_time values (dep,leg,currval('span_id'),weekday);
+return 1;
+end;
+$$
+language plpgsql;
+
 -- sequences
 -- Sequence: reservation_id
 CREATE SEQUENCE reservation_id
@@ -266,5 +281,14 @@ CREATE SEQUENCE reservation_id
       CYCLE
 ;
 
+Create sequence transit_id
+    increment by 1
+    start 1
+;
+
+Create sequence span_id
+    increment by 1
+    start 1
+;
 -- End of file.
 
