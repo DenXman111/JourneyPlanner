@@ -26,6 +26,8 @@ DROP FUNCTION IF EXISTS have_free_seat_check();
 DROP FUNCTION IF EXISTS remove_breaks_after_delete();
 DROP FUNCTION IF EXISTS remove_breaks_after_update();
 DROP FUNCTION IF EXISTS seat_reservation_departure_date_check();
+DROP FUNCTION IF EXISTS seat_reservation_departure_date_check();
+DROP FUNCTION IF EXISTS check_span_overlap();
 drop function if exists add_bus(int,int,int,int,date,date,time,interval,day);
 
 DROP TYPE IF EXISTS day;

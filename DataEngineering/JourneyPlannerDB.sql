@@ -21,7 +21,7 @@ CREATE TABLE cities (
     country varchar(63)  NOT NULL,
     CONSTRAINT cities_pk PRIMARY KEY (id),
     constraint rating_range check (rating>=0 and rating<=5),
-    constraint minimum_price check (average_price>=0 and average_price<=10000),
+    constraint minimum_price check (average_price>=0 and average_price <= 10000),
     constraint proper_name check (name similar to '[A-Z][a-z]*((-| |\. )[A-Z][a-z]*)*'),
     constraint proper_country check (country similar to '[A-Z][a-z]*((-| |\. )[A-Z][a-z]*)*')
 );
@@ -252,8 +252,19 @@ CREATE TRIGGER break_check BEFORE INSERT OR UPDATE ON breaks
 
 --triggers
 --trigger on seat_reservation checks [have bus with true departure_date]
+-- modification, check if seat is not already reserved, @author Łukasz Selwa
 CREATE OR REPLACE FUNCTION seat_reservation_departure_date_check() RETURNS trigger AS $seat_reservation_departure_date_check$
+DECLARE
+    my_transit int;
 BEGIN
+    my_transit = (select max(transit) from transit_reservation where id = new.transit_reservation_id);
+    if (
+        select count(*)
+        from seat_reservation seat join transit_reservation res on seat.transit_reservation_id = res.id
+        where res.transit = my_transit
+        ) <> 0 then
+        raise exception 'seat is already taken';
+    end if;
     IF (SELECT count(*) FROM buses WHERE departure = NEW.departure_date AND id_transit = NEW.transit) = 0 THEN
         RAISE EXCEPTION 'Have not bus in this departure_date';
     END IF;
