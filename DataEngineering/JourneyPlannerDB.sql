@@ -11,10 +11,52 @@ CREATE DOMAIN email AS citext
   CHECK ( value ~ '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$' );
 
 
+-- sequences
+-- Sequence: reservation_id
+CREATE SEQUENCE reservation_id
+      INCREMENT BY 1
+      MINVALUE 1
+      START WITH 1
+;
+
+-- Sequence: generates ids for cities
+CREATE SEQUENCE cities_id_seq
+    INCREMENT BY 1
+    MINVALUE 100
+    START WITH 100
+;
+
+-- Sequence: generates ids for bus_stops
+CREATE SEQUENCE stops_id_seq
+    INCREMENT BY 1
+    MINVALUE 100
+    START WITH 100
+;
+
+Create sequence transit_id
+    increment by 1
+    start 1
+;
+
+Create sequence span_id
+    increment by 1
+    start 1
+;
+
+Create sequence reservation_id_seq
+    increment by 1
+    start 1
+;
+
+Create sequence transit_reservation_id_seq
+    increment by 1
+    start 1
+;
+
 -- tables
 -- Table: cities
 CREATE TABLE cities (
-    id NUMERIC  NOT NULL,
+    id NUMERIC  NOT NULL DEFAULT NEXTVAL('cities_id_seq'),
     name varchar(63)  NOT NULL,
     rating int  NOT NULL,
     average_price int  NOT NULL,
@@ -28,7 +70,7 @@ CREATE TABLE cities (
 
 -- Table: bus_stops
 CREATE TABLE bus_stops (
-    id NUMERIC  NOT NULL,
+    id NUMERIC  NOT NULL DEFAULT  NEXTVAL('stops_id_seq'),
     stop_name varchar(127)  NOT NULL,
     city numeric  NOT NULL,
     CONSTRAINT bus_stops_pk PRIMARY KEY (id),
@@ -45,7 +87,7 @@ CREATE TABLE buses_models (
 
 -- Table: transits
 CREATE TABLE transits (
-    id_transit numeric  NOT NULL,
+    id_transit numeric  NOT NULL DEFAULT NEXTVAL('transit_id'),
     departure_stop numeric  NOT NULL,
     arrival_stop numeric  NOT NULL,
     price numeric(4, 2)  NOT NULL CHECK (0 <= price AND price <= 10000),
@@ -57,8 +99,8 @@ CREATE TABLE transits (
 );
 
 -- Table: spans
-CREATE TABLE spans (
-    id int  NOT NULL,
+CREATE TABLE spans(
+    id int  NOT NULL DEFAULT NEXTVAL('span_id'),
     begin_date date  NOT NULL,
     end_date date  NOT NULL,
     transit int  NOT NULL,
@@ -95,7 +137,7 @@ CREATE TABLE  users (
 
 -- Table: reservations
 CREATE TABLE reservations (
-    id int  NOT NULL,
+    id int  NOT NULL DEFAULT NEXTVAL('reservation_id_seq'),
     "user" varchar(20)  NOT NULL,
     date_reservation timestamp  NOT NULL,
     CONSTRAINT reservations_pk PRIMARY KEY (id)
@@ -103,7 +145,7 @@ CREATE TABLE reservations (
 
 -- Table: transit_reservation
 CREATE TABLE transit_reservation (
-    id int  NOT NULL,
+    id int  NOT NULL DEFAULT NEXTVAL('transit_reservation_id_seq'),
     transit int  NOT NULL,
     departure_date timestamp  NOT NULL,
     reservation int  NOT NULL,
@@ -322,25 +364,5 @@ return 1;
 end;
 $$
 language plpgsql;
-
--- sequences
--- Sequence: reservation_id
-CREATE SEQUENCE reservation_id
-      INCREMENT BY 1
-      MINVALUE 1
-      MAXVALUE 1000000000
-      START WITH 1
-      CYCLE
-;
-
-Create sequence transit_id
-    increment by 1
-    start 1
-;
-
-Create sequence span_id
-    increment by 1
-    start 1
-;
 -- End of file.
 

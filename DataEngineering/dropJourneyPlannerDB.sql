@@ -17,8 +17,12 @@ DROP VIEW IF EXISTS countries;
 DROP VIEW IF EXISTS lines;
 
 DROP SEQUENCE IF EXISTS reservation_id;
+DROP SEQUENCE IF EXISTS cities_id_seq;
 drop sequence if exists transit_id;
 drop sequence if exists span_id;
+DROP SEQUENCE IF EXISTS reservation_id_seq;
+DROP SEQUENCE IF EXISTS stops_id_seq;
+DROP SEQUENCE IF EXISTS transit_reservation_id_seq;
 
 DROP FUNCTION IF EXISTS break_check();
 DROP FUNCTION IF EXISTS date_reservation_check();
