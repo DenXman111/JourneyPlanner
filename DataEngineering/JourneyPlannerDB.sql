@@ -21,9 +21,9 @@ CREATE TABLE cities (
     country varchar(63)  NOT NULL,
     CONSTRAINT cities_pk PRIMARY KEY (id),
     constraint rating_range check (rating>=0 and rating<=5),
-    constraint minimum_price check (average_price>=0),
-    constraint proper_name check (name similar to '[A-Z][a-z]*((-| )[A-Z][a-z]*)*'),
-    constraint proper_country check (country similar to '[A-Z][a-z]*((-| )[A-Z][a-z]*)*')
+    constraint minimum_price check (average_price>=0 and average_price<=10000),
+    constraint proper_name check (name similar to '[A-Z][a-z]*((-| |\. )[A-Z][a-z]*)*'),
+    constraint proper_country check (country similar to '[A-Z][a-z]*((-| |\. )[A-Z][a-z]*)*')
 );
 
 -- Table: bus_stops
@@ -32,7 +32,8 @@ CREATE TABLE bus_stops (
     stop_name varchar(127)  NOT NULL,
     city numeric  NOT NULL,
     CONSTRAINT bus_stops_pk PRIMARY KEY (id),
-    CONSTRAINT city_fk FOREIGN KEY (city) REFERENCES cities (id)
+    CONSTRAINT city_fk FOREIGN KEY (city) REFERENCES cities (id),
+    constraint proper_name check (name similar to '[A-Z][a-z]*((: |-| |\. )[A-Z][a-z]*)*')
 );
 
 -- Table: buses_models
