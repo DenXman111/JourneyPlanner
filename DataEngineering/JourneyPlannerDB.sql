@@ -35,7 +35,8 @@ CREATE SEQUENCE stops_id_seq
 
 Create sequence transit_id
     increment by 1
-    start 1
+    minvalue 100
+    start with 100
 ;
 
 Create sequence span_id
