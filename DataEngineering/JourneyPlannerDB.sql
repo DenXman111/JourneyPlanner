@@ -75,8 +75,8 @@ CREATE TABLE bus_stops (
     stop_name varchar(127)  NOT NULL,
     city numeric  NOT NULL,
     CONSTRAINT bus_stops_pk PRIMARY KEY (id),
-    CONSTRAINT city_fk FOREIGN KEY (city) REFERENCES cities (id),
-    constraint proper_name check (stop_name similar to '[A-Z][a-z]*((: |-| |\. )[A-Z][a-z]*)*')
+    CONSTRAINT city_fk FOREIGN KEY (city) REFERENCES cities (id)
+    --constraint proper_name check (stop_name similar to '[A-Z][a-z]*((: |-| |\. )[A-Z][a-z]*)*')
 );
 
 -- Table: buses_models
@@ -115,7 +115,7 @@ CREATE TABLE departure_time (
     time interval  NOT NULL,
     span int  NOT NULL,
     day_of_the_week day  NOT NULL,
-    CONSTRAINT departure_time_pk PRIMARY KEY (departure, span, day_of_the_week, time)
+    CONSTRAINT departure_time_pk PRIMARY KEY (departure, span, day_of_the_week)
 );
 
 -- Table: exceptions
