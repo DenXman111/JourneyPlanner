@@ -6,7 +6,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -42,9 +45,16 @@ public class SignUpController {
     }
 
     @FXML
-    void signUpButtonPressed(ActionEvent event) {
+    void signUpButtonPressed(ActionEvent event) throws IOException{
         try{
-            DbAdapter.addNewUser(UsernameField.getText(), PasswordField.hashCode(), EmailField.getText(), NameField.getText(), SurnameField.getText());
+            if (UsernameField.getText().length() == 0) throw new Exception("Username field is empty");
+            if (PasswordField.getText().length() == 0) throw new Exception("Password field is empty");
+            if (EmailField.getText().length() == 0) throw new Exception("Email field is empty");
+            if (NameField.getText().length() == 0) throw new Exception("Name field is empty");
+            if (SurnameField.getText().length() == 0) throw new Exception("Surname field is empty");
+            System.out.println(PasswordField.hashCode());
+            System.out.println(PasswordField.hashCode());
+            DbAdapter.addNewUser(UsernameField.getText(), PasswordField.getText(), EmailField.getText(), NameField.getText(), SurnameField.getText());
             FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
 
             Pane myPane = myLoader.load();
@@ -55,16 +65,9 @@ public class SignUpController {
             prevStage.setScene(myScene);
 
         } catch (SQLException e){
-            e.printStackTrace();
-            //System.out.println(e.getMessage());
-            //System.out.println(e.getSQLState());
-
-            /*
-             *Show window with error
-             */
-
-        } catch (IOException e){
-            e.printStackTrace();
+            new ErrorWindow("User with this username or email already exists");
+        } catch (Exception e){
+            new ErrorWindow(e.getMessage());
         }
     }
 

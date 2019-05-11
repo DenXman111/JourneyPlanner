@@ -85,21 +85,32 @@ public class DbAdapter {
         return null;
     }
 
-    public static void addNewUser(String username, int password, String email, String name, String surname) throws SQLException{
-//        try {
-            statement = connection.createStatement();
+    public static void addNewUser(String username, String password, String email, String name, String surname) throws SQLException{
+        statement = connection.createStatement();
 //            String query="INSERT INTO users VALUES(" + username + ", " + password + ", " + email + ", " + name + ", " + surname + ")";
-            String query="INSERT INTO users(username, password, email, name, surname) VALUES(?, ?, ?, ?, ?)";
-            PreparedStatement pst = connection.prepareStatement(query);
-            pst.setString(1, username);
-            pst.setInt(2, password);
-            pst.setString(3, email);
-            pst.setString(4, name);
-            pst.setString(5, surname);
-            pst.executeUpdate();
-//        } catch (SQLException e){
-//            e.printStackTrace();
-//        }
+        String query="INSERT INTO users(username, password, email, name, surname) VALUES(?, ?, ?, ?, ?)";
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setString(1, username);
+        pst.setString(2, password);
+        pst.setString(3, email);
+        pst.setString(4, name);
+        pst.setString(5, surname);
+        pst.executeUpdate();
+    }
+
+    public static boolean haveUser(String username, String password){
+        try {
+            statement = connection.createStatement();
+            String query="Select count(*) from users where username = \'"+username+"\' AND password = \'"+password+"\'";
+            ResultSet result=statement.executeQuery(query);
+            if (result.next()){
+                if (result.getInt("count") == 0) return false; else
+                    return true;
+            } else return false;
+        } catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public static List< Edge > getNeighbours(Integer cityID){ //geting list of cityID's neighbours
@@ -123,6 +134,7 @@ public class DbAdapter {
         }
         return a;
     }
+
     public static ArrayList<String> getCityList(){
         ArrayList<String> a =new ArrayList<>();
         try {

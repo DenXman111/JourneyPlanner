@@ -3,6 +3,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -17,7 +18,7 @@ public class LoginController {
     private TextField UsernameField;
 
     @FXML
-    private TextField PasswordField;
+    private PasswordField PasswordField;
 
     @FXML
     private Button ReturnButton;
@@ -47,18 +48,24 @@ public class LoginController {
 
     @FXML
     void findButtonPressed(ActionEvent event) throws IOException{
-        Stage stage = new Stage();
-        stage.setTitle("Main");
+        try{
+            if (!DbAdapter.haveUser(UsernameField.getText(), PasswordField.getText())) throw new Exception("User data wrong");
 
-        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/form.fxml"));
-        Pane myPane = myLoader.load();
-        FormController controller = myLoader.getController();
-        controller.setPrevStage(stage);
+            Stage stage = new Stage();
+            stage.setTitle("Main");
 
-        Scene scene = new Scene(myPane);
-        stage.setScene(scene);
-        prevStage.close();
-        stage.show();
+            FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/form.fxml"));
+            Pane myPane = myLoader.load();
+            FormController controller = myLoader.getController();
+            controller.setPrevStage(stage);
+
+            Scene scene = new Scene(myPane);
+            stage.setScene(scene);
+            prevStage.close();
+            stage.show();
+        } catch (Exception e){
+            new ErrorWindow(e.getMessage());
+        }
     }
 
     @FXML

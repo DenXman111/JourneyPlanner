@@ -110,15 +110,7 @@ public class FormController implements Initializable {
             MainButtonFind.setPrefWidth(170);
 
         } catch (FormsCheckException e){
-            Stage errorStage = new Stage();
-            StackPane pane = new StackPane();
-            Text text = new Text(e.getMassage());
-            pane.getChildren().add(text);
-
-            Scene scene = new Scene(pane, 200, 100);
-            errorStage.setScene(scene);
-            errorStage.setResizable(false);
-            errorStage.show();
+            new ErrorWindow(e.getMassage());
         }
     }
 
