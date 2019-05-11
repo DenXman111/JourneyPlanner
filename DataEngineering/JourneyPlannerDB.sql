@@ -129,7 +129,7 @@ CREATE TABLE breaks (
 
 -- Table: users
 CREATE TABLE  users (
-    username varchar(20)  NOT NULL,
+    username varchar(50)  NOT NULL,
     email_address email NOT NULL UNIQUE,
     password text NOT NULL,
     name varchar(63)  NOT NULL,
@@ -183,7 +183,7 @@ select departure_stop, arrival_stop from transits group by departure_stop, arriv
 -- author Łukasz Selwa
 CREATE VIEW new_users AS
 SELECT
-       varchar(20) 'new username' as username,
+       varchar(50) 'new username' as username,
        email 'john.smith@example.com' as email_address,
        varchar(50) 'not hashed password' as password,
        varchar(63) 'John' as name,
