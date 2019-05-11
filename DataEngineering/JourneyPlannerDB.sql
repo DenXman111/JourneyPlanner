@@ -388,6 +388,58 @@ end;
 $$
 language plpgsql;
 
+-- function buses_in_span returns all buses in span span_id and dates in interval L..R
+create or replace function  buses_in_span(span_id numeric, L date, R date)
+    returns TABLE(span numeric, departure timestamp, arrival timestamp) as
+$$
+declare
+    now date;
+    r record;
+begin
+    FOR r IN
+        SELECT * FROM departure_time WHERE span = span_id
+        LOOP
+            now = L;
+            LOOP
+                EXIT  WHEN  r.day_of_the_week = extract(isodow from now);
+                now = now + '1 day' :: interval;
+            END LOOP;
+            LOOP
+                EXIT WHEN now > R;
+                IF (SELECT count(*) FROM breaks WHERE span = span_id AND date = now) > 0 THEN
+                    now = now + '7 days' :: interval;
+                    CONTINUE;
+                end if;
+                span = span_id;
+                departure = EXTRACT(EPOCH FROM (now + r.departure));
+                arrival = departure + r.time;
+                now = now + '7 days' :: interval;
+                RETURN NEXT;
+            END LOOP;
+
+        END LOOP;
+end;
+$$
+    language plpgsql;
+
+-- function get_buses returns all buses in dates in interval L..R
+create or replace function  get_buses(L date, R date)
+    returns TABLE(id_transit numeric, start_city numeric, end_city numeric, price numeric(6, 2), departure timestamp, arrival timestamp) as
+$$
+begin
+    return QUERY
+        SELECT tr.id_transit, bsd.city, bsa.city, tr.price, bii.departure, bii.arrival
+        FROM transits tr
+                 JOIN bus_stops bsd ON tr.departure_stop = bsd.id
+                 JOIN bus_stops bsa ON tr.arrival_stop = bsa.id
+                 JOIN spans sp ON tr.id_transit = sp.transit
+                 JOIN buses_in_span(sp.id, L, R) bii ON sp.id = bii.span
+    ;
+end;
+$$
+    language plpgsql;
+
+
 
 -- function get_buses returns all buses in dates in interval L..R
 -- @author Denis Pivovarov
@@ -407,6 +459,8 @@ begin
 end;
 $$
 language plpgsql;
+
+
 
 -- End of file.
 
