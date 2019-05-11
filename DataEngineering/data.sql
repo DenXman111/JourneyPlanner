@@ -278,3 +278,10 @@ INSERT INTO new_users(username, email_address, password, name, surname) VALUES
 ('Stephen_Mills199', 'stephen.mills@example.com', 'thomas', 'Stephen', 'Mills');
 
 
+-- bus models
+INSERT INTO buses_models(id, seats) VALUES
+(0, 30),
+(1, 40),
+(2, 60),
+(3, 60),
+(4, 50);

@@ -93,7 +93,7 @@ CREATE TABLE transits (
     id_transit numeric  NOT NULL DEFAULT NEXTVAL('transit_id'),
     departure_stop numeric  NOT NULL,
     arrival_stop numeric  NOT NULL,
-    price numeric(6, 2)  NOT NULL CHECK (0 <= price AND price <= 10000),
+    price numeric(4, 2)  NOT NULL CHECK (0 <= price AND price <= 10000),
     bus_model numeric  NOT NULL,
     CONSTRAINT transits_pk PRIMARY KEY (id_transit),
     CONSTRAINT bus_model_fk FOREIGN KEY (bus_model) REFERENCES buses_models (id),
@@ -108,8 +108,7 @@ CREATE TABLE spans(
     end_date date  NOT NULL,
     transit int  NOT NULL,
     CONSTRAINT spans_pk PRIMARY KEY (id),
-    CONSTRAINT transit_fk FOREIGN KEY (transit) REFERENCES transits (id_transit),
-    CONSTRAINT correct_span CHECK (NOW() <= begin_date AND begin_date <= end_date )
+    CONSTRAINT correct_span CHECK ( begin_date <= end_date )
 );
 
 -- Table: departure_time
@@ -118,16 +117,14 @@ CREATE TABLE departure_time (
     time interval  NOT NULL,
     span int  NOT NULL,
     day_of_the_week day  NOT NULL,
-    CONSTRAINT departure_time_pk PRIMARY KEY (departure, span, day_of_the_week),
-    CONSTRAINT span_fk FOREIGN KEY (span) REFERENCES spans (id)
+    CONSTRAINT departure_time_pk PRIMARY KEY (departure, span, day_of_the_week)
 );
 
 -- Table: exceptions
 CREATE TABLE breaks (
     date date  NOT NULL,
-    span_id numeric  NOT NULL,
-    CONSTRAINT break_pk PRIMARY KEY (date, span_id),
-    CONSTRAINT span_id_fk FOREIGN KEY (span_id) REFERENCES spans (id)
+    span_id int  NOT NULL,
+    CONSTRAINT break_pk PRIMARY KEY (date, span_id)
 );
 
 -- Table: users
@@ -142,13 +139,11 @@ CREATE TABLE  users (
 );
 
 -- Table: reservations
-CREATE TABLE reservations
-(
-    id               int         NOT NULL DEFAULT NEXTVAL('reservation_id_seq'),
-    "user"           varchar(20) NOT NULL,
-    date_reservation timestamp   NOT NULL,
-    CONSTRAINT reservations_pk PRIMARY KEY (id),
-    CONSTRAINT user_fk FOREIGN KEY ("user") REFERENCES users (username)
+CREATE TABLE reservations (
+    id int  NOT NULL DEFAULT NEXTVAL('reservation_id_seq'),
+    "user" varchar(20)  NOT NULL,
+    date_reservation timestamp  NOT NULL,
+    CONSTRAINT reservations_pk PRIMARY KEY (id)
 );
 
 -- Table: transit_reservation
@@ -157,20 +152,24 @@ CREATE TABLE transit_reservation (
     transit int  NOT NULL,
     departure_date timestamp  NOT NULL,
     reservation int  NOT NULL,
-    CONSTRAINT transit_reservation_pk PRIMARY KEY (id),
-    CONSTRAINT reservation_fk FOREIGN KEY (reservation) REFERENCES reservations (id),
-    CONSTRAINT transit_fk FOREIGN KEY (transit) REFERENCES transits (id_transit)
+    CONSTRAINT transit_reservation_pk PRIMARY KEY (id)
 );
 
+-- Table: seat_reservation
 -- Table: seat_reservation
 CREATE TABLE seat_reservation (
     seat int  NOT NULL CHECK (1 <= seat AND seat <= 300),
     transit_reservation_id int  NOT NULL,
-    CONSTRAINT seat_reservation_pk PRIMARY KEY (seat,transit_reservation_id),
-    CONSTRAINT transit_reservation_id_fk FOREIGN KEY (transit_reservation_id) REFERENCES transit_reservation (id)
+    CONSTRAINT seat_reservation_pk PRIMARY KEY (seat,transit_reservation_id)
 );
 
--- views
+-- tough view to write, left for later
+-- -- views
+-- -- View: buses
+-- CREATE VIEW buses AS
+-- select res.id_transit, res.start_city, res.end_city, res.price, res.departure, res.arrival
+-- from buses_reservation res;
+
 -- View: countries
 CREATE VIEW countries AS
 select country as name from cities group by country;
@@ -197,6 +196,64 @@ CREATE RULE create_new_user AS ON INSERT TO new_users
     DO INSTEAD
     INSERT INTO users(username, email_address, password, name, surname)
     VALUES(new.username, new.email_address, ENCODE(DIGEST(new.password, 'sha1'), 'hex'), new.name, new.surname);
+
+-- foreign keys
+-- Reference: departure_time_spans (table: departure_time)
+ALTER TABLE departure_time ADD CONSTRAINT departure_time_spans
+    FOREIGN KEY (span)
+    REFERENCES spans (id)
+    NOT DEFERRABLE
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: breaks_spans (table: exceptions)
+ALTER TABLE breaks ADD CONSTRAINT breaks_spans
+    FOREIGN KEY (span_id)
+    REFERENCES spans (id)
+    NOT DEFERRABLE
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: spans_transits (table: spans)
+ALTER TABLE spans ADD CONSTRAINT spans_transits
+    FOREIGN KEY (transit)
+    REFERENCES transits (id_transit)
+    NOT DEFERRABLE
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: transit_reservations (table: transit_reservation)
+ALTER TABLE transit_reservation ADD CONSTRAINT transit_reservations
+    FOREIGN KEY (reservation)
+    REFERENCES reservations (id)
+    NOT DEFERRABLE
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: transit_reservation_ref (table: transit_reservation)
+ALTER TABLE transit_reservation ADD CONSTRAINT transit_reservation_ref
+    FOREIGN KEY (transit)
+    REFERENCES transits (id_transit)
+    NOT DEFERRABLE
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: reservations_users (table: reservations)
+ALTER TABLE reservations ADD CONSTRAINT reservations_users
+    FOREIGN KEY ("user")
+    REFERENCES users (username)
+    NOT DEFERRABLE
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: seat_transit_reservation (table: seat_reservation)
+ALTER TABLE seat_reservation ADD CONSTRAINT seat_transit_reservation
+    FOREIGN KEY (transit_reservation_id)
+    REFERENCES transit_reservation (id)
+    NOT DEFERRABLE
+    INITIALLY IMMEDIATE
+;
+
 
 
 -- Trigger: spans
@@ -226,7 +283,8 @@ CREATE OR REPLACE FUNCTION check_span_overlap() RETURNS TRIGGER AS
         rec record;
     begin
         for rec in select id ,begin_date, end_date from spans where transit = new.transit loop
-            if GREATEST(rec.begin_date, rec.end_date) <= LEAST(rec.end_date, new.end_date) then
+            if GREATEST(rec.begin_date, new.begin_date) <= LEAST(rec.end_date, new.end_date) then
+                raise notice 'Value: %, %,    %, %', new.begin_date, new.end_date, rec.begin_date, rec.end_date;
                 raise exception 'new span overlaps with other span';
             end if;
         end loop;
@@ -258,7 +316,7 @@ CREATE TRIGGER break_check BEFORE INSERT OR UPDATE ON breaks
     FOR EACH ROW EXECUTE PROCEDURE break_check();
 
 --triggers
---trigger on seat_reservation checks [have bus with true departure_date], @author Denis Pivovarov
+--trigger on seat_reservation checks [have bus with true departure_date]
 -- modification, check if seat is not already reserved, @author Łukasz Selwa
 CREATE OR REPLACE FUNCTION seat_reservation_departure_date_check() RETURNS trigger AS $seat_reservation_departure_date_check$
 DECLARE
@@ -272,7 +330,7 @@ BEGIN
         ) <> 0 then
         raise exception 'seat is already taken';
     end if;
-    IF (SELECT count(*) FROM get_buses(NEW.departure_date :: date, (NEW.departure_date + '1 day' :: interval) :: date) WHERE departure = NEW.departure_date AND id_transit = NEW.transit) = 0 THEN
+    IF (SELECT count(*) FROM buses WHERE departure = NEW.departure_date AND id_transit = NEW.transit) = 0 THEN
         RAISE EXCEPTION 'Have not bus in this departure_date';
     END IF;
     return NEW;
@@ -285,7 +343,6 @@ CREATE TRIGGER seat_reservation_departure_date_check BEFORE INSERT OR UPDATE ON 
 
 
 --trigger on reservations checks [date_reservation before all buses]
--- @author Denis Pivovarov
 CREATE OR REPLACE FUNCTION date_reservation_check() RETURNS trigger AS $date_reservation_check$
 BEGIN
     IF (SELECT min(departure_date) FROM seat_reservation WHERE transit = NEW.id) < NEW.date_reservation THEN
@@ -301,10 +358,9 @@ CREATE TRIGGER date_reservation_check BEFORE INSERT OR UPDATE ON reservations
 
 
 --trigger on seat_reservation checks that number of reserved seats < all seats when somebody try make bus reservation
--- @author Denis Pivovarov
 CREATE OR REPLACE FUNCTION have_free_seat_check() RETURNS trigger AS $have_free_seat_check$
 BEGIN
-    IF (SELECT min(seats) FROM get_buses(NOW(), NOW() + '20 years' :: interval) b JOIN transits t ON t.id_transit = b.id_transit JOIN buses_models bm ON t.bus_model = bm.id WHERE NEW.depatrure_date = b.departure AND NEW.transit = b.id_transit)
+    IF (SELECT min(seats) FROM buses b JOIN transits t ON t.id_transit = b.id_transit JOIN buses_models bm ON t.bus_model = bm.id WHERE NEW.depatrure_date = b.departure AND NEW.transit = b.id_transit)
         = (SELECT count(*) FROM seat_reservation WHERE NEW.transit = transit AND NEW.departure_date = departure_date)
     THEN
         RAISE EXCEPTION 'No free places in bus';
@@ -317,8 +373,6 @@ DROP TRIGGER IF EXISTS have_free_seat_check ON seat_reservation;
 CREATE TRIGGER have_free_seat_check BEFORE INSERT OR UPDATE ON seat_reservation
     FOR EACH ROW EXECUTE PROCEDURE have_free_seat_check();
 
-
--- function add new bus to table
 create or replace function add_bus(dep_stop int, arr_stop int, price int, bus_model int,bg_dt date, ed_dt date, dep time, leg interval, weekday day) returns numeric as
 $$
 begin
@@ -334,42 +388,6 @@ end;
 $$
 language plpgsql;
 
-
--- function buses_in_span returns all buses in span span_id and dates in interval L..R
--- @author Denis Pivovarov
-
-create or replace function  buses_in_span(span_id numeric, L date, R date)
-    returns TABLE(span numeric, departure timestamp, arrival timestamp) as
-$$
-declare
-    now date;
-    r record;
-begin
-    FOR r IN
-        SELECT * FROM departure_time WHERE span = span_id
-    LOOP
-        now = L;
-        LOOP
-            EXIT  WHEN  r.day_of_the_week = extract(isodow from now);
-            now = now + '1 day' :: interval;
-        END LOOP;
-        LOOP
-            EXIT WHEN now > R;
-            IF (SELECT count(*) FROM breaks WHERE span = span_id AND date = now) > 0 THEN
-                now = now + '7 days' :: interval;
-                CONTINUE;
-            end if;
-            span = span_id;
-            departure = EXTRACT(EPOCH FROM (now + r.departure));
-            arrival = departure + r.time;
-            now = now + '7 days' :: interval;
-            RETURN NEXT;
-        END LOOP;
-
-    END LOOP;
-end;
-$$
-language plpgsql;
 
 -- function get_buses returns all buses in dates in interval L..R
 -- @author Denis Pivovarov
@@ -389,6 +407,7 @@ begin
 end;
 $$
 language plpgsql;
+
 
 
 -- End of file.
