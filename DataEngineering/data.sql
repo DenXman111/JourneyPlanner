@@ -70,4 +70,7 @@ INSERT INTO bus_stops(id, stop_name, city) VALUES
 (34, 'Zagreb Bus Station', 23), --
 (35, 'Central Bus Terminals', 25);
 
+INSERT INTO new_users(username, email_address, password, name, surname) VALUES
+('admin1', 'admin1@example.com', 'admin1', 'Łukasz', 'Selwa');
+
 

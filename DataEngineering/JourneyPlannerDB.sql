@@ -10,6 +10,8 @@ CREATE EXTENSION citext;
 CREATE DOMAIN email AS citext
   CHECK ( value ~ '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$' );
 
+-- password
+CREATE EXTENSION pgcrypto;
 
 -- sequences
 -- Sequence: reservation_id
@@ -128,12 +130,12 @@ CREATE TABLE breaks (
 -- Table: users
 CREATE TABLE  users (
     username varchar(20)  NOT NULL,
-    email email NOT NULL UNIQUE,
-    password bigint  NOT NULL,
+    email_address email NOT NULL UNIQUE,
+    password text NOT NULL,
     name varchar(63)  NOT NULL,
     surname varchar(63)  NOT NULL,
     CONSTRAINT users_pk PRIMARY KEY (username),
-    constraint unique_email UNIQUE (email)
+    constraint unique_email UNIQUE (email_address)
 );
 
 -- Table: reservations
@@ -175,6 +177,25 @@ select country as name from cities group by country;
 -- View: lines
 CREATE VIEW lines AS
 select departure_stop, arrival_stop from transits group by departure_stop, arrival_stop;
+
+-- View: new_users
+-- empty view used for adding new users with not hashed password
+-- author Łukasz Selwa
+CREATE VIEW new_users AS
+SELECT
+       varchar(20) 'new username' as username,
+       email 'john.smith@example.com' as email_address,
+       varchar(50) 'not hashed password' as password,
+       varchar(63) 'John' as name,
+       varchar(63) 'Smith' as surname;
+
+-- Rule: new_users
+-- adds user to users table and hashes his password
+-- author Łukasz Selwa
+CREATE RULE create_new_user AS ON INSERT TO new_users
+    DO INSTEAD
+    INSERT INTO users(username, email_address, password, name, surname)
+    VALUES(new.username, new.email_address, ENCODE(DIGEST(new.password, 'sha1'), 'hex'), new.name, new.surname);
 
 -- foreign keys
 -- Reference: departure_time_spans (table: departure_time)
@@ -365,5 +386,7 @@ return 1;
 end;
 $$
 language plpgsql;
+
+
 -- End of file.
 

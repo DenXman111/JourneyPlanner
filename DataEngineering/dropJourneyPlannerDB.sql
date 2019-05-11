@@ -15,6 +15,7 @@ DROP TABLE IF EXISTS users CASCADE;
 
 DROP VIEW IF EXISTS countries;
 DROP VIEW IF EXISTS lines;
+DROP VIEW IF EXISTS new_users;
 
 DROP SEQUENCE IF EXISTS reservation_id;
 DROP SEQUENCE IF EXISTS cities_id_seq;
@@ -37,3 +38,4 @@ drop function if exists add_bus(int,int,int,int,date,date,time,interval,day);
 DROP TYPE IF EXISTS day;
 DROP DOMAIN IF EXISTS email;
 DROP EXTENSION IF EXISTS citext;
+DROP EXTENSION IF EXISTS pgcrypto;
