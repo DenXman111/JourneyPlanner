@@ -174,4 +174,50 @@ public class DbAdapter {
         }
         return a;
     }
+    public static ArrayList <ArrayList <Edge> > getHistory(String user) {
+        ArrayList <ArrayList <Edge> > out=new ArrayList();
+        try {
+            statement = connection.createStatement();
+            String query="select unique id from trips where traveler=\'"+user+"\'";
+            ResultSet result=statement.executeQuery(query);
+            while (result.next()) {
+                ArrayList<Edge> tmp=new ArrayList<>();
+                String tr=result.getString("id");
+                String query2="Select buses.*, a.id from trips join (select * from trips where id=\'"+tr+"\') a order by a.id,departure";
+                ResultSet result2=statement.executeQuery(query);
+                while(result2.next()) {
+                    City r1=getCityFromID(result2.getInt("Start_city"));
+                    City r2=getCityFromID(result2.getInt("ec1"));
+                    Edge b=new Edge(result2.getInt("id1"),r1,r2,result2.getInt("p1"),
+                            result2.getDate("d1").toLocalDate(),
+                            result2.getDate("a1").toLocalDate());
+                    tmp.add(b);
+                }
+                out.add(tmp);
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return out;
+    }
+    public static void reserve(ArrayList <Edge> arg,String user){
+        try {
+            statement = connection.createStatement();
+            for (int i = 0; i < arg.size(); i++) {
+                int g = arg.get(i).getBusId();
+                if (i==0){
+                    String query = "insert into trips values (nextval('res_id'), "+g+", '"+user+"')";
+                    statement.executeUpdate(query);
+                }
+                else {
+                    String query = "insert into trips values (currval('res_id'), " + g + ", '" + user + "')";
+                    statement.executeUpdate(query);
+                }
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

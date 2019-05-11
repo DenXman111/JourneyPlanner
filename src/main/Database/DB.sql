@@ -41,6 +41,11 @@ create table trips(
     primary key (id,bus_id,traveler)
 );
 
+create sequence res_id
+    increment by 1
+    start 1
+;
+
 insert into cities values
 (1, 'Krakow', 4.27, 74, 'Poland'),
 (2, 'Mozyr', 3.00, 30, 'Belarus'),
