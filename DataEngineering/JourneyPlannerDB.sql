@@ -387,6 +387,7 @@ $$
 language plpgsql;
 
 -- function buses_in_span returns all buses in span span_id and dates in interval L..R
+-- @author Denis Pivovarov
 create or replace function  buses_in_span(span_id numeric, L_date date, R_date date)
     returns TABLE(span numeric, departure timestamp, arrival timestamp) as
 $$
@@ -419,25 +420,6 @@ begin
 end;
 $$
 language plpgsql;
-
--- function get_buses returns all buses in dates in interval L..R
-create or replace function  get_buses(L date, R date)
-    returns TABLE(id_transit numeric, start_city numeric, end_city numeric, price numeric(6, 2), departure timestamp, arrival timestamp) as
-$$
-begin
-    return QUERY
-        SELECT tr.id_transit, bsd.city, bsa.city, tr.price, bii.departure, bii.arrival
-        FROM transits tr
-                 JOIN bus_stops bsd ON tr.departure_stop = bsd.id
-                 JOIN bus_stops bsa ON tr.arrival_stop = bsa.id
-                 JOIN spans sp ON tr.id_transit = sp.transit
-                 JOIN buses_in_span(sp.id, L, R) bii ON sp.id = bii.span
-    ;
-end;
-$$
-    language plpgsql;
-
-
 
 -- function get_buses returns all buses in dates in interval L..R
 -- @author Denis Pivovarov

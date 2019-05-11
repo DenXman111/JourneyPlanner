@@ -20,28 +20,31 @@
                <TextField fx:id="EmailField" maxWidth="-Infinity" prefHeight="53.0" prefWidth="306.0" promptText="Email" />
                <TextField fx:id="NameField" maxWidth="-Infinity" prefHeight="53.0" prefWidth="306.0" promptText="Name" />
                <TextField fx:id="SurnameField" maxWidth="-Infinity" prefHeight="53.0" prefWidth="306.0" promptText="Surname" />
-               <Button fx:id="SignUp" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" onAction="#signUpPressed" prefHeight="50.0" prefWidth="207.0" style="-fx-background-radius: 20; -fx-background-insets: 0, 1, 1;" styleClass="mainButton" text="Sign up" textFill="#14a085">
+               <Button fx:id="SignUpButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" onAction="#signUpButtonPressed" prefHeight="50.0" prefWidth="207.0" style="-fx-background-radius: 20; -fx-background-insets: 0, 1, 1;" styleClass="mainButton" text="Sign up" textFill="#14a085">
                   <font>
                      <Font size="24.0" />
                   </font>
+                  <VBox.margin>
+                     <Insets top="55.0" />
+                  </VBox.margin>
                </Button>
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
                <padding>
-                  <Insets top="50.0" />
+                  <Insets top="80.0" />
                </padding>
             </VBox>
-            <Button fx:id="Return" mnemonicParsing="false" onAction="#returnPressed">
-               <graphic>
-                  <ImageView fitHeight="56.0" fitWidth="60.0">
-                     <image>
-                        <Image url="@../back.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-            </Button>
          </children>
       </AnchorPane>
+      <Button fx:id="ReturnButton" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="575.0" mnemonicParsing="false" onAction="#returnButtonPressed" prefHeight="33.0" prefWidth="46.0" style="-fx-background-color: null;">
+         <graphic>
+            <ImageView fitHeight="36.0" fitWidth="41.0">
+               <image>
+                  <Image url="@../back.png" />
+               </image>
+            </ImageView>
+         </graphic>
+      </Button>
    </children>
 </AnchorPane>

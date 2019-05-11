@@ -12,6 +12,7 @@ public class WelcomeController {
 
     private Stage prevStage;
 
+    @SuppressWarnings("WeakerAccess")
     public void setPrevStage(Stage stage){
         this.prevStage = stage;
     }
@@ -20,10 +21,14 @@ public class WelcomeController {
     public void startButtonPressed(ActionEvent event) throws IOException {
         Stage stage = new Stage();
         stage.setTitle("Main");
-        Pane myPane = FXMLLoader.load(getClass().getResource("/xmlFiles/form.fxml"));
+        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/form.fxml"));
+
+        Pane myPane = myLoader.load();
+        FormController controller = myLoader.getController();
+        controller.setPrevStage(stage);
+
         Scene scene = new Scene(myPane);
         stage.setScene(scene);
-
         prevStage.close();
         stage.show();
     }

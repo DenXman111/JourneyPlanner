@@ -31,17 +31,18 @@ public class SignUpController {
     private TextField SurnameField;
 
     @FXML
-    private Button SignUp;
+    private Button SignUpButton;
 
     @FXML
-    private Button Return;
+    private Button ReturnButton;
 
-    public void setPrevStage(Stage stage){
+    @SuppressWarnings("WeakerAccess")
+    protected void setPrevStage(Stage stage){
         this.prevStage = stage;
     }
 
     @FXML
-    void signUpPressed(ActionEvent event) {
+    void signUpButtonPressed(ActionEvent event) {
         try{
             DbAdapter.addNewUser(UsernameField.getText(), PasswordField.hashCode(), EmailField.getText(), NameField.getText(), SurnameField.getText());
             FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
@@ -54,29 +55,28 @@ public class SignUpController {
             prevStage.setScene(myScene);
 
         } catch (SQLException e){
-            System.out.println(e.getMessage());
-            System.out.println(e.getSQLState());
-            //Show window with error
+            e.printStackTrace();
+            //System.out.println(e.getMessage());
+            //System.out.println(e.getSQLState());
+
+            /*
+             *Show window with error
+             */
+
         } catch (IOException e){
             e.printStackTrace();
         }
     }
 
     @FXML
-    void returnPressed(ActionEvent event) {
-        try{
-            FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
+    void returnButtonPressed(ActionEvent event) throws IOException{
+        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
 
-            Pane myPane = myLoader.load();
-            WelcomeController controller = myLoader.getController();
-            controller.setPrevStage(prevStage);
+        Pane myPane = myLoader.load();
+        WelcomeController controller = myLoader.getController();
+        controller.setPrevStage(prevStage);
 
-            Scene myScene = new Scene(myPane);
-            prevStage.setScene(myScene);
-
-        } catch (IOException e){
-            e.printStackTrace();
-        }
+        Scene myScene = new Scene(myPane);
+        prevStage.setScene(myScene);
     }
-
 }
