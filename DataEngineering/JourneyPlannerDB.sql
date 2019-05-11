@@ -408,7 +408,5 @@ end;
 $$
 language plpgsql;
 
-
-
 -- End of file.
 
