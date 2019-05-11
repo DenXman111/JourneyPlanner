@@ -35,8 +35,9 @@ DROP FUNCTION IF EXISTS seat_reservation_departure_date_check();
 DROP FUNCTION IF EXISTS check_span_overlap();
 drop function if exists add_bus(int,int,int,int,date,date,time,interval,day);
 DROP FUNCTION IF EXISTS get_buses(date, date);
+DROP FUNCTION IF EXISTS buses_in_span(numeric, date, date);
+DROP FUNCTION IF EXISTS add_bus(integer, integer, integer, integer, date, date, time, interval, integer);
 
-DROP TYPE IF EXISTS day;
 DROP DOMAIN IF EXISTS email;
 DROP EXTENSION IF EXISTS citext;
 DROP EXTENSION IF EXISTS pgcrypto;

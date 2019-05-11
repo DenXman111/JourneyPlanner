@@ -1,9 +1,5 @@
 -- noinspection SqlResolveForFile
 
--- types
--- day used in departure_time table
-CREATE TYPE day AS ENUM ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Everyday');
-
 -- email used in users table
 -- email type, copied from stack overflow: "https://dba.stackexchange.com/questions/68266/what-is-the-best-way-to-store-an-email-address-in-postgresql"
 CREATE EXTENSION citext;
@@ -116,7 +112,7 @@ CREATE TABLE departure_time (
     departure time  NOT NULL,
     time interval  NOT NULL,
     span int  NOT NULL,
-    day_of_the_week day  NOT NULL,
+    day_of_the_week int NOT NULL CHECK ( day_of_the_week BETWEEN 1 and 7),
     CONSTRAINT departure_time_pk PRIMARY KEY (departure, span, day_of_the_week)
 );
 
@@ -373,10 +369,12 @@ DROP TRIGGER IF EXISTS have_free_seat_check ON seat_reservation;
 CREATE TRIGGER have_free_seat_check BEFORE INSERT OR UPDATE ON seat_reservation
     FOR EACH ROW EXECUTE PROCEDURE have_free_seat_check();
 
-create or replace function add_bus(dep_stop int, arr_stop int, price int, bus_model int,bg_dt date, ed_dt date, dep time, leg interval, weekday day) returns numeric as
+create or replace function add_bus(dep_stop int, arr_stop int, price int, bus_model int,bg_dt date, ed_dt date, dep time, leg interval, weekday int) returns numeric as
 $$
 begin
-if ((select count(*)from bus_stops where dep_stop=id)=0 or (select count(*)from bus_stops where arr_stop=id)=0 or price<=0 or (select count(*) from buses_models where id=bus_model)=0 or bg_dt>ed_dt)
+if ((select count(*)from bus_stops where dep_stop=id)=0 or (select count(*)from bus_stops where arr_stop=id)=0 or price<=0
+        or (select count(*) from buses_models where id=bus_model)=0 or bg_dt>ed_dt
+        or weekday not between 1 and 7)
 then
 raise exception 'Incorrect input';
 end if;
@@ -389,7 +387,7 @@ $$
 language plpgsql;
 
 -- function buses_in_span returns all buses in span span_id and dates in interval L..R
-create or replace function  buses_in_span(span_id numeric, L date, R date)
+create or replace function  buses_in_span(span_id numeric, L_date date, R_date date)
     returns TABLE(span numeric, departure timestamp, arrival timestamp) as
 $$
 declare
@@ -397,21 +395,21 @@ declare
     r record;
 begin
     FOR r IN
-        SELECT * FROM departure_time WHERE span = span_id
+        SELECT * FROM departure_time WHERE departure_time.span = span_id
         LOOP
-            now = L;
+            now = L_date;
             LOOP
-                EXIT  WHEN  r.day_of_the_week = extract(isodow from now);
+                EXIT  WHEN  r.day_of_the_week = FLOOR(extract(isodow from now));
                 now = now + '1 day' :: interval;
             END LOOP;
             LOOP
-                EXIT WHEN now > R;
-                IF (SELECT count(*) FROM breaks WHERE span = span_id AND date = now) > 0 THEN
+                EXIT WHEN now > R_date;
+                IF (SELECT count(*) FROM breaks WHERE span = breaks.span_id AND date = now) > 0 THEN
                     now = now + '7 days' :: interval;
                     CONTINUE;
                 end if;
                 span = span_id;
-                departure = EXTRACT(EPOCH FROM (now + r.departure));
+                departure = now + r.departure;
                 arrival = departure + r.time;
                 now = now + '7 days' :: interval;
                 RETURN NEXT;
@@ -420,7 +418,7 @@ begin
         END LOOP;
 end;
 $$
-    language plpgsql;
+language plpgsql;
 
 -- function get_buses returns all buses in dates in interval L..R
 create or replace function  get_buses(L date, R date)
