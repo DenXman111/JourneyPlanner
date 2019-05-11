@@ -93,7 +93,7 @@ CREATE TABLE transits (
     id_transit numeric  NOT NULL DEFAULT NEXTVAL('transit_id'),
     departure_stop numeric  NOT NULL,
     arrival_stop numeric  NOT NULL,
-    price numeric(4, 2)  NOT NULL CHECK (0 <= price AND price <= 10000),
+    price numeric(6, 2)  NOT NULL CHECK (0 <= price AND price <= 10000),
     bus_model numeric  NOT NULL,
     CONSTRAINT transits_pk PRIMARY KEY (id_transit),
     CONSTRAINT bus_model_fk FOREIGN KEY (bus_model) REFERENCES buses_models (id),
@@ -108,7 +108,7 @@ CREATE TABLE spans(
     end_date date  NOT NULL,
     transit int  NOT NULL,
     CONSTRAINT spans_pk PRIMARY KEY (id),
-    CONSTRAINT correct_span CHECK ( begin_date <= end_date )
+    CONSTRAINT correct_span CHECK (NOW() <= begin_date AND begin_date <= end_date )
 );
 
 -- Table: departure_time
@@ -123,7 +123,7 @@ CREATE TABLE departure_time (
 -- Table: exceptions
 CREATE TABLE breaks (
     date date  NOT NULL,
-    span_id int  NOT NULL,
+    span_id numeric  NOT NULL,
     CONSTRAINT break_pk PRIMARY KEY (date, span_id)
 );
 
@@ -139,11 +139,13 @@ CREATE TABLE  users (
 );
 
 -- Table: reservations
-CREATE TABLE reservations (
-    id int  NOT NULL DEFAULT NEXTVAL('reservation_id_seq'),
-    "user" varchar(20)  NOT NULL,
-    date_reservation timestamp  NOT NULL,
-    CONSTRAINT reservations_pk PRIMARY KEY (id)
+CREATE TABLE reservations
+(
+    id               int         NOT NULL DEFAULT NEXTVAL('reservation_id_seq'),
+    "user"           varchar(20) NOT NULL,
+    date_reservation timestamp   NOT NULL,
+    CONSTRAINT reservations_pk PRIMARY KEY (id),
+    CONSTRAINT user_fk FOREIGN KEY ("user") REFERENCES users (username)
 );
 
 -- Table: transit_reservation
@@ -155,7 +157,6 @@ CREATE TABLE transit_reservation (
     CONSTRAINT transit_reservation_pk PRIMARY KEY (id)
 );
 
--- Table: seat_reservation
 -- Table: seat_reservation
 CREATE TABLE seat_reservation (
     seat int  NOT NULL CHECK (1 <= seat AND seat <= 300),
@@ -383,6 +384,58 @@ insert into transits values (nextval('transit_id'),dep_stop,arr_stop,price,bus_m
 insert into intervals values (nextval('span_id'),bg_dt,ed_dt,currval('transit_id'));
 insert into departure_time values (dep,leg,currval('span_id'),weekday);
 return 1;
+end;
+$$
+language plpgsql;
+
+
+-- function buses_in_span returns all buses in span span_id and dates in interval L..R
+create or replace function  buses_in_span(span_id numeric, L date, R date)
+    returns TABLE(span numeric, departure timestamp, arrival timestamp) as
+$$
+declare
+    now date;
+    r record;
+begin
+    FOR r IN
+        SELECT * FROM departure_time WHERE span = span_id
+    LOOP
+        now = L;
+        LOOP
+            EXIT  WHEN  r.day_of_the_week = extract(isodow from now);
+            now = now + '1 day' :: interval;
+        END LOOP;
+        LOOP
+            EXIT WHEN now > R;
+            IF (SELECT count(*) FROM breaks WHERE span = span_id AND date = now) > 0 THEN
+                now = now + '7 days' :: interval;
+                CONTINUE;
+            end if;
+            span = span_id;
+            departure = EXTRACT(EPOCH FROM (now + r.departure));
+            arrival = departure + r.time;
+            now = now + '7 days' :: interval;
+            RETURN NEXT;
+        END LOOP;
+
+    END LOOP;
+end;
+$$
+language plpgsql;
+
+-- function get_buses returns all buses in dates in interval L..R
+create or replace function  get_buses(L date, R date)
+    returns TABLE(id_transit numeric, start_city numeric, end_city numeric, price numeric(6, 2), departure timestamp, arrival timestamp) as
+$$
+begin
+    return QUERY
+        SELECT tr.id_transit, bsd.city, bsa.city, tr.price, bii.departure, bii.arrival
+        FROM transits tr
+            JOIN bus_stops bsd ON tr.departure_stop = bsd.id
+            JOIN bus_stops bsa ON tr.arrival_stop = bsa.id
+            JOIN spans sp ON tr.id_transit = sp.transit
+            JOIN buses_in_span(sp.id, L, R) bii ON sp.id = bii.span
+    ;
 end;
 $$
 language plpgsql;

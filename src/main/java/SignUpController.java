@@ -33,6 +33,9 @@ public class SignUpController {
     @FXML
     private Button SignUp;
 
+    @FXML
+    private Button Return;
+
     public void setPrevStage(Stage stage){
         this.prevStage = stage;
     }
@@ -54,6 +57,23 @@ public class SignUpController {
             System.out.println(e.getMessage());
             System.out.println(e.getSQLState());
             //Show window with error
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void returnPressed(ActionEvent event) {
+        try{
+            FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
+
+            Pane myPane = myLoader.load();
+            WelcomeController controller = myLoader.getController();
+            controller.setPrevStage(prevStage);
+
+            Scene myScene = new Scene(myPane);
+            prevStage.setScene(myScene);
+
         } catch (IOException e){
             e.printStackTrace();
         }
