@@ -49,7 +49,7 @@
             </HBox.margin>
          </Label>
       </HBox>
-      <VBox alignment="CENTER" prefHeight="100.0" prefWidth="120.0" spacing="5.0" GridPane.columnIndex="1" GridPane.halignment="CENTER">
+      <VBox alignment="CENTER" prefHeight="100.0" prefWidth="120.0" GridPane.columnIndex="1" GridPane.halignment="CENTER">
          <opaqueInsets>
             <Insets />
          </opaqueInsets>
