@@ -102,7 +102,7 @@ CREATE TABLE spans(
     id int  NOT NULL DEFAULT NEXTVAL('span_id'),
     begin_date date  NOT NULL,
     end_date date  NOT NULL,
-    transit int  NOT NULL,
+    transit numeric  NOT NULL,
     CONSTRAINT spans_pk PRIMARY KEY (id),
     CONSTRAINT correct_span CHECK ( begin_date <= end_date )
 );
@@ -116,7 +116,7 @@ CREATE TABLE departure_time (
     CONSTRAINT departure_time_pk PRIMARY KEY (departure, span, day_of_the_week)
 );
 
--- Table: exceptions
+-- Table: breaks
 CREATE TABLE breaks (
     date date  NOT NULL,
     span_id int  NOT NULL,
@@ -145,7 +145,7 @@ CREATE TABLE reservations (
 -- Table: transit_reservation
 CREATE TABLE transit_reservation (
     id int  NOT NULL DEFAULT NEXTVAL('transit_reservation_id_seq'),
-    transit int  NOT NULL,
+    transit numeric  NOT NULL,
     departure_date timestamp  NOT NULL,
     reservation int  NOT NULL,
     CONSTRAINT transit_reservation_pk PRIMARY KEY (id)
