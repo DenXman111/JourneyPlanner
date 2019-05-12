@@ -81,7 +81,7 @@ public class FormController implements Initializable {
     void findButtonPressed(ActionEvent event) {
         try {
             check(); //without checking for debug
-
+            Trip.displayBookButton = true;
             List<Trip> propositions = Planner.
                     plan(   MainCityChoiceBox.getValue(),
                             Integer.valueOf(MainFieldFunds.getText()),

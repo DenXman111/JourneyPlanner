@@ -30,9 +30,11 @@ public class SignUpController {
     @FXML
     private TextField SurnameField;
 
+    @SuppressWarnings("unused")
     @FXML
     private Button SignUpButton;
 
+    @SuppressWarnings("unused")
     @FXML
     private Button ReturnButton;
 
@@ -40,6 +42,7 @@ public class SignUpController {
         this.prevStage = stage;
     }
 
+    @SuppressWarnings("unused")
     @FXML
     void signUpButtonPressed(ActionEvent event) throws IOException{
         try{
@@ -65,6 +68,7 @@ public class SignUpController {
         }
     }
 
+    @SuppressWarnings("unused")
     @FXML
     void returnButtonPressed(ActionEvent event) throws IOException{
         FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
