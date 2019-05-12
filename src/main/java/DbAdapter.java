@@ -1,6 +1,8 @@
 import java.io.FileInputStream;
 import java.sql.*;
-import java.time.ZoneId;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @SuppressWarnings("all")
@@ -87,7 +89,6 @@ public class DbAdapter {
 
     public static void addNewUser(String username, String password, String email, String name, String surname) throws SQLException{
         statement = connection.createStatement();
-//            String query="INSERT INTO users VALUES(" + username + ", " + password + ", " + email + ", " + name + ", " + surname + ")";
         String query="INSERT INTO users(username, password, email, name, surname) VALUES(?, ?, ?, ?, ?)";
         PreparedStatement pst = connection.prepareStatement(query);
         pst.setString(1, username);
@@ -95,6 +96,21 @@ public class DbAdapter {
         pst.setString(3, email);
         pst.setString(4, name);
         pst.setString(5, surname);
+        pst.executeUpdate();
+    }
+    public static void addNewBus(String cityA, String cityB, int price, LocalDate departure, LocalDate arrival, int places) throws SQLException{
+        statement = connection.createStatement();
+        String query = "INSERT INTO buses VALUES(nextval(\'buses_seq\'), ?, ?, ?, ?, ?, ?)";
+        PreparedStatement pst = connection.prepareStatement(query);
+        System.out.println(getCityID(cityA) + " " + getCityID(cityB) + " " + price + " " + departure.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " " + arrival.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " " + places);
+        pst.setInt(1, getCityID(cityA));
+        pst.setInt(2, getCityID(cityB));
+        pst.setInt(3, price);
+        pst.setDate(4, Date.valueOf(departure));
+        pst.setDate(5, Date.valueOf(arrival));
+//            pst.setDate(4, departure.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+//            pst.setDate(5, arrival.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        pst.setInt(6, places);
         pst.executeUpdate();
     }
 

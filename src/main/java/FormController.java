@@ -51,7 +51,6 @@ public class FormController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        System.out.println(LoginController.username);
         ObservableList<String> observableCitiesList = FXCollections.observableArrayList(DbAdapter.getCityList());
         MainCityChoiceBox.setItems(observableCitiesList);
 

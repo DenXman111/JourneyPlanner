@@ -41,6 +41,7 @@ public class HistoryController implements Initializable {
     }
 
     @FXML
+    @SuppressWarnings("Duplicates")
     void returnButtonPressed(ActionEvent event) throws IOException {
         FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
         Pane myPane = myLoader.load();
