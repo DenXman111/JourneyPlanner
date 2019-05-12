@@ -10,6 +10,7 @@ public class ErrorWindow{
     private String message;
     static private Stage stage;
     protected ErrorWindow(String message){
+        System.out.println(message);
         if (stage != null){
             stage.close();
         }

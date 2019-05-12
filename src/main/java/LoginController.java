@@ -49,9 +49,9 @@ public class LoginController {
     }
 
     @FXML
-    void findButtonPressed(ActionEvent event){
+    void findButtonPressed(ActionEvent event) throws IOException{
         try{
-            if (!DbAdapter.haveUser(UsernameField.getText(), PasswordField.getText())) throw new Exception("User data wrong");
+            if (!DbAdapter.haveUser(UsernameField.getText(), PasswordField.getText())) throw new FieldsDataException("User data wrong");
 
             Stage stage = new Stage();
             stage.setTitle("Main");
@@ -66,49 +66,52 @@ public class LoginController {
             stage.setScene(scene);
             prevStage.close();
             stage.show();
-        } catch (Exception e){
+        } catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
         }
     }
 
     @FXML
-    void loginAsModeratorPressed(ActionEvent event){
+    void loginAsModeratorPressed(ActionEvent event) throws IOException{
         try{
-            if (!DbAdapter.haveModer(UsernameField.getText(), PasswordField.getText())) throw new Exception("User data wrong");
+            if (!DbAdapter.haveModer(UsernameField.getText(), PasswordField.getText())) throw new FieldsDataException("User data wrong");
 
             Stage stage = new Stage();
             stage.setTitle("AppSettings");
 
-            FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/moderator.fxml"));
+            FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/moder.fxml"));
             Pane myPane = myLoader.load();
-            FormController controller = myLoader.getController();
+            ModerController controller = myLoader.getController();
             controller.setPrevStage(stage);
 
             Scene scene = new Scene(myPane);
             stage.setScene(scene);
+            stage.setResizable(false);
             prevStage.close();
             stage.show();
-        } catch (Exception e){
+        } catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
         }
     }
 
     @FXML
-    void showHistoryButtonPressed(ActionEvent event) {
+    void showHistoryButtonPressed(ActionEvent event) throws IOException{
         try{
-            if (!DbAdapter.haveUser(UsernameField.getText(), PasswordField.getText())) throw new Exception("User data wrong");
+            if (!DbAdapter.haveUser(UsernameField.getText(), PasswordField.getText())) throw new FieldsDataException("User data wrong");
             username=UsernameField.getText();
             Stage stage = new Stage();
             stage.setTitle("Main");
+
             FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/history.fxml"));
             Pane myPane = myLoader.load();
             HistoryController controller = myLoader.getController();
             controller.setPrevStage(stage);
+
             Scene scene = new Scene(myPane);
             stage.setScene(scene);
             prevStage.close();
             stage.show();
-        } catch (Exception e){
+        } catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
         }
     }

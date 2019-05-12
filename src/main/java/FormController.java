@@ -59,22 +59,22 @@ public class FormController implements Initializable {
             loginLabel.setText("logged as " + LoginController.username);
     }
 
-    private void check() throws FormsCheckException{
-        if (MainCityChoiceBox.getSelectionModel().isEmpty()) throw new FormsCheckException("Choose any city");
-        if (MainFieldFunds.getText().isEmpty()) throw new FormsCheckException("Write your funds");
-        if (MainFieldStartDate.getValue() == null) throw new FormsCheckException("Fill start date");
-        if (MainFieldEndingDate.getValue() == null) throw new FormsCheckException("Fill ending date");
+    private void check() throws FieldsDataException{
+        if (MainCityChoiceBox.getSelectionModel().isEmpty()) throw new FieldsDataException("Choose any city");
+        if (MainFieldFunds.getText().isEmpty()) throw new FieldsDataException("Write your funds");
+        if (MainFieldStartDate.getValue() == null) throw new FieldsDataException("Fill start date");
+        if (MainFieldEndingDate.getValue() == null) throw new FieldsDataException("Fill ending date");
         try{
             Integer.valueOf(MainFieldFunds.getText());
         } catch (RuntimeException e){
             e.getStackTrace();
-            throw new FormsCheckException("Should be number in Funds");
+            throw new FieldsDataException("Should be number in Funds");
         }
 
         if (LocalDate.now().isAfter(MainFieldStartDate.getValue()))
-            throw new FormsCheckException("Start date should be in future");
+            throw new FieldsDataException("Start date should be in future");
         if (MainFieldStartDate.getValue().isAfter(MainFieldEndingDate.getValue()))
-            throw new FormsCheckException("Ending date before start date");
+            throw new FieldsDataException("Ending date before start date");
     }
     @SuppressWarnings("unused")
     @FXML
@@ -98,8 +98,8 @@ public class FormController implements Initializable {
 
             MainButtonFind.setPrefWidth(170);
 
-        } catch (FormsCheckException e){
-            new ErrorWindow(e.getMassage());
+        } catch (FieldsDataException e){
+            new ErrorWindow(e.getMessage());
         }
     }
 
