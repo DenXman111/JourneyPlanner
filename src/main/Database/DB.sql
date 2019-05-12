@@ -48,6 +48,11 @@ create table trips(
     primary key (id,bus_id,traveler)
 );
 
+create sequence if not exists res_id
+    increment by 1
+    start 1
+;
+
 insert into cities values
 (1, 'Krakow', 4.27, 74, 'Poland'),
 (2, 'Mozyr', 3.00, 30, 'Belarus'),
@@ -337,3 +342,10 @@ insert into buses values
 (nextval('buses_seq'), 19, 1, 69, '2019-05-06', '2019-05-07', 30),
 (nextval('buses_seq'), 19, 1, 69, '2019-05-09', '2019-05-10', 30),
 (nextval('buses_seq'), 19, 1, 69, '2019-05-12', '2019-05-13', 30);
+
+insert into users values('a','b','c','d','e');
+insert into users values('q','b','d','d','e');
+insert into trips values(1,1,'a');
+insert into trips values(1,7,'a');
+insert into trips values(2,8,'a');
+insert into trips values(3,20,'q');

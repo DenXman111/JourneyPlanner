@@ -49,7 +49,7 @@ public class LoginController {
     }
 
     @FXML
-    void findButtonPressed(ActionEvent event) throws IOException{
+    void findButtonPressed(ActionEvent event){
         try{
             if (!DbAdapter.haveUser(UsernameField.getText(), PasswordField.getText())) throw new Exception("User data wrong");
 
@@ -72,7 +72,7 @@ public class LoginController {
     }
 
     @FXML
-    void loginAsModeratorPressed(ActionEvent event) throws IOException{
+    void loginAsModeratorPressed(ActionEvent event){
         try{
             if (!DbAdapter.haveModer(UsernameField.getText(), PasswordField.getText())) throw new Exception("User data wrong");
 
@@ -95,8 +95,21 @@ public class LoginController {
 
     @FXML
     void showHistoryButtonPressed(ActionEvent event) {
-        //...
-        username = UsernameField.getText();
-        //...
+        try{
+            if (!DbAdapter.haveUser(UsernameField.getText(), PasswordField.getText())) throw new Exception("User data wrong");
+            username=UsernameField.getText();
+            Stage stage = new Stage();
+            stage.setTitle("Main");
+            FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/history.fxml"));
+            Pane myPane = myLoader.load();
+            HistoryController controller = myLoader.getController();
+            controller.setPrevStage(stage);
+            Scene scene = new Scene(myPane);
+            stage.setScene(scene);
+            prevStage.close();
+            stage.show();
+        } catch (Exception e){
+            new ErrorWindow(e.getMessage());
+        }
     }
 }

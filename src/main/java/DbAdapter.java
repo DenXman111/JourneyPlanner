@@ -189,24 +189,29 @@ public class DbAdapter {
         }
         return a;
     }
-    public static ArrayList <ArrayList <Edge> > getHistory(String user) {
-        ArrayList <ArrayList <Edge> > out=new ArrayList();
+    public static ArrayList <Trip> getHistory(String user) {
+        ArrayList <Trip> out=new ArrayList();
         try {
             statement = connection.createStatement();
-            String query="select unique id from trips where traveler=\'"+user+"\'";
+            String query="select distinct id from trips where traveler=\'"+user+"\'";
             ResultSet result=statement.executeQuery(query);
+            ArrayList<String> id_list=new ArrayList<>();
             while (result.next()) {
-                ArrayList<Edge> tmp=new ArrayList<>();
-                String tr=result.getString("id");
-                String query2="Select buses.*, a.id from trips join (select * from trips where id=\'"+tr+"\') a order by a.id,departure";
-                ResultSet result2=statement.executeQuery(query);
-                while(result2.next()) {
-                    City r1=getCityFromID(result2.getInt("Start_city"));
-                    City r2=getCityFromID(result2.getInt("ec1"));
-                    Edge b=new Edge(result2.getInt("id1"),r1,r2,result2.getInt("p1"),
-                            result2.getDate("d1").toLocalDate(),
-                            result2.getDate("a1").toLocalDate());
-                    tmp.add(b);
+                id_list.add(result.getString("id"));
+            }
+            for(int i=0;i<id_list.size();i++) {
+                Trip tmp=new Trip();
+                String tr = id_list.get(i);
+                String query2 = "Select buses.* from buses join (select * from trips where id=\'" + tr + "\') as a on buses.id=a.bus_id order by a.id,departure;";
+                ResultSet result2 = statement.executeQuery(query2);
+                while (result2.next()) {
+                    System.out.println(tr);
+                    City r1 = getCityFromID(result2.getInt("start_city"));
+                    City r2 = getCityFromID(result2.getInt("end_city"));
+                    Edge b = new Edge(result2.getInt("id"), r1, r2, result2.getInt("price"),
+                            result2.getDate("departure").toLocalDate(),
+                            result2.getDate("arrival").toLocalDate());
+                    tmp.pushEdge(b);
                 }
                 out.add(tmp);
             }
