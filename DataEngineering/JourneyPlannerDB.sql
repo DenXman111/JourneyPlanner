@@ -254,6 +254,7 @@ ALTER TABLE seat_reservation ADD CONSTRAINT seat_transit_reservation
 
 -- Trigger: spans
 -- after modifying or deleting spans remove all breaks that will not be contained
+-- @author Łukasz Selwa
 CREATE OR REPLACE FUNCTION remove_breaks_after_delete() RETURNS TRIGGER AS
     $remove_breaks$
     begin
@@ -273,6 +274,8 @@ CREATE TRIGGER remove_breaks_after_update AFTER UPDATE ON spans
     FOR EACH ROW EXECUTE PROCEDURE remove_breaks_after_update();
 
 -- before inserting span check if it does not overlap other span with the same transit_id
+-- @author Łukasz Selwa
+-- it's a temporary trigger,
 CREATE OR REPLACE FUNCTION check_span_overlap() RETURNS TRIGGER AS
     $check_span_overlap$
     declare
@@ -292,6 +295,7 @@ CREATE TRIGGER check_span_overlap BEFORE INSERT ON spans
 
 -- Trigger: breaks
 -- returns null if break is not contained in indicated span
+-- @author Łukasz Selwa
 CREATE OR REPLACE FUNCTION break_check() RETURNS TRIGGER AS
     $break_check$
     declare
@@ -342,6 +346,7 @@ CREATE TRIGGER seat_reservation_departure_date_check BEFORE INSERT OR UPDATE ON 
 
 
 -- trigger on transit_reservation checks if such transit exists (the is a bus in database which leaves on given time)
+-- @author Łukasz Selwa
 CREATE OR REPLACE FUNCTION transit_reservation_check() RETURNS TRIGGER AS
     $trasit_reservation_check$
     begin
@@ -442,10 +447,10 @@ declare
     L_date date;
     R_date date;
 begin
-    -- author @Łukasz
+    -- author @Łukasz {
     L_date = GREATEST(begin_date, (select sp.begin_date from spans sp where sp.id = span_id));
     R_date = LEAST(end_date, (select sp.end_date from spans sp where sp.id = span_id));
-    --
+    -- }
     FOR r IN
         SELECT * FROM departure_time WHERE departure_time.span = span_id
         LOOP
