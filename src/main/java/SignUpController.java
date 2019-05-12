@@ -39,8 +39,7 @@ public class SignUpController {
     @FXML
     private Button ReturnButton;
 
-    @SuppressWarnings("WeakerAccess")
-    protected void setPrevStage(Stage stage){
+    void setPrevStage(Stage stage){
         this.prevStage = stage;
     }
 
@@ -52,8 +51,6 @@ public class SignUpController {
             if (EmailField.getText().length() == 0) throw new Exception("Email field is empty");
             if (NameField.getText().length() == 0) throw new Exception("Name field is empty");
             if (SurnameField.getText().length() == 0) throw new Exception("Surname field is empty");
-            System.out.println(PasswordField.hashCode());
-            System.out.println(PasswordField.hashCode());
             DbAdapter.addNewUser(UsernameField.getText(), PasswordField.getText(), EmailField.getText(), NameField.getText(), SurnameField.getText());
             FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
 

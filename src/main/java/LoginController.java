@@ -11,8 +11,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class LoginController {
-
     private Stage prevStage;
+    static String username = null;
 
     @FXML
     private TextField UsernameField;
@@ -24,13 +24,15 @@ public class LoginController {
     private Button ReturnButton;
 
     @FXML
+    private Button ModerLoginButton;
+
+    @FXML
     private Button LoginButton;
 
     @FXML
     private Button ShowHistoryButton;
 
-    @SuppressWarnings("WeakerAccess")
-    protected void setPrevStage(Stage stage){
+    void setPrevStage(Stage stage){
         this.prevStage = stage;
     }
 
@@ -53,6 +55,29 @@ public class LoginController {
 
             Stage stage = new Stage();
             stage.setTitle("Main");
+            username = UsernameField.getText();
+
+            FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/form.fxml"));
+            Pane myPane = myLoader.load();
+            FormController controller = myLoader.getController();
+            controller.setPrevStage(stage);
+
+            Scene scene = new Scene(myPane);
+            stage.setScene(scene);
+            prevStage.close();
+            stage.show();
+        } catch (Exception e){
+            new ErrorWindow(e.getMessage());
+        }
+    }
+
+    @FXML
+    void loginAsModeratorPressed(ActionEvent event) throws IOException{
+        try{
+            if (!DbAdapter.haveModer(UsernameField.getText(), PasswordField.getText())) throw new Exception("User data wrong");
+
+            Stage stage = new Stage();
+            stage.setTitle("AppSettings");
 
             FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/form.fxml"));
             Pane myPane = myLoader.load();
@@ -70,6 +95,8 @@ public class LoginController {
 
     @FXML
     void showHistoryButtonPressed(ActionEvent event) {
-
+        //...
+        username = UsernameField.getText();
+        //...
     }
 }

@@ -113,6 +113,21 @@ public class DbAdapter {
         }
     }
 
+    public static boolean haveModer(String username, String password){
+        try {
+            statement = connection.createStatement();
+            String query="Select count(*) from moderators where username = \'"+username+"\' AND password = \'"+password+"\'";
+            ResultSet result=statement.executeQuery(query);
+            if (result.next()){
+                if (result.getInt("count") == 0) return false; else
+                    return true;
+            } else return false;
+        } catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public static List< Edge > getNeighbours(Integer cityID){ //geting list of cityID's neighbours
         ArrayList<Edge> a=new ArrayList<>();
         try {

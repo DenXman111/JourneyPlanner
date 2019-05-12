@@ -18,6 +18,14 @@
             <VBox.margin>
                <Insets top="20.0" />
             </VBox.margin></PasswordField>
+         <Button fx:id="ModerLoginButton" mnemonicParsing="false" onAction="#loginAsModeratorPressed" style="-fx-background-color: null;" text="Login as moderator" textFill="#11836c">
+            <VBox.margin>
+               <Insets left="170.0" />
+            </VBox.margin>
+            <padding>
+               <Insets bottom="5.0" top="5.0" />
+            </padding>
+         </Button>
          <Button fx:id="LoginButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" onAction="#findButtonPressed" prefHeight="50.0" prefWidth="195.0" style="-fx-background-radius: 20; -fx-background-insets: 0, 1, 1;" styleClass="mainButton" text="Find" textFill="#14a085">
             <font>
                <Font size="24.0" />

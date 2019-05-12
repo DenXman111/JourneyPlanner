@@ -32,6 +32,13 @@ create table users(
     surname varchar(30) not null
 );
 
+drop table if exists moderators cascade;
+
+create table moderators(
+    username varchar(30) primary key not null,
+    password varchar(30) not null
+);
+
 drop table if exists trips;
 
 create table trips(
@@ -40,11 +47,6 @@ create table trips(
     traveler varchar(30) references users(username),
     primary key (id,bus_id,traveler)
 );
-
-create sequence res_id
-    increment by 1
-    start 1
-;
 
 insert into cities values
 (1, 'Krakow', 4.27, 74, 'Poland'),
@@ -78,6 +80,15 @@ CREATE SEQUENCE cities_seq START 26;
 
 DROP SEQUENCE IF EXISTS buses_seq;
 CREATE SEQUENCE buses_seq START 1;
+
+DROP SEQUENCE IF EXISTS res_id;
+create sequence res_id increment by 1 start 1 ;
+
+insert into users values
+('admin', 'admin', 'denis_pivovarov@gmail.com', 'Denis', 'Pivovarov'),
+('user', 'user', 'denis@gmail.com', 'Denis', 'Pivovarov');
+
+insert into moderators values ('admin', 'admin');
 
 insert into buses values
 (nextval('buses_seq'), 1, 2, 44, '2019-05-01', '2019-05-02', 30),

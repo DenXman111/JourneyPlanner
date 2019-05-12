@@ -52,13 +52,13 @@ public class FormController implements Initializable {
     @FXML
     private VBox answersVBox;
 
-    @SuppressWarnings("WeakerAccess")
-    protected void setPrevStage(Stage stage){
+    void setPrevStage(Stage stage){
         this.prevStage = stage;
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        System.out.println(LoginController.username);
         ObservableList<String> observableCitiesList = FXCollections.observableArrayList(DbAdapter.getCityList());
         MainCityChoiceBox.setItems(observableCitiesList);
     }
