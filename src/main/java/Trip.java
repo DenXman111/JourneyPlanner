@@ -241,8 +241,14 @@ public class Trip implements Displayable{
         //box contains informationBox and bookButton
         HBox boxesAbove = new HBox();
         VBox.setMargin(boxesAbove, new Insets(0, 0, 5, 5));
-        if (LoginController.username != null)
+        if (LoginController.username != null) {
+            bookButton.setOnMouseClicked( mouseEvent -> {
+                DbAdapter.reserve(this, LoginController.username);
+                bookButton.getStyleClass().add("booked");
+                bookButton.setText("booked");
+            });
             boxesAbove.getChildren().add(bookButton);
+        }
         boxesAbove.getChildren().add(informationBox);
 
         box.getChildren().addAll(boxesAbove, tripBox);

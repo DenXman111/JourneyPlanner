@@ -43,6 +43,17 @@
     -fx-background-color: rgba(124, 46, 43, 0.98);
 }
 
+.booked{
+    -fx-background-color: rgba(122, 174, 106, 0.98);
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 30, 0, 0, 8);
+}
+
+.booked:hover{
+    -fx-background-color: rgba(122, 174, 106, 0.98);
+}
+
 #mainVBox{
     -fx-background-image: url('backgroundPrague.jpg');
     -fx-background-size: cover;
