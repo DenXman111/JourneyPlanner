@@ -63,6 +63,9 @@
             <opaqueInsets>
                <Insets />
             </opaqueInsets>
+            <VBox.margin>
+               <Insets bottom="10.0" />
+            </VBox.margin>
          </Button>
          <Button fx:id="SignUp" mnemonicParsing="false" onAction="#signUpPressed" prefWidth="95.0" style="-fx-font-size: 14;" styleClass="image-button" text="Sign up">
             <font>

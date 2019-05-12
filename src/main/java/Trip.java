@@ -25,6 +25,8 @@ public class Trip implements Displayable{
     private Pane mainPane;
     private LocalDate beginDate, endDate;
 
+    static boolean displayBookButton = true;
+
     @SuppressWarnings("WeakerAccess")
     public Trip() {
         plan = new ArrayList<>();
@@ -241,7 +243,7 @@ public class Trip implements Displayable{
         //box contains informationBox and bookButton
         HBox boxesAbove = new HBox();
         VBox.setMargin(boxesAbove, new Insets(0, 0, 5, 5));
-        if (LoginController.username != null) {
+        if (displayBookButton  && LoginController.username != null) {
             bookButton.setOnMouseClicked( mouseEvent -> {
                 DbAdapter.reserve(this, LoginController.username);
                 bookButton.getStyleClass().add("booked");
