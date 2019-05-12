@@ -202,7 +202,7 @@ public class DbAdapter {
             for(int i=0;i<id_list.size();i++) {
                 Trip tmp=new Trip();
                 String tr = id_list.get(i);
-                String query2 = "Select buses.* from buses join (select * from trips where id=\'" + tr + "\') as a on buses.id=a.bus_id order by a.id,departure;";
+                String query2 = "Select buses.* from buses join (select * from trips where id=\'" + tr + "\' and traveler=\'"+user+"\') as a on buses.id=a.bus_id order by a.id,departure;";
                 ResultSet result2 = statement.executeQuery(query2);
                 while (result2.next()) {
                     System.out.println(tr);

@@ -50,7 +50,7 @@ create table trips(
 
 create sequence if not exists res_id
     increment by 1
-    start 1
+    start 3
 ;
 
 insert into cities values
@@ -346,6 +346,5 @@ insert into buses values
 insert into users values('a','b','c','d','e');
 insert into users values('q','b','d','d','e');
 insert into trips values(1,1,'a');
-insert into trips values(1,7,'a');
-insert into trips values(2,8,'a');
-insert into trips values(3,20,'q');
+insert into trips values(1,8,'a');
+insert into trips values(2,15,'a');
