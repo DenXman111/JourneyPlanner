@@ -46,11 +46,11 @@ public class SignUpController {
     @FXML
     void signUpButtonPressed(ActionEvent event) throws IOException{
         try{
-            if (UsernameField.getText().length() == 0) throw new Exception("Username field is empty");
-            if (PasswordField.getText().length() == 0) throw new Exception("Password field is empty");
-            if (EmailField.getText().length() == 0) throw new Exception("Email field is empty");
-            if (NameField.getText().length() == 0) throw new Exception("Name field is empty");
-            if (SurnameField.getText().length() == 0) throw new Exception("Surname field is empty");
+            if (UsernameField.getText().length() == 0) throw new FieldsDataException("Username field is empty");
+            if (PasswordField.getText().length() == 0) throw new FieldsDataException("Password field is empty");
+            if (EmailField.getText().length() == 0) throw new FieldsDataException("Email field is empty");
+            if (NameField.getText().length() == 0) throw new FieldsDataException("Name field is empty");
+            if (SurnameField.getText().length() == 0) throw new FieldsDataException("Surname field is empty");
             DbAdapter.addNewUser(UsernameField.getText(), PasswordField.getText(), EmailField.getText(), NameField.getText(), SurnameField.getText());
             FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
 
@@ -63,7 +63,7 @@ public class SignUpController {
 
         } catch (SQLException e){
             new ErrorWindow("User with this username or email already exists");
-        } catch (Exception e){
+        } catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
         }
     }
