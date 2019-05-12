@@ -221,11 +221,12 @@ public class DbAdapter {
         }
         return out;
     }
-    public static void reserve(ArrayList <Edge> arg,String user){
+    public static void reserve(Trip arg,String user){
         try {
             statement = connection.createStatement();
-            for (int i = 0; i < arg.size(); i++) {
-                int g = arg.get(i).getBusId();
+            List<Edge> a=arg.getPlan();
+            for (int i = 0; i < a.size(); i++) {
+                int g = a.get(i).getBusId();
                 if (i==0){
                     String query = "insert into trips values (nextval('res_id'), "+g+", '"+user+"')";
                     statement.executeUpdate(query);
