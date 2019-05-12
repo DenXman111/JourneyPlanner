@@ -25,16 +25,29 @@ nigdy nie będą się nachodzić. (prawdopodobnie jego funkcjonalność zostanie
 
 4. Wyzwalacz break_check nie dodaje przerwy jeżeli nie jest zawarta w przedziale.
 
-5. Wyzwalacz seat_reservation_departure_date_check zapewnia, że nigdy nie będą dwie rezerwacje na to samo
-miejsce w jednyn autobusie.
-
-6. Wyzwalacz transit_reservation_check przed wstawieniem rezerwacji na przejazd sprawdza czy dany przejazd
+5. Wyzwalacz transit_reservation_check przed wstawieniem rezerwacji na przejazd sprawdza czy dany przejazd
 faktycznie odbędzie się w podanym terminie.
 
-7. Przykładowe dane dla tabel cities, bus_stops, new_users, buses_models, transits, spans,
+6. Przykładowe dane dla tabel cities, bus_stops, new_users, buses_models, transits, spans,
  departure_time, reservations, transit_reservation, seat_reservation
 
+Łukasz Selwa + Denis Pivovarov:
 
+1. Wyzwalacz seat_reservation_departure_date_check zapewnia, że nigdy nie będą dwie rezerwacje na to samo
+miejsce w jednyn autobusie.
+
+Denis Pivovarov:
+
+1. Wyzwalacz date_reservation_check na tabeli 'reservations' sprawdza czy data rezerwacji jest przed czasem wyjazdu wszystkich busów tej
+rezerwacji.
+
+2. Wyzwalacz have_free_seat_check na tabeli 'seat_reservation' sprawdza czy jest wolne miejsce w autobusie.
+
+3. Funkcja buses_in_span zwraca tabel z informacją o pojedynczych przejazdach na jednym interwale.
+
+4. Funkcja get_buses zwraca tabel z informacją o pojedynczych przejazdach w zadanym przedziale dat.
+
+5. Ograniczenia na tabelach buses_models, transits, spans, seat_reservation.
 
 Krzysztof Mrzigod
 

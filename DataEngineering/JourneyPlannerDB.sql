@@ -89,7 +89,7 @@ CREATE TABLE transits (
     id_transit numeric  NOT NULL DEFAULT NEXTVAL('transit_id'),
     departure_stop numeric  NOT NULL,
     arrival_stop numeric  NOT NULL,
-    price numeric(4, 2)  NOT NULL CHECK (0 <= price AND price <= 10000),
+    price numeric(6, 2)  NOT NULL CHECK (0 <= price AND price <= 10000),
     bus_model numeric  NOT NULL,
     CONSTRAINT transits_pk PRIMARY KEY (id_transit),
     CONSTRAINT bus_model_fk FOREIGN KEY (bus_model) REFERENCES buses_models (id),
@@ -159,13 +159,7 @@ CREATE TABLE seat_reservation (
     CONSTRAINT seat_reservation_pk PRIMARY KEY (seat,transit_reservation_id)
 );
 
--- tough view to write, left for later
--- -- views
--- -- View: buses
--- CREATE VIEW buses AS
--- select res.id_transit, res.start_city, res.end_city, res.price, res.departure, res.arrival
--- from buses_reservation res;
-
+--Views
 -- View: countries
 CREATE VIEW countries AS
 select country as name from cities group by country;
@@ -346,7 +340,7 @@ CREATE TRIGGER seat_reservation_departure_date_check BEFORE INSERT OR UPDATE ON 
 
 
 -- trigger on transit_reservation checks if such transit exists (the is a bus in database which leaves on given time)
--- @author Łukasz Selwa
+-- @author Łukasz Selwa + Denis Pivovarov
 CREATE OR REPLACE FUNCTION transit_reservation_check() RETURNS TRIGGER AS
     $trasit_reservation_check$
     begin
@@ -372,16 +366,11 @@ CREATE OR REPLACE FUNCTION transit_reservation_check() RETURNS TRIGGER AS
 CREATE TRIGGER transit_reservation_check BEFORE INSERT OR UPDATE ON transit_reservation
     FOR EACH ROW EXECUTE PROCEDURE transit_reservation_check();
 
-/*
--- After minor changes in database structure this trigger has not work correctly anymore and by 'not correctly' I mean at all.
--- Fixed it if you have time.
--- Sincerely,
--- Łukasz
-
 --trigger on reservations checks [date_reservation before all buses]
+-- @author Denis Pivovarov
 CREATE OR REPLACE FUNCTION date_reservation_check() RETURNS trigger AS $date_reservation_check$
 BEGIN
-    IF (SELECT min(departure_date) FROM seat_reservation WHERE transit = NEW.id) < NEW.date_reservation THEN
+    IF (SELECT min(departure_date) FROM transit_reservation WHERE transit = NEW.id) < NEW.date_reservation THEN
         RAISE EXCEPTION 'some departure_date in reservation is before date_reservation';
     END IF;
     return NEW;
@@ -389,22 +378,16 @@ END;
 $date_reservation_check$ LANGUAGE plpgsql;
 
 
-DROP TRIGGER IF EXISTS date_reservation_check ON reservations;
 CREATE TRIGGER date_reservation_check BEFORE INSERT OR UPDATE ON reservations
     FOR EACH ROW EXECUTE PROCEDURE date_reservation_check();
-*/
 
-/*
--- This trigger does not work because it uses relation 'buses' which does not exist.
--- We agreed not to include view 'buses' in final version, please write it from scratch without this relation.
--- Sincerely,
--- Łukasz
 
 --trigger on seat_reservation checks that number of reserved seats < all seats when somebody try make bus reservation
+-- @author Denis Pivovarov
 CREATE OR REPLACE FUNCTION have_free_seat_check() RETURNS trigger AS $have_free_seat_check$
 BEGIN
-    IF (SELECT min(seats) FROM buses b JOIN transits t ON t.id_transit = b.id_transit JOIN buses_models bm ON t.bus_model = bm.id WHERE NEW.depatrure_date = b.departure AND NEW.transit = b.id_transit)
-        = (SELECT count(*) FROM seat_reservation WHERE NEW.transit = transit AND NEW.departure_date = departure_date)
+    IF (SELECT bm.seats FROM transit_reservation tr JOIN transits t ON t.id_transit = tr.transit JOIN buses_models bm ON bm.id = t.bus_model WHERE NEW.transit_reservation_id = tr.id)
+        <= (NEW.seat)
     THEN
         RAISE EXCEPTION 'No free places in bus';
     END IF;
@@ -412,10 +395,9 @@ BEGIN
 END;
 $have_free_seat_check$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS have_free_seat_check ON seat_reservation;
 CREATE TRIGGER have_free_seat_check BEFORE INSERT OR UPDATE ON seat_reservation
     FOR EACH ROW EXECUTE PROCEDURE have_free_seat_check();
-*/
+
 
 create or replace function add_bus(dep_stop int, arr_stop int, price int, bus_model int,bg_dt date, ed_dt date, dep time, leg interval, weekday int) returns numeric as
 $$
@@ -434,7 +416,7 @@ end;
 $$
 language plpgsql;
 
--- function buses_in_span returns all buses in span span_id and dates in interval L..R
+-- function buses_in_span returns all buses in span span_id and dates in interval
 -- @author Denis Pivovarov
 
 -- fixed bug, @Łukasz Selwa

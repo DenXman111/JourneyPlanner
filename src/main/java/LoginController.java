@@ -79,7 +79,7 @@ public class LoginController {
             Stage stage = new Stage();
             stage.setTitle("AppSettings");
 
-            FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/form.fxml"));
+            FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/moderator.fxml"));
             Pane myPane = myLoader.load();
             FormController controller = myLoader.getController();
             controller.setPrevStage(stage);
