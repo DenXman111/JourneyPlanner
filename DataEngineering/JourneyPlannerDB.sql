@@ -137,7 +137,7 @@ CREATE TABLE  users (
 -- Table: reservations
 CREATE TABLE reservations (
     id int  NOT NULL DEFAULT NEXTVAL('reservation_id_seq'),
-    "user" varchar(20)  NOT NULL,
+    "user" varchar(50)  NOT NULL,
     date_reservation timestamp  NOT NULL,
     CONSTRAINT reservations_pk PRIMARY KEY (id)
 );
@@ -311,32 +311,67 @@ CREATE OR REPLACE FUNCTION break_check() RETURNS TRIGGER AS
 CREATE TRIGGER break_check BEFORE INSERT OR UPDATE ON breaks
     FOR EACH ROW EXECUTE PROCEDURE break_check();
 
---triggers
---trigger on seat_reservation checks [have bus with true departure_date]
--- modification, check if seat is not already reserved, @author Łukasz Selwa
+-- triggers
+
+-- trigger on seat_reservation checks if seat has not been taken already
+-- Old version didn't work (I think Denis was the author), I wrote it from scratch
+-- @author Łukasz Selwa
 CREATE OR REPLACE FUNCTION seat_reservation_departure_date_check() RETURNS trigger AS $seat_reservation_departure_date_check$
 DECLARE
     my_transit int;
+    my_departure_date timestamp;
 BEGIN
-    my_transit = (select max(transit) from transit_reservation where id = new.transit_reservation_id);
+    if new.transit_reservation_id is null or new.seat is null then
+        raise exception 'incorrect seat data';
+    end if;
+    my_transit = (select max(tr.transit) from transit_reservation tr where tr.id = new.transit_reservation_id);
+    my_departure_date = (select max(tr.departure_date) from transit_reservation tr where tr.id = new.transit_reservation_id);
     if (
         select count(*)
-        from seat_reservation seat join transit_reservation res on seat.transit_reservation_id = res.id
-        where res.transit = my_transit
+        from seat_reservation st join transit_reservation res on st.transit_reservation_id = res.id
+        where res.transit = my_transit and res.departure_date = my_departure_date and st.seat = new.seat
         ) <> 0 then
-        raise exception 'seat is already taken';
+        raise exception 'seat % is already taken in transit % on % (transit_reservation: %)', new.seat, my_transit, my_departure_date, new.transit_reservation_id;
     end if;
-    IF (SELECT count(*) FROM buses WHERE departure = NEW.departure_date AND id_transit = NEW.transit) = 0 THEN
-        RAISE EXCEPTION 'Have not bus in this departure_date';
-    END IF;
     return NEW;
 END;
 $seat_reservation_departure_date_check$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS seat_reservation_departure_date_check ON seat_reservation;
 CREATE TRIGGER seat_reservation_departure_date_check BEFORE INSERT OR UPDATE ON seat_reservation
     FOR EACH ROW EXECUTE PROCEDURE seat_reservation_departure_date_check();
 
+
+-- trigger on transit_reservation checks if such transit exists (the is a bus in database which leaves on given time)
+CREATE OR REPLACE FUNCTION transit_reservation_check() RETURNS TRIGGER AS
+    $trasit_reservation_check$
+    begin
+        if new.transit is null or new.departure_date is null then
+            raise exception 'null values in transit_reservation';
+        end if;
+
+        if (
+            select count(*)
+            from departure_time dt join spans s on dt.span = s.id
+            where
+                s.transit = new.transit
+                and new.departure_date between s.begin_date and (s.end_date + '1 day'::interval)
+                and dt.day_of_the_week = extract(isodow from new.departure_date)
+                and dt.departure = cast(new.departure_date as time)
+            ) = 0 then
+            raise exception 'There is no transit % departing on %', new.transit, new.departure_date;
+        end if;
+
+        return new;
+    end;
+    $trasit_reservation_check$ LANGUAGE plpgsql;
+CREATE TRIGGER transit_reservation_check BEFORE INSERT OR UPDATE ON transit_reservation
+    FOR EACH ROW EXECUTE PROCEDURE transit_reservation_check();
+
+/*
+-- After minor changes in database structure this trigger has not work correctly anymore and by 'not correctly' I mean at all.
+-- Fixed it if you have time.
+-- Sincerely,
+-- Łukasz
 
 --trigger on reservations checks [date_reservation before all buses]
 CREATE OR REPLACE FUNCTION date_reservation_check() RETURNS trigger AS $date_reservation_check$
@@ -348,10 +383,17 @@ BEGIN
 END;
 $date_reservation_check$ LANGUAGE plpgsql;
 
+
 DROP TRIGGER IF EXISTS date_reservation_check ON reservations;
 CREATE TRIGGER date_reservation_check BEFORE INSERT OR UPDATE ON reservations
     FOR EACH ROW EXECUTE PROCEDURE date_reservation_check();
+*/
 
+/*
+-- This trigger does not work because it uses relation 'buses' which does not exist.
+-- We agreed not to include view 'buses' in final version, please write it from scratch without this relation.
+-- Sincerely,
+-- Łukasz
 
 --trigger on seat_reservation checks that number of reserved seats < all seats when somebody try make bus reservation
 CREATE OR REPLACE FUNCTION have_free_seat_check() RETURNS trigger AS $have_free_seat_check$
@@ -368,6 +410,7 @@ $have_free_seat_check$ LANGUAGE plpgsql;
 DROP TRIGGER IF EXISTS have_free_seat_check ON seat_reservation;
 CREATE TRIGGER have_free_seat_check BEFORE INSERT OR UPDATE ON seat_reservation
     FOR EACH ROW EXECUTE PROCEDURE have_free_seat_check();
+*/
 
 create or replace function add_bus(dep_stop int, arr_stop int, price int, bus_model int,bg_dt date, ed_dt date, dep time, leg interval, weekday int) returns numeric as
 $$
@@ -388,13 +431,21 @@ language plpgsql;
 
 -- function buses_in_span returns all buses in span span_id and dates in interval L..R
 -- @author Denis Pivovarov
-create or replace function  buses_in_span(span_id numeric, L_date date, R_date date)
+
+-- fixed bug, @Łukasz Selwa
+create or replace function  buses_in_span(span_id numeric, begin_date date, end_date date)
     returns TABLE(span numeric, departure timestamp, arrival timestamp) as
 $$
 declare
     now date;
     r record;
+    L_date date;
+    R_date date;
 begin
+    -- author @Łukasz
+    L_date = GREATEST(begin_date, (select sp.begin_date from spans sp where sp.id = span_id));
+    R_date = LEAST(end_date, (select sp.end_date from spans sp where sp.id = span_id));
+    --
     FOR r IN
         SELECT * FROM departure_time WHERE departure_time.span = span_id
         LOOP

@@ -37,6 +37,7 @@ drop function if exists add_bus(int,int,int,int,date,date,time,interval,day);
 DROP FUNCTION IF EXISTS get_buses(date, date);
 DROP FUNCTION IF EXISTS buses_in_span(numeric, date, date);
 DROP FUNCTION IF EXISTS add_bus(integer, integer, integer, integer, date, date, time, interval, integer);
+DROP FUNCTION IF EXISTS transit_reservation_check();
 
 DROP DOMAIN IF EXISTS email;
 DROP EXTENSION IF EXISTS citext;
