@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox id="mainVBox" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="750.0" prefWidth="1000.0" stylesheets="@../styleSheet.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HistoryController">
+   <VBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity">
+      <VBox.margin>
+         <Insets left="20.0" right="20.0" top="20.0" />
+      </VBox.margin>
+      <HBox maxWidth="-Infinity" prefHeight="40.0" prefWidth="1900.0" style="-fx-spacing: 395;">
+         <children>
+            <VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" styleClass="boxes" stylesheets="@../styleSheet.css">
+            <Label scaleShape="false" text="History of your reservations:" textAlignment="CENTER" textFill="#14a085" textOverrun="CLIP">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </VBox.margin>
+            </Label>
+            </VBox>
+            <Button fx:id="ReturnButton" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" onAction="#returnButtonPressed" prefHeight="33.0" prefWidth="46.0" style="-fx-background-color: null;">
+               <graphic>
+                  <ImageView fitHeight="36.0" fitWidth="41.0">
+                     <image>
+                        <Image url="@../back.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <padding>
+                  <Insets top="-35.0" />
+               </padding>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </Button>
+         </children>
+      </HBox>
+
+   </VBox>
+   <ScrollPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" pannable="true" prefWidth="743.0" styleClass="blank-pane" VBox.vgrow="ALWAYS">
+      <VBox.margin>
+         <Insets />
+      </VBox.margin>
+      <VBox fx:id="answersVBox" maxHeight="-Infinity" maxWidth="-Infinity" />
+   </ScrollPane>
+</VBox>
