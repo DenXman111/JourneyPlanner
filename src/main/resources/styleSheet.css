@@ -19,6 +19,17 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 30, 0, 0, 8);
 }
 
+.ratting-button{
+    -fx-background-color: rgba(174, 68, 58, 0.98);
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 30, 0, 0, 8);
+}
+
+.ratting-button:hover{
+    -fx-background-color: rgba(124, 46, 43, 0.98);
+}
+
 #mainVBox{
     -fx-background-image: url('backgroundPrague.jpg');
     -fx-background-size: cover;

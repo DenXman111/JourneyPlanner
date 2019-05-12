@@ -11,9 +11,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -46,6 +44,7 @@ public class FormController implements Initializable {
     @FXML
     private Button MainButtonFind;
 
+    @SuppressWarnings("unused")
     @FXML
     private Button ReturnButton;
 
@@ -70,24 +69,19 @@ public class FormController implements Initializable {
         if (MainFieldFunds.getText().isEmpty()) throw new FormsCheckException("Write your funds");
         if (MainFieldStartDate.getValue() == null) throw new FormsCheckException("Fill start date");
         if (MainFieldEndingDate.getValue() == null) throw new FormsCheckException("Fill ending date");
-//        System.out.println(MainFieldName.getCharacters());
-//        System.out.println(MainFieldSurname.getCharacters());
-//        System.out.println(MainFieldCity.getCharacters());
         try{
             Integer.valueOf(MainFieldFunds.getText());
-//            System.out.println(Integer.valueOf(MainFieldFunds.getText()));
         } catch (RuntimeException e){
             e.getStackTrace();
             throw new FormsCheckException("Should be number in Funds");
         }
-//        System.out.println(MainFieldStartDate.getValue());
-//        System.out.println(MainFieldEndingDate.getValue());
 
         if (LocalDate.now().isAfter(MainFieldStartDate.getValue()))
             throw new FormsCheckException("Start date should be in future");
         if (MainFieldStartDate.getValue().isAfter(MainFieldEndingDate.getValue()))
             throw new FormsCheckException("Ending date before start date");
     }
+    @SuppressWarnings("unused")
     @FXML
     void findButtonPressed(ActionEvent event) {
         try {
@@ -114,6 +108,7 @@ public class FormController implements Initializable {
         }
     }
 
+    @SuppressWarnings({"Duplicates", "unused"})
     @FXML
     void returnButtonPressed(ActionEvent event) throws IOException {
         FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
@@ -130,6 +125,5 @@ public class FormController implements Initializable {
         stage.setResizable(false);
         prevStage.close();
         stage.show();
-
     }
 }

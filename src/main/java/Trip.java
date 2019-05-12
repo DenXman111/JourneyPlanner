@@ -2,6 +2,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -104,11 +105,11 @@ public class Trip implements Displayable{
         return plan.isEmpty();
     }
 
+    @SuppressWarnings("unused")
     public Trip getTrip(){
         return this;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public double getRating(){
         return rating;
     }
@@ -121,10 +122,12 @@ public class Trip implements Displayable{
         return edge.getStartCity().getNightPrice() * days;
     }
 
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public List<Edge> getPlan(){
         return plan;
     }
 
+    @SuppressWarnings("unused")
     public void setRating(double rating){
         this.rating = rating;
     }
@@ -200,7 +203,7 @@ public class Trip implements Displayable{
         numberLabel.getStyleClass().add("grey-text");
         HBox.setMargin(numberLabel, new Insets(0, 10, 0, 0));
 
-        Label travelTimeLabel = new Label( "Travel time: " + daysInTrip +  ( daysInTrip > 1 ? " days" : "day"));
+        Label travelTimeLabel = new Label( "Travel time: " + daysInTrip +  ( daysInTrip == 1 ? " days" : " day"));
         travelTimeLabel.getStyleClass().add("rating-text");
         HBox.setMargin(travelTimeLabel, new Insets(0, 5, 0, 0));
 
@@ -217,7 +220,6 @@ public class Trip implements Displayable{
         informationBox.setAlignment(Pos.BOTTOM_LEFT);
         informationBox.setMaxWidth(Region.USE_PREF_SIZE);
         informationBox.getStyleClass().add("rating-box");
-        VBox.setMargin(informationBox, new Insets(0, 0, 5, 5));
 
         fillInformationPane(informationBox);
 
@@ -232,7 +234,18 @@ public class Trip implements Displayable{
         fillHBox(tripBox);
         createdTripBox = tripBox;
 
-        box.getChildren().addAll(informationBox, tripBox);
+        Button bookButton = new Button("book");
+        bookButton.getStyleClass().add("ratting-button");
+        HBox.setMargin(bookButton, new Insets(0, 10, 0, 0));
+
+        //box contains informationBox and bookButton
+        HBox boxesAbove = new HBox();
+        VBox.setMargin(boxesAbove, new Insets(0, 0, 5, 5));
+        if (LoginController.username != null)
+            boxesAbove.getChildren().add(bookButton);
+        boxesAbove.getChildren().add(informationBox);
+
+        box.getChildren().addAll(boxesAbove, tripBox);
         return box;
     }
 }

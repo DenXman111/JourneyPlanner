@@ -339,7 +339,7 @@ CREATE TRIGGER seat_reservation_departure_date_check BEFORE INSERT OR UPDATE ON 
     FOR EACH ROW EXECUTE PROCEDURE seat_reservation_departure_date_check();
 
 
--- trigger on transit_reservation checks if such transit exists (the is a bus in database which leaves on given time)
+-- trigger on transit_reservation checks if given transit exists (there is a bus in database which leaves on given time)
 -- @author Łukasz Selwa + Denis Pivovarov
 CREATE OR REPLACE FUNCTION transit_reservation_check() RETURNS TRIGGER AS
     $trasit_reservation_check$
@@ -348,12 +348,22 @@ CREATE OR REPLACE FUNCTION transit_reservation_check() RETURNS TRIGGER AS
             raise exception 'null values in transit_reservation';
         end if;
 
+        -- look for breaks:
+        if (
+            select count(*)
+            from breaks br join spans sp on br.span_id = sp.id
+            where sp.transit = new.transit
+            and br.date = new.departure_date::date
+               ) <> 0 then
+            return new;
+        end if;
+
         if (
             select count(*)
             from departure_time dt join spans s on dt.span = s.id
             where
                 s.transit = new.transit
-                and new.departure_date between s.begin_date and (s.end_date + '1 day'::interval)
+                and new.departure_date::date between s.begin_date and s.end_date
                 and dt.day_of_the_week = extract(isodow from new.departure_date)
                 and dt.departure = cast(new.departure_date as time)
             ) = 0 then
@@ -382,7 +392,7 @@ CREATE TRIGGER date_reservation_check BEFORE INSERT OR UPDATE ON reservations
     FOR EACH ROW EXECUTE PROCEDURE date_reservation_check();
 
 
---trigger on seat_reservation checks that number of reserved seats < all seats when somebody try make bus reservation
+--trigger on seat_reservation that checks if seat number < all seats when somebody tries to make a bus reservation
 -- @author Denis Pivovarov
 CREATE OR REPLACE FUNCTION have_free_seat_check() RETURNS trigger AS $have_free_seat_check$
 BEGIN
