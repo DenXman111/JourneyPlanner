@@ -87,7 +87,7 @@ public class City implements Displayable {
         deleteIcon.setFitWidth(10);
         deleteIcon.getStyleClass().add("icon");
         deleteIcon.setVisible(false);
-        if (trip != null && replaceEdge != null) {
+        if (trip != null && replaceEdge != null && Trip.displayBookButton) {
             deleteIcon.setVisible(true);
             deleteIcon.setOnMouseClicked(mouseEvent -> trip.removeCityWithIndex(indexInTrip, replaceEdge));
         }

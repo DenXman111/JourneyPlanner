@@ -93,7 +93,7 @@ public class Edge implements Displayable{
         addIcon.getStyleClass().add("icon");
         VBox.setMargin(addIcon, new Insets(7, 0, 0, 0));
         addIcon.setVisible(false);
-        if (trip != null && edges != null && !edges.isEmpty()) {
+        if (trip != null && edges != null && !edges.isEmpty() && Trip.displayBookButton) {
             addIcon.setVisible(true);
             ContextMenu citiesMenu = new ContextMenu();
 
