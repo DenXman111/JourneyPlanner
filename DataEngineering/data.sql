@@ -37,15 +37,15 @@ INSERT INTO cities (id, name, rating, average_price, country) VALUES
 
 -- stops data
 INSERT INTO bus_stops(id, stop_name, city) VALUES
-(1, 'Dworzec autobusowy w Białymstoku', 10),
+(1, 'Dworzec autobusowy w Bialymstoku', 10),
 (2, 'Dworzec autobusowy w Bydgoszczy', 8),
-(3, 'Dworzec PKS Gdańsk', 6),
+(3, 'Dworzec PKS Gdansk', 6),
 (4, 'Dworzec autobusowy w Katowicach', 26),
 (5, 'Dworzec PKS w Kielcach', 27),
 (6, 'Dworzec MDA w Krakowie', 1),
 (7, 'Dworzec autobusowy w Lublinie', 9),
-(8, 'Dworzec autobusowy Centralny w Łodzi', 5),
-(9, 'Dworzec autobusowy Łódź Kaliska', 5),
+(8, 'Dworzec autobusowy Centralny w Lodzi', 5),
+(9, 'Dworzec autobusowy Lodz Kaliska', 5),
 (10, 'Dworzec autobusowy w Olsztynie', 28),
 (11, 'Dworzec autobusowy w Poznaniu', 3),
 (12, 'Dworzec autobusowy w Rzeszowie', 29),
@@ -54,11 +54,11 @@ INSERT INTO bus_stops(id, stop_name, city) VALUES
 (15, 'Dworzec PKS w Toruniu', 30), --
 (16, 'Dworzec autobusowy Warszawa Stadion', 4), --
 (17, 'Dworzec autobusowy Warszawa Zachodnia', 4), --
-(18, 'Dworzec Wrocław', 11), --
+(18, 'Dworzec Wroclaw', 11), --
 (19, 'Kiev Central Bus Station', 16), --
 (20, 'Lviv bus station', 17), --
 (21, 'Zentraler Omnibusbahnhof Berlin', 14), --
-(22, 'Zentraler Omnibusbahnhof München', 24), --
+(22, 'Zentraler Omnibusbahnhof Munchen', 24), --
 (23, 'Avtovokzal Mazyr', 2), --
 (24, 'Vienna International Busterminal', 12), --
 (25, 'Vienna bu station', 12), --

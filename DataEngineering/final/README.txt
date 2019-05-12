@@ -36,3 +36,11 @@ faktycznie odbędzie się w podanym terminie.
 
 
 
+Krzysztof Mrzigod
+
+1. Constrainty spojnosciowe na tabelach cities, bus_stops (rating, cena, nazwa)
+
+2. Funkcja add_bus ktora dodaje potrzebne krotki do tabel transits, intervals i departure dates by reprezentowac nowa linie autobusowa
+
+3. Sekwencje transit_id i bus_id wykorzystywane przez powyzsza funkcje
+
