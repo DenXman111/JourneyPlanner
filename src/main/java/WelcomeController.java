@@ -10,6 +10,9 @@ import java.io.IOException;
 
 public class WelcomeController {
 
+    public Button SignUp;
+    public Button Login;
+    public Button WelcomeSceneStartButton;
     private Stage prevStage;
 
     @SuppressWarnings("WeakerAccess")
@@ -17,6 +20,7 @@ public class WelcomeController {
         this.prevStage = stage;
     }
 
+    @SuppressWarnings({"Duplicates", "unused"})
     @FXML
     public void startButtonPressed(ActionEvent event) throws IOException {
         Stage stage = new Stage();
@@ -32,6 +36,7 @@ public class WelcomeController {
         prevStage.close();
         stage.show();
     }
+    @SuppressWarnings("unused")
     @FXML
     public void loginPressed(ActionEvent event) throws IOException{
         FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/login.fxml"));
@@ -44,6 +49,7 @@ public class WelcomeController {
         prevStage.setScene(myScene);
     }
 
+    @SuppressWarnings("unused")
     @FXML
     public void signUpPressed(ActionEvent event) throws IOException{
         FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/signUp.fxml"));

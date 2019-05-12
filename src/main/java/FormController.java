@@ -6,10 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -24,10 +21,7 @@ public class FormController implements Initializable {
     private Stage prevStage;
 
     @FXML
-    private TextField MainFieldName;
-
-    @FXML
-    private TextField MainFieldSurname;
+    private Label loginLabel;
 
     @FXML
     private ChoiceBox<String> MainCityChoiceBox;
@@ -60,11 +54,12 @@ public class FormController implements Initializable {
         System.out.println(LoginController.username);
         ObservableList<String> observableCitiesList = FXCollections.observableArrayList(DbAdapter.getCityList());
         MainCityChoiceBox.setItems(observableCitiesList);
+
+        if (LoginController.username != null)
+            loginLabel.setText("logged as " + LoginController.username);
     }
 
     private void check() throws FormsCheckException{
-        if (MainFieldName.getText().isEmpty()) throw new FormsCheckException("Write your name");
-        if (MainFieldSurname.getText().isEmpty()) throw new FormsCheckException("Write your surname");
         if (MainCityChoiceBox.getSelectionModel().isEmpty()) throw new FormsCheckException("Choose any city");
         if (MainFieldFunds.getText().isEmpty()) throw new FormsCheckException("Write your funds");
         if (MainFieldStartDate.getValue() == null) throw new FormsCheckException("Fill start date");

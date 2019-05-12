@@ -1,4 +1,4 @@
--- noinspection SpellCheckingInspectionForFile
+-- noinspection SqlResolveForFile
 
 -- noinspection SqlResolveForFile
 

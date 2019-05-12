@@ -10,12 +10,25 @@
     -fx-border-width: 1;
     -fx-border-radius: 20;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 30, 0, 0, 10);
+    -fx-text-fill: #14a085;
 }
 
 .mainButton:hover{
     -fx-background-color: white;
     -fx-border-color: #14a085;
     -fx-border-width: 2;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 30, 0, 0, 8);
+}
+
+.image-button{
+    -fx-background-color: #14a085;
+    -fx-background-radius: 30;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.16), 30, 0, 0, 10);
+    -fx-text-fill: white;
+}
+
+.image-button:hover{
+    -fx-background-color: #107763;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 30, 0, 0, 8);
 }
 
