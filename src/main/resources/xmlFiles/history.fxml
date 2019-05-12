@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox id="mainVBox" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="750.0" prefWidth="1000.0" stylesheets="@../styleSheet.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HistoryController">
+<VBox id="mainVBox" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="750.0" prefWidth="733.0" stylesheets="@../styleSheet.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HistoryController">
    <VBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity">
       <VBox.margin>
          <Insets left="20.0" right="20.0" top="20.0" />
@@ -35,9 +35,6 @@
                      </image>
                   </ImageView>
                </graphic>
-               <padding>
-                  <Insets top="-35.0" />
-               </padding>
                <HBox.margin>
                   <Insets />
                </HBox.margin>
@@ -46,7 +43,7 @@
       </HBox>
 
    </VBox>
-   <ScrollPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" pannable="true" prefWidth="743.0" styleClass="blank-pane" VBox.vgrow="ALWAYS">
+   <ScrollPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" pannable="true" prefHeight="672.0" styleClass="blank-pane" VBox.vgrow="ALWAYS">
       <VBox.margin>
          <Insets />
       </VBox.margin>

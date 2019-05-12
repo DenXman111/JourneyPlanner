@@ -110,6 +110,7 @@ public class LoginController {
 
             Scene scene = new Scene(myPane);
             stage.setScene(scene);
+            stage.setResizable(false);
             prevStage.close();
             stage.show();
         } catch (FieldsDataException e){
