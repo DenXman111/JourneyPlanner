@@ -49,6 +49,7 @@ public class LoginController {
     }
 
     @FXML
+    @SuppressWarnings("Duplicates")
     void findButtonPressed(ActionEvent event) throws IOException{
         try{
             if (!DbAdapter.haveUser(UsernameField.getText(), PasswordField.getText())) throw new FieldsDataException("User data wrong");

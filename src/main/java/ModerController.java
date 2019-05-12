@@ -10,6 +10,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.time.LocalDate;
 
 public class ModerController {
     private Stage prevStage;
@@ -43,10 +44,20 @@ public class ModerController {
 
     @FXML
     void addNewBusPressed(ActionEvent event) {
+        try{
+            if (!SeatPlacesField.getText().matches("-?\\d+(\\.\\d+)?")) throw new FieldsDataException("Write number to seat places field");
+            if (!PriceField.getText().matches("-?\\d+(\\.\\d+)?")) throw new FieldsDataException("Write number to price field");
+            if (DepartureDate.getValue().isBefore(LocalDate.now())) throw new FieldsDataException("Departure date shouldn't be in past");
+            if (ArrivalDate.getValue().isBefore(DepartureDate.getValue())) throw new FieldsDataException("Arrival date shouldn't be before departure date");
 
+
+        } catch (FieldsDataException e){
+            new ErrorWindow(e.getMessage());
+        }
     }
 
     @FXML
+    @SuppressWarnings("Duplicates")
     void returnButtonPressed(ActionEvent event) throws IOException {
         FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
         Pane myPane = myLoader.load();

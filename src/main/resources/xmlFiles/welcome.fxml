@@ -16,62 +16,57 @@
 <VBox alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="450.0" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefWidth="626.0" stylesheets="@../styleSheet.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="WelcomeController">
    <GridPane>
       <columnConstraints>
-         <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0"/>
-         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
+         <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" />
+         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
       </columnConstraints>
       <rowConstraints>
-         <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
       </rowConstraints>
       <VBox.margin>
-         <Insets left="15.0" right="5.0"/>
+         <Insets left="15.0" right="5.0" />
       </VBox.margin>
-      <HBox alignment="CENTER" maxWidth="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT"
-            prefHeight="100.0" prefWidth="481.0">
+      <HBox alignment="CENTER" maxWidth="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="100.0" prefWidth="481.0">
          <opaqueInsets>
-            <Insets left="15.0"/>
+            <Insets left="15.0" />
          </opaqueInsets>
          <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
             <HBox.margin>
-               <Insets right="30.0"/>
+               <Insets right="30.0" />
             </HBox.margin>
-            <Image url="@../backpack.png"/>
+            <Image url="@../backpack.png" />
          </ImageView>
-         <Label alignment="CENTER_RIGHT" contentDisplay="CENTER" text="Journey" textAlignment="CENTER"
-                textFill="#14a085" textOverrun="CLIP">
+         <Label alignment="CENTER_RIGHT" contentDisplay="CENTER" text="Journey" textAlignment="CENTER" textFill="#14a085" textOverrun="CLIP">
             <font>
-               <Font size="36.0"/>
+               <Font size="36.0" />
             </font>
          </Label>
          <Label text="Planner">
             <font>
-               <Font size="36.0"/>
+               <Font size="36.0" />
             </font>
             <HBox.margin>
-               <Insets right="80.0"/>
+               <Insets right="80.0" />
             </HBox.margin>
          </Label>
       </HBox>
-      <VBox alignment="CENTER" prefHeight="100.0" prefWidth="120.0" spacing="5.0" GridPane.columnIndex="1"
-            GridPane.halignment="CENTER">
+      <VBox alignment="CENTER" prefHeight="100.0" prefWidth="120.0" spacing="5.0" GridPane.columnIndex="1" GridPane.halignment="CENTER">
          <opaqueInsets>
-            <Insets/>
+            <Insets />
          </opaqueInsets>
          <cursor>
-            <Cursor fx:constant="MOVE"/>
+            <Cursor fx:constant="MOVE" />
          </cursor>
-         <Button fx:id="Login" mnemonicParsing="false" onAction="#loginPressed" prefWidth="95.0"
-                 style="-fx-font-size: 14;" styleClass="image-button" text="Login">
+         <Button fx:id="Login" mnemonicParsing="false" onAction="#loginPressed" prefWidth="95.0" style="-fx-font-size: 14;" styleClass="image-button" text="Login">
             <font>
-               <Font size="18.0"/>
+               <Font size="18.0" />
             </font>
             <opaqueInsets>
-               <Insets/>
+               <Insets />
             </opaqueInsets>
          </Button>
-         <Button fx:id="SignUp" mnemonicParsing="false" onAction="#signUpPressed" prefWidth="95.0"
-                 style="-fx-font-size: 14;" styleClass="image-button" text="Sign up">
+         <Button fx:id="SignUp" mnemonicParsing="false" onAction="#signUpPressed" prefWidth="95.0" style="-fx-font-size: 14;" styleClass="image-button" text="Sign up">
             <font>
-               <Font size="18.0"/>
+               <Font size="18.0" />
             </font>
          </Button>
       </VBox>
@@ -83,7 +78,7 @@
       <rowConstraints>
          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
       </rowConstraints>
-      <Button fx:id="WelcomeSceneStartButton" mnemonicParsing="false" onAction="#startButtonPressed" prefHeight="40.0" prefWidth="300.0" styleClass="mainButton" stylesheets="@../styleSheet.css" text="Plan my trip" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+      <Button fx:id="WelcomeSceneStartButton" mnemonicParsing="false" onAction="#startButtonPressed" prefHeight="40.0" prefWidth="300.0" style="-fx-background-insets: 0, 1, 1;" styleClass="mainButton" stylesheets="@../styleSheet.css" text="Plan my trip" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
          <font>
             <Font size="18.0" />
          </font>

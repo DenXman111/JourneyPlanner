@@ -7,17 +7,14 @@ import static java.lang.Double.max;
 
 
 public class ErrorWindow{
-    private String message;
     static private Stage stage;
-    protected ErrorWindow(String message){
-        System.out.println(message);
+    ErrorWindow(String message){
         if (stage != null){
             stage.close();
         }
-        this.message = message;
         stage = new Stage();
         StackPane pane = new StackPane();
-        Text text = new Text(this.message);
+        Text text = new Text(message);
         pane.getChildren().add(text);
 
         Scene scene = new Scene(pane, max(200, text.getLayoutBounds().getWidth() + 10), 100);
