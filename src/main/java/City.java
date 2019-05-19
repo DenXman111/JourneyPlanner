@@ -18,6 +18,7 @@ public class City implements Displayable {
     private Integer cityID;
     private double rating;
     private int nightPrice;
+    private long days;
 
     @SuppressWarnings("WeakerAccess")
     public City(Integer id, String name, double rating, int price){
@@ -27,18 +28,19 @@ public class City implements Displayable {
         this.cityID = id;
         this.rating = rating;
         this.nightPrice = price;
+        this.days = 0;
     }
 
     @SuppressWarnings("WeakerAccess")
     public Integer getID() { return cityID; }
 
-    @SuppressWarnings({"unused", "WeakerAccess"})
+    @SuppressWarnings({"unused"})
     public double getRating() { return rating; }
 
     @SuppressWarnings({"unused", "WeakerAccess"})
     public int getNightPrice() { return nightPrice; }
 
-    @SuppressWarnings({"unused", "WeakerAccess"})
+    @SuppressWarnings({"unused"})
     public String getName() { return name; }
 
     /**
@@ -53,7 +55,7 @@ public class City implements Displayable {
 
         // draws a circle above label containing city name
         Circle circle = new Circle();
-        circle.setRadius(7);
+        circle.setRadius(5);
         circle.getStyleClass().add("point");
 
         // displays additional information when user moves cursor above circle
@@ -64,7 +66,7 @@ public class City implements Displayable {
 
         // Displays label with city name
         Label label = new Label();
-        label.setText(name);
+        label.setText(name + "\n");
         label.getStyleClass().add("description");
 
         box.getChildren().addAll(circle, label);
@@ -94,5 +96,10 @@ public class City implements Displayable {
         VBox.setMargin(deleteIcon, new Insets(5, 0, 0, 0));
         box.getChildren().add(deleteIcon);
         return box;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public void setDays(long days) {
+        this.days = days;
     }
 }

@@ -41,13 +41,13 @@
 }
 
 .booked{
-    -fx-background-color: rgba(122, 174, 106, 0.98);
+    -fx-background-color: rgb(122, 174, 106);
     -fx-text-fill: white;
     -fx-background-radius: 20;
 }
 
 .booked:hover{
-    -fx-background-color: rgba(122, 174, 106, 0.98);
+    -fx-background-color: rgb(122, 174, 106);
 }
 
 #mainVBox{

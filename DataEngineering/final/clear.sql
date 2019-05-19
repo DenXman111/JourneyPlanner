@@ -25,6 +25,8 @@ DROP SEQUENCE IF EXISTS reservation_id_seq;
 DROP SEQUENCE IF EXISTS stops_id_seq;
 DROP SEQUENCE IF EXISTS transit_reservation_id_seq;
 
+DROP CAST IF EXISTS (day as integer);
+
 DROP FUNCTION IF EXISTS break_check();
 DROP FUNCTION IF EXISTS date_reservation_check();
 DROP FUNCTION IF EXISTS have_free_seat_check();
@@ -38,7 +40,12 @@ DROP FUNCTION IF EXISTS get_buses(date, date);
 DROP FUNCTION IF EXISTS buses_in_span(numeric, date, date);
 DROP FUNCTION IF EXISTS add_bus(integer, integer, integer, integer, date, date, time, interval, integer);
 DROP FUNCTION IF EXISTS transit_reservation_check();
+DROP FUNCTION IF EXISTS day_to_int(day);
+DROP FUNCTION IF EXISTS count_breaks(begin_date date, end_date date, weekday day, span_id numeric);
+DROP FUNCTION IF EXISTS days_in_span(begin_date date, end_date date, weekday day);
+DROP FUNCTION IF EXISTS departure_time_check();
 
 DROP DOMAIN IF EXISTS email;
 DROP EXTENSION IF EXISTS citext;
 DROP EXTENSION IF EXISTS pgcrypto;
+DROP TYPE IF EXISTS day;

@@ -171,13 +171,17 @@ public class Trip implements Displayable{
         beginDate = beginDate == null && !plan.isEmpty() ? plan.get(0).getStartDate() : beginDate;
         endDate = endDate == null && !plan.isEmpty() ? plan.get(plan.size() - 1).getEndingDate() : endDate;
         pane.getChildren().clear();
-        if (!plan.isEmpty()) pane.getChildren().add(plan.get(0).getStartCity().display(-1, this, null));
+        if (!plan.isEmpty()) {
+            plan.get(0).getStartCity().setDays(DAYS.between(beginDate, plan.get(0).getStartDate()));
+            pane.getChildren().add(plan.get(0).getStartCity().display(-1, this, null));
+        }
         int index = 0;
         for (int i = 0; i < plan.size(); i++) {
             Edge edge = plan.get(i);
             Edge nextEdge = i < plan.size() - 1 ? plan.get(i + 1) : null;
             LocalDate begin = 0 < i ? plan.get(i - 1).getEndingDate() : beginDate.minusDays(1);
             LocalDate end = nextEdge != null  ? nextEdge.getStartDate() : endDate.plusDays(1);
+            //edge.getEndCity().setDays(DAYS.between(edge.getEndingDate(), nextEdge.getStartDate()));
             pane.getChildren().addAll(
                     edge.display(this, index, EdgesInOut.possibleInserts(edge, begin, end)),
                     edge.getEndCity().display(index++, this, Edge.mergeEdges(edge, nextEdge))
@@ -248,6 +252,7 @@ public class Trip implements Displayable{
                 DbAdapter.reserve(this, LoginController.username);
                 bookButton.getStyleClass().add("booked");
                 bookButton.setText("booked");
+                bookButton.setOnMouseClicked( mouseEvent1 -> {});
             });
             boxesAbove.getChildren().add(bookButton);
         }

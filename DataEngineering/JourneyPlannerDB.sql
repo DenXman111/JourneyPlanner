@@ -6,6 +6,26 @@ CREATE EXTENSION citext;
 CREATE DOMAIN email AS citext
   CHECK ( value ~ '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$' );
 
+-- day enum for departure_time
+CREATE TYPE day as ENUM ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
+
+-- casting day to int
+CREATE OR REPLACE FUNCTION day_to_int(day) returns int as
+$$
+begin
+    case
+        when $1 = 'Monday'::day then return 1;
+        when $1 = 'Tuesday'::day then return 2;
+        when $1 = 'Wednesday'::day then return 3;
+        when $1 = 'Thursday'::day then return 4;
+        when $1 = 'Friday'::day then return 5;
+        when $1 = 'Saturday'::day then return 6;
+        else return 7; -- Sunday
+    end case;
+end;
+$$ LANGUAGE plpgsql;
+CREATE CAST ( day as integer ) with function day_to_int(day);
+
 -- password
 CREATE EXTENSION pgcrypto;
 
@@ -112,7 +132,7 @@ CREATE TABLE departure_time (
     departure time  NOT NULL,
     time interval  NOT NULL,
     span int  NOT NULL,
-    day_of_the_week int NOT NULL CHECK ( day_of_the_week BETWEEN 1 and 7),
+    day_of_the_week day NOT NULL,
     CONSTRAINT departure_time_pk PRIMARY KEY (departure, span, day_of_the_week)
 );
 
@@ -267,28 +287,69 @@ CREATE OR REPLACE FUNCTION remove_breaks_after_update() RETURNS TRIGGER AS
 CREATE TRIGGER remove_breaks_after_update AFTER UPDATE ON spans
     FOR EACH ROW EXECUTE PROCEDURE remove_breaks_after_update();
 
--- before inserting span check if it does not overlap other span with the same transit_id
--- @author Łukasz Selwa
--- it's a temporary trigger,
-CREATE OR REPLACE FUNCTION check_span_overlap() RETURNS TRIGGER AS
-    $check_span_overlap$
+-- Trigger: departure_time
+
+-- function returns number of given day of the week in the interval
+CREATE OR REPLACE FUNCTION days_in_span(begin_date date, end_date date, weekday day) RETURNS integer as
+    $$
+    begin
+        if begin_date > end_date then
+            return 0;
+        end if;
+        return (
+            select count(*)
+            from (
+                select begin_date + times * '1 day'::interval as d
+                from generate_series(0, end_date - begin_date) times
+                ) foo
+            where extract(isodow from foo.d) = weekday::integer);
+    end;
+    $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION count_breaks(begin_date date, end_date date, weekday day, span_id numeric) RETURNS INTEGER AS
+    $$
+    begin
+        return (
+            select count(*)
+            from breaks br
+            where br.span_id = span_id
+              and extract(isodow from br.date) = weekday::integer
+              and br.date between begin_date and end_date
+            );
+    end;
+    $$ LANGUAGE plpgsql;
+
+-- before insert or update check if there is no other bus leaving on the same time
+CREATE OR REPLACE FUNCTION departure_time_check() RETURNS TRIGGER AS
+    $departure_time_check$
     declare
+        tr integer;
+        span_begin date;
+        span_end date;
         rec record;
     begin
-        for rec in select id ,begin_date, end_date from spans where transit = new.transit loop
-            if GREATEST(rec.begin_date, new.begin_date) <= LEAST(rec.end_date, new.end_date) then
-                raise notice 'Value: %, %,    %, %', new.begin_date, new.end_date, rec.begin_date, rec.end_date;
-                raise exception 'new span overlaps with other span';
+        tr = (select sp.transit from spans sp where sp.id = new.span);
+        span_begin = (select sp.begin_date from spans sp where sp.id = new.span);
+        span_end = (select sp.end_date from spans sp where sp.id = new.span);
+
+        for rec in select *
+        from departure_time dt join spans sp on dt.span = sp.id
+        where sp.transit = tr and dt.day_of_the_week = new.day_of_the_week and dt.departure = new.departure and
+              GREATEST(sp.begin_date, span_begin) <= LEAST(sp.end_date, span_end) loop
+            if days_in_span(GREATEST(rec.begin_date, span_begin), LEAST(rec.end_date, span_end), new.day_of_the_week)
+                   - count_breaks(GREATEST(rec.begin_date, span_begin), LEAST(rec.end_date, span_end), new.day_of_the_week, rec.span)
+                   > 0 then
+                raise exception 'bus % already leaves at % (span %)', tr, new.departure, rec.span;
             end if;
         end loop;
         return new;
     end;
-    $check_span_overlap$ LANGUAGE plpgsql;
-CREATE TRIGGER check_span_overlap BEFORE INSERT ON spans
-    FOR EACH ROW EXECUTE PROCEDURE check_span_overlap();
+    $departure_time_check$ LANGUAGE plpgsql;
+CREATE TRIGGER departure_time_check BEFORE INSERT OR UPDATE ON departure_time
+    FOR EACH ROW EXECUTE PROCEDURE departure_time_check();
 
 -- Trigger: breaks
--- returns null if break is not contained in indicated span
+-- returns null if given break is not contained in the indicated span
 -- @author Łukasz Selwa
 CREATE OR REPLACE FUNCTION break_check() RETURNS TRIGGER AS
     $break_check$
@@ -348,24 +409,15 @@ CREATE OR REPLACE FUNCTION transit_reservation_check() RETURNS TRIGGER AS
             raise exception 'null values in transit_reservation';
         end if;
 
-        -- look for breaks:
-        if (
-            select count(*)
-            from breaks br join spans sp on br.span_id = sp.id
-            where sp.transit = new.transit
-            and br.date = new.departure_date::date
-               ) <> 0 then
-            return new;
-        end if;
-
         if (
             select count(*)
             from departure_time dt join spans s on dt.span = s.id
             where
                 s.transit = new.transit
                 and new.departure_date::date between s.begin_date and s.end_date
-                and dt.day_of_the_week = extract(isodow from new.departure_date)
+                and dt.day_of_the_week::integer = extract(isodow from new.departure_date)
                 and dt.departure = cast(new.departure_date as time)
+                and (select count(*) from breaks br where br.span_id = s.id and br.date = new.departure_date::date) = 0
             ) = 0 then
             raise exception 'There is no transit % departing on %', new.transit, new.departure_date;
         end if;
@@ -409,7 +461,7 @@ CREATE TRIGGER have_free_seat_check BEFORE INSERT OR UPDATE ON seat_reservation
     FOR EACH ROW EXECUTE PROCEDURE have_free_seat_check();
 
 
-create or replace function add_bus(dep_stop int, arr_stop int, price int, bus_model int,bg_dt date, ed_dt date, dep time, leg interval, weekday int) returns numeric as
+create or replace function add_bus(dep_stop int, arr_stop int, price int, bus_model int,bg_dt date, ed_dt date, dep time, leg interval, weekday day) returns numeric as
 $$
 begin
 if ((select count(*)from bus_stops where dep_stop=id)=0 or (select count(*)from bus_stops where arr_stop=id)=0 or price<=0
@@ -448,7 +500,7 @@ begin
         LOOP
             now = L_date;
             LOOP
-                EXIT  WHEN  r.day_of_the_week = FLOOR(extract(isodow from now));
+                EXIT  WHEN  r.day_of_the_week::integer = FLOOR(extract(isodow from now));
                 now = now + '1 day' :: interval;
             END LOOP;
             LOOP
