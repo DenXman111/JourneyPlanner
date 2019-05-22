@@ -15,13 +15,15 @@ https://jdbc.postgresql.org/download.html
     
     Also add postgresql-42.2.5.jar to Libraries.
 
-3. 
+3.  Go to **File -> Project Structure -> Models** and add the GMapsFX-2.12.0.jar (in libs/jars) to the project.
+
+4. 
     In **Preferences (File -> Settings) -> Appearance & Behavior -> Path Variables**
      define the name of new global variable as **PATH_TO_FX** and browse to the lib folder of the JavaFX SDK to set its value,
       and click apply.
     Then click on **Run -> Edit Configurations...** and add these VM options:
     
-    --module-path ${PATH_TO_FX} --add-modules=javafx.controls,javafx.fxml
+    --module-path ${PATH_TO_FX} --add-modules=javafx.controls,javafx.fxml,javafx.web
     
     
 
