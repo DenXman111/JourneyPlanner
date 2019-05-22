@@ -240,6 +240,10 @@ public class Trip implements Displayable{
         fillHBox(tripBox);
         createdTripBox = tripBox;
 
+        Button showButton = new Button("show");
+        showButton.getStyleClass().add("booked");
+        HBox.setMargin(showButton, new Insets(0, 10, 0, 0));
+
         Button bookButton = new Button("book");
         bookButton.getStyleClass().add("ratting-button");
         HBox.setMargin(bookButton, new Insets(0, 10, 0, 0));
@@ -248,6 +252,11 @@ public class Trip implements Displayable{
         HBox boxesAbove = new HBox();
         VBox.setMargin(boxesAbove, new Insets(0, 0, 5, 5));
         if (displayBookButton  && LoginController.username != null) {
+            showButton.setOnMouseClicked( mouseEvent -> {
+                System.out.println("Showing map");
+            });
+            boxesAbove.getChildren().add(showButton);
+
             bookButton.setOnMouseClicked( mouseEvent -> {
                 DbAdapter.reserve(this, LoginController.username);
                 bookButton.getStyleClass().add("booked");
