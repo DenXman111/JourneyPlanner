@@ -5,8 +5,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -88,6 +90,9 @@ public class FormController implements Initializable {
                             MainFieldEndingDate.getValue() );
             assert propositions != null;
             answersVBox.getChildren().clear();
+
+            Trip.setFormController(this);
+
             propositions.stream().
                     map(Trip::display).
                     forEach(node -> {
@@ -119,5 +124,28 @@ public class FormController implements Initializable {
         stage.setResizable(false);
         prevStage.close();
         stage.show();
+    }
+
+    void showButtonPressed(ActionEvent event) throws IOException {
+/*        //FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/map.fxml"));
+        Pane myPane = myLoader.load();
+
+        Scene scene = new Scene(myPane);
+        Stage stage = new Stage();
+        stage.setTitle("Map");
+        stage.setScene(scene);
+        stage.show();
+
+ */
+        Parent root = FXMLLoader.load(getClass().getResource("/xmlFiles/Simple.fxml"));
+
+        Scene scene = new Scene(root);
+        scene.getStylesheets().add("/xmlFiles/simple.css");
+
+        Stage stage = new Stage();
+        stage.setTitle("Directions API Example");
+        stage.setScene(scene);
+        stage.show();
+
     }
 }

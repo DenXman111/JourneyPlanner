@@ -1,7 +1,11 @@
+import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
@@ -10,6 +14,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +30,7 @@ public class Trip implements Displayable{
     private Pane mainPane;
     private LocalDate beginDate, endDate;
 
+    static private FormController formController;
     static boolean displayBookButton = true;
 
     @SuppressWarnings("WeakerAccess")
@@ -47,6 +53,9 @@ public class Trip implements Displayable{
         this.createdInformationBox = null;
     }
 
+    static public void setFormController(FormController controller){
+        formController = controller;
+    }
     /*
     // Used for generating random trips during testing trip.display
     public Trip(List<Edge> plan){
@@ -251,12 +260,17 @@ public class Trip implements Displayable{
         //box contains informationBox and bookButton
         HBox boxesAbove = new HBox();
         VBox.setMargin(boxesAbove, new Insets(0, 0, 5, 5));
-        if (displayBookButton  && LoginController.username != null) {
-            showButton.setOnMouseClicked( mouseEvent -> {
-                System.out.println("Showing map");
-            });
-            boxesAbove.getChildren().add(showButton);
 
+        showButton.setOnAction( (event) -> {
+            try {
+                formController.showButtonPressed(event);
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        });
+        boxesAbove.getChildren().add(showButton);
+
+        if (displayBookButton  && LoginController.username != null) {
             bookButton.setOnMouseClicked( mouseEvent -> {
                 DbAdapter.reserve(this, LoginController.username);
                 bookButton.getStyleClass().add("booked");

@@ -15,9 +15,7 @@ https://jdbc.postgresql.org/download.html
     
     Also add postgresql-42.2.5.jar to Libraries.
 
-3.  Go to **File -> Project Structure -> Models** and add the GMapsFX-2.12.0.jar (in libs/jars) to the project.
-
-4. 
+3. 
     In **Preferences (File -> Settings) -> Appearance & Behavior -> Path Variables**
      define the name of new global variable as **PATH_TO_FX** and browse to the lib folder of the JavaFX SDK to set its value,
       and click apply.
@@ -26,4 +24,4 @@ https://jdbc.postgresql.org/download.html
     --module-path ${PATH_TO_FX} --add-modules=javafx.controls,javafx.fxml,javafx.web
     
     
-
+4. If you want use elements from .jar in Scene Builder you should add .jar to Scene Builder.

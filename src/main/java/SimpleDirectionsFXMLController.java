@@ -47,7 +47,7 @@ public class SimpleDirectionsFXMLController implements Initializable, MapCompone
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        mapView.setKey("API key");
+        //mapView.setKey("API key");
         mapView.addMapInializedListener(this);
         to.bindBidirectional(toTextField.textProperty());
         from.bindBidirectional(fromTextField.textProperty());
