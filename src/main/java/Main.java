@@ -3,16 +3,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
+import com.lynden.gmapsfx.*;
 
 
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setTitle("JourneyPlanner");
+
+        com.lynden.gmapsfx.GoogleMapView googleMapView = null;
 
         FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
 
@@ -22,7 +21,6 @@ public class Main extends Application {
 
         Scene myScene = new Scene(myPane);
         primaryStage.setScene(myScene);
-        primaryStage.setResizable(false);
         primaryStage.show();
     }
 

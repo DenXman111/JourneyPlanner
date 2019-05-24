@@ -8,7 +8,6 @@ import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -137,8 +136,9 @@ public class FormController implements Initializable {
         stage.show();
 
  */
+        System.out.println("Start loading");
         Parent root = FXMLLoader.load(getClass().getResource("/xmlFiles/Simple.fxml"));
-
+        System.out.println("Loaded fxm");
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/xmlFiles/simple.css");
 

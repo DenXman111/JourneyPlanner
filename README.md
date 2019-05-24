@@ -21,7 +21,7 @@ https://jdbc.postgresql.org/download.html
       and click apply.
     Then click on **Run -> Edit Configurations...** and add these VM options:
     
-    --module-path ${PATH_TO_FX} --add-modules=javafx.controls,javafx.fxml,javafx.web
+    --module-path ${PATH_TO_FX} --add-modules=javafx.controls,javafx.web,javafx.fxml
     
     
 4. If you want use elements from .jar in Scene Builder you should add .jar to Scene Builder.

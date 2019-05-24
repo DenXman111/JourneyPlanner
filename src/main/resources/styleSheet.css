@@ -1,4 +1,4 @@
-#welcomeGrid{
+.background-prague{
     -fx-background-image: url('backgroundPrague.jpg');
     -fx-background-size: cover;
 }

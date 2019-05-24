@@ -13,25 +13,39 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="450.0" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefWidth="626.0" stylesheets="@../styleSheet.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="WelcomeController">
-   <GridPane>
+
+<GridPane alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="450.0" prefWidth="700.0" stylesheets="@../styleSheet.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="WelcomeController">
+   <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" vgrow="SOMETIMES" />
+   </rowConstraints>
+   <VBox alignment="CENTER" styleClass="background-prague" GridPane.rowIndex="1">
+      <Button fx:id="WelcomeSceneStartButton" alignment="CENTER" mnemonicParsing="false" onAction="#startButtonPressed"
+              prefHeight="40.0" prefWidth="300.0" style="-fx-background-insets: 0, 1, 1;" styleClass="mainButton"
+              stylesheets="@../styleSheet.css" text="Plan my trip">
+         <font>
+            <Font size="18.0"/>
+         </font>
+      </Button>
+   </VBox>
+   <GridPane maxHeight="-Infinity" styleClass="scroll-pane">
       <columnConstraints>
-         <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" />
-         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+         <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="-Infinity" />
+         <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" />
       </columnConstraints>
       <rowConstraints>
-         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+         <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
       </rowConstraints>
-      <VBox.margin>
-         <Insets left="15.0" right="5.0" />
-      </VBox.margin>
-      <HBox alignment="CENTER" maxWidth="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="100.0" prefWidth="481.0">
+      <HBox alignment="CENTER_LEFT" maxWidth="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="100.0">
          <opaqueInsets>
             <Insets left="15.0" />
          </opaqueInsets>
          <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
             <HBox.margin>
-               <Insets right="30.0" />
+               <Insets left="30.0" right="20.0" />
             </HBox.margin>
             <Image url="@../backpack.png" />
          </ImageView>
@@ -45,7 +59,7 @@
                <Font size="36.0" />
             </font>
             <HBox.margin>
-               <Insets right="80.0" />
+               <Insets right="20.0" />
             </HBox.margin>
          </Label>
       </HBox>
@@ -72,19 +86,9 @@
                <Font size="18.0" />
             </font>
          </Button>
+         <GridPane.margin>
+            <Insets right="20.0" />
+         </GridPane.margin>
       </VBox>
    </GridPane>
-   <GridPane id="welcomeGrid" alignment="CENTER" maxHeight="1.7976931348623157E308" minHeight="350.0" nodeOrientation="LEFT_TO_RIGHT" stylesheets="@../styleSheet.css">
-      <columnConstraints>
-         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-      </columnConstraints>
-      <rowConstraints>
-         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-      </rowConstraints>
-      <Button fx:id="WelcomeSceneStartButton" mnemonicParsing="false" onAction="#startButtonPressed" prefHeight="40.0" prefWidth="300.0" style="-fx-background-insets: 0, 1, 1;" styleClass="mainButton" stylesheets="@../styleSheet.css" text="Plan my trip" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-         <font>
-            <Font size="18.0" />
-         </font>
-      </Button>
-   </GridPane>
-</VBox>
+</GridPane>
