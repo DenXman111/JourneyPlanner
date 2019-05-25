@@ -102,15 +102,32 @@ public class DbAdapter {
         statement = connection.createStatement();
         String query = "INSERT INTO buses VALUES(nextval(\'buses_seq\'), ?, ?, ?, ?, ?, ?)";
         PreparedStatement pst = connection.prepareStatement(query);
-        System.out.println(getCityID(cityA) + " " + getCityID(cityB) + " " + price + " " + departure.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " " + arrival.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " " + places);
         pst.setInt(1, getCityID(cityA));
         pst.setInt(2, getCityID(cityB));
         pst.setInt(3, price);
         pst.setDate(4, Date.valueOf(departure));
         pst.setDate(5, Date.valueOf(arrival));
-//            pst.setDate(4, departure.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-//            pst.setDate(5, arrival.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         pst.setInt(6, places);
+        pst.executeUpdate();
+    }
+
+    public static boolean haveBusWithID(int id) throws SQLException{
+
+        statement = connection.createStatement();
+        String query="Select count(*) from buses where id = \'"+id+"\'";
+        ResultSet result=statement.executeQuery(query);
+        if (result.next()){
+            if (result.getInt("count") == 0) return false; else
+                return true;
+        } else return false;
+    }
+
+    public static void removeBusByID(int id) throws SQLException{
+        if (!haveBusWithID(id)) throw new SQLException();
+        statement = connection.createStatement();
+        String query = "DELETE FROM buses WHERE id = ?";
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setInt(1, id);
         pst.executeUpdate();
     }
 

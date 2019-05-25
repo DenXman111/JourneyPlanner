@@ -44,6 +44,12 @@ public class ModerController implements Initializable{
     @FXML
     private Button AddNewBusButton;
 
+    @FXML
+    private TextField BusNumberField;
+
+    @FXML
+    private Button DeleteByIDButton;
+
     void setPrevStage(Stage stage){
         this.prevStage = stage;
     }
@@ -56,7 +62,7 @@ public class ModerController implements Initializable{
     }
 
 
-        @FXML
+    @FXML
     void addNewBusPressed(ActionEvent event) {
         try{
             if (CityAChoiceBox.getValue() == null) throw new FieldsDataException("Set departure city");
@@ -79,6 +85,22 @@ public class ModerController implements Initializable{
         }
         catch (SQLException e){
             new ErrorWindow("Can't add this bus");
+        }
+    }
+
+    @FXML
+    void deleteBusByIDPressed(ActionEvent event) {
+        try{
+            if (BusNumberField.getText().length() == 0) throw new FieldsDataException("Bus number field is empty");
+            if (!BusNumberField.getText().matches("\\d+")) throw new FieldsDataException("Write number to bus number field");
+
+            DbAdapter.removeBusByID(Integer.valueOf(BusNumberField.getText()));
+            new ErrorWindow("Deleted!");
+        } catch (FieldsDataException e){
+            new ErrorWindow(e.getMessage());
+        }
+        catch (SQLException e){
+            new ErrorWindow("Wrong bus ID");
         }
     }
 

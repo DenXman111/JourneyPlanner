@@ -36,5 +36,11 @@
             <Font size="18.0" />
          </font>
       </Button>
+      <TextField fx:id="BusNumberField" layoutX="229.0" layoutY="301.0" prefHeight="38.0" prefWidth="335.0" promptText="Bus number" />
+      <Button fx:id="DeleteByIDButton" layoutX="448.0" layoutY="301.0" mnemonicParsing="false" onAction="#deleteBusByIDPressed" prefHeight="38.0" prefWidth="116.0" style="-fx-background-insets: 0, 0, 0;" text="Delete bus" textFill="#14a085">
+         <font>
+            <Font size="17.0" />
+         </font>
+      </Button>
    </children>
 </AnchorPane>

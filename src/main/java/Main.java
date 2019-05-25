@@ -26,15 +26,6 @@ public class Main extends Application {
 
 
     public static void main(String[] args) {
-/*
-        JarAdder jarAdder = new JarAdder();
-        try {
-            jarAdder.addJarToClasspath(new File("src/main/libs/jars/jfoenix-9.0.8.jar"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
- */
         DbAdapter dbAdapter = new DbAdapter();
         try{
             dbAdapter.connect();
