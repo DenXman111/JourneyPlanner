@@ -126,7 +126,7 @@ public class FormController implements Initializable {
     }
 
     void showButtonPressed(ActionEvent event) throws IOException {
-/*        //FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/map.fxml"));
+        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/map.fxml"));
         Pane myPane = myLoader.load();
 
         Scene scene = new Scene(myPane);
@@ -134,18 +134,5 @@ public class FormController implements Initializable {
         stage.setTitle("Map");
         stage.setScene(scene);
         stage.show();
-
- */
-        System.out.println("Start loading");
-        Parent root = FXMLLoader.load(getClass().getResource("/xmlFiles/Simple.fxml"));
-        System.out.println("Loaded fxm");
-        Scene scene = new Scene(root);
-        scene.getStylesheets().add("/xmlFiles/simple.css");
-
-        Stage stage = new Stage();
-        stage.setTitle("Directions API Example");
-        stage.setScene(scene);
-        stage.show();
-
     }
 }
