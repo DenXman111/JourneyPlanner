@@ -16,8 +16,9 @@ public class MapController implements Initializable, MapComponentInitializedList
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        mapView.setKey("API key");
+        //mapView.setKey("API key");
         mapView.addMapInializedListener(this);
+        System.out.println("initialized");
     }
 
     @Override
@@ -30,6 +31,6 @@ public class MapController implements Initializable, MapComponentInitializedList
                 .overviewMapControl(false)
                 .mapType(MapTypeIdEnum.ROADMAP);
         GoogleMap map = mapView.createMap(options);
-
+        System.out.println("Created");
     }
 }
