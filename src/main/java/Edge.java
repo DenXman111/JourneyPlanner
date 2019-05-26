@@ -8,6 +8,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,19 +23,19 @@ public class Edge implements Displayable{
     private Integer busID;
     private City startCity;
     private City endCity;
-    private LocalDate startDate;
-    private LocalDate endingDate;
+    private Timestamp startTime;
+    private Timestamp endingDate;
     private int price;
 
     private List<EdgesInOut> additionalVisits;
     private Edge edgeOmittingEndCity;
 
-    Edge(Integer busID, City startCity, City endCity, int price, LocalDate startDate, LocalDate endingDate){
+    Edge(Integer busID, City startCity, City endCity, int price, Timestamp startDate, Timestamp endingDate){
         this.busID = busID;
         this.startCity = startCity;
         this.endCity = endCity;
         this.price = price;
-        this.startDate = startDate;
+        this.startTime = startDate;
         this.endingDate = endingDate;
     }
 
@@ -42,7 +44,7 @@ public class Edge implements Displayable{
         this.busID = edge.busID;
         this.startCity = edge.startCity;
         this.endCity = edge.endCity;
-        this.startDate = edge.startDate;
+        this.startTime = edge.startTime;
         this.endingDate = edge.endingDate;
         this.price = edge.price;
         this.additionalVisits = edge.additionalVisits;
@@ -50,12 +52,12 @@ public class Edge implements Displayable{
     }
 
     @SuppressWarnings("WeakerAccess")
-    public void findOmittingEdge(Edge nextEdge){
+    public void findOmittingEdge(Edge nextEdge) throws SQLException {
         edgeOmittingEndCity = mergeEdges(this, nextEdge);
     }
 
     @SuppressWarnings("WeakerAccess")
-    public void findAdditionalVisits(LocalDate begin, LocalDate end){
+    public void findAdditionalVisits(Timestamp begin, Timestamp end) throws SQLException {
         additionalVisits = EdgesInOut.possibleInserts(this, begin, end);
     }
 
@@ -77,12 +79,12 @@ public class Edge implements Displayable{
     public int getPrice() { return price; }
 
     @SuppressWarnings("WeakerAccess")
-    public LocalDate getStartDate() {
-        return startDate;
+    public Timestamp getStartDate() {
+        return startTime;
     }
 
     @SuppressWarnings("WeakerAccess")
-    public LocalDate getEndingDate() {
+    public Timestamp getEndingDate() {
         return endingDate;
     }
 
@@ -131,8 +133,8 @@ public class Edge implements Displayable{
         return box;
     }
 
-    private boolean isBetween(LocalDate begin, LocalDate end){
-        return !begin.isAfter(startDate) && !end.isBefore(endingDate);
+    private boolean isBetween(Timestamp begin, Timestamp end){
+        return !begin.after(startTime) && !end.before(endingDate);
     }
 
 
@@ -142,12 +144,12 @@ public class Edge implements Displayable{
      *      V
      */
     @SuppressWarnings("WeakerAccess")
-    public static Edge mergeEdges(Edge first, Edge second){
+    public static Edge mergeEdges(Edge first, Edge second) throws SQLException {
         if (first == null || second == null) return null;
-        Integer startId = first.getStartCity().getID(), endId = second.getEndCity().getID();
-        List<Edge> options = DbAdapter.getNeighbours(startId)
+        Integer endId = second.getEndCity().getID();
+        List<Edge> options = DbAdapter.getNeighbours(first.getStartCity(), first.getStartDate(), second.getEndingDate())
                 .stream()
-                .filter( edge -> edge.getEndCity().getID().equals(endId) && edge.isBetween(first.startDate, second.endingDate))
+                .filter( edge -> edge.getEndCity().getID().equals(endId) && edge.isBetween(first.startTime, second.endingDate))
                 .collect(Collectors.toList());
         return !options.isEmpty() ? options.get(0) : null;
     }

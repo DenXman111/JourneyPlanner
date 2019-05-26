@@ -9,6 +9,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class LoginController {
     private Stage prevStage;
@@ -52,7 +53,7 @@ public class LoginController {
     @SuppressWarnings("Duplicates")
     void findButtonPressed(ActionEvent event) throws IOException{
         try{
-            if (!DbAdapter.haveUser(UsernameField.getText(), PasswordField.getText())) throw new FieldsDataException("User data wrong");
+            if (!DbAdapter.userExists(UsernameField.getText(), PasswordField.getText())) throw new FieldsDataException("User data wrong");
 
             Stage stage = new Stage();
             stage.setTitle("Main");
@@ -69,6 +70,8 @@ public class LoginController {
             stage.show();
         } catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
+        } catch (SQLException e) {
+            new ErrorWindow("Connection error");
         }
     }
 
@@ -92,13 +95,15 @@ public class LoginController {
             stage.show();
         } catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
+        } catch (SQLException e) {
+            new ErrorWindow("Connection error");
         }
     }
 
     @FXML
     void showHistoryButtonPressed(ActionEvent event) throws IOException{
         try{
-            if (!DbAdapter.haveUser(UsernameField.getText(), PasswordField.getText())) throw new FieldsDataException("User data wrong");
+            if (!DbAdapter.userExists(UsernameField.getText(), PasswordField.getText())) throw new FieldsDataException("User data wrong");
             username=UsernameField.getText();
             Stage stage = new Stage();
             stage.setTitle("Main");
@@ -115,6 +120,8 @@ public class LoginController {
             stage.show();
         } catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
+        } catch (SQLException e) {
+            new ErrorWindow("Connection error");
         }
     }
 }

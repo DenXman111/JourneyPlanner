@@ -42,14 +42,8 @@ public class City implements Displayable {
 
     public String getName() { return name; }
 
-    @SuppressWarnings("WeakerAccess")
-    public String getCountry() { return DbAdapter.getCountryFromID(cityID); }
+    //public String getCountry() { return DbAdapter.getCountryFromID(cityID); }
 
-    /**
-     * Wraps small circle and city name in VBox.
-     * Displays additional information about the city when cursor is over the circle
-     * @return Pane with dot and city name
-     */
     @Override
     public Pane display() {
         VBox box = new VBox();
@@ -100,7 +94,7 @@ public class City implements Displayable {
         return box;
     }
 
-    @SuppressWarnings("WeakerAccess")
+    @SuppressWarnings("unused")
     public void setDays(long days) {
         this.days = days;
     }

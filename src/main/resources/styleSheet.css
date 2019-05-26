@@ -128,3 +128,9 @@
     -fx-opacity: 0.9;
 }
 
+.progress-indicator{
+    -fx-background-color: white;
+    -fx-background-radius: 35;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 30, 0, 0, 8);
+}
+

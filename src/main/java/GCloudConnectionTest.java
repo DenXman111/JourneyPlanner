@@ -1,15 +1,25 @@
 import java.sql.*;
 import java.util.ArrayList;
 
+@SuppressWarnings({"SqlNoDataSourceInspection", "SqlResolve", "FieldCanBeLocal"})
 public class GCloudConnectionTest {
-    @SuppressWarnings("SqlResolve")
+
+    private static String user = "application_user";
+
+    private static String password = "qjNds5HVPTMTuCy";
+
+    private static String socketFactory = "com.google.cloud.sql.postgres.SocketFactory";
+
+    private static String jdbcUrl = "jdbc:postgresql://google/postgres?cloudSqlInstance=ferrous-phoenix-241520:europe-north1:journey-planer";
+
+
     public static void main(String[] args){
         System.out.println("Start");
         Connection connection = null;
         Statement statement = null;
         try {
             Class.forName("org.postgresql.Driver");
-            connection = DriverManager.getConnection("message me for text - Ł.S.");
+            connection = DriverManager.getConnection(jdbcUrl + "&socketFactory=" + socketFactory + "&user=" + user + "&password=" + password);
             statement = connection.createStatement();
             String query = "Select * from guestbook";
             ResultSet result = statement.executeQuery(query);
@@ -27,8 +37,14 @@ public class GCloudConnectionTest {
         }
         finally {
             try{
-                if (connection != null) connection.close();
-                if (statement != null) statement.close();
+                if (connection != null) {
+                    connection.close();
+                    System.out.println("Closed connection");
+                }
+                if (statement != null) {
+                    statement.close();
+                    System.out.println("Closed statement");
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }

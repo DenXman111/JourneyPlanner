@@ -35,14 +35,10 @@ public class Main extends Application {
 
 
     public static void main(String[] args) {
-        DbAdapter dbAdapter = new DbAdapter();
         try{
-            dbAdapter.connect();
-            dbAdapter.create();
-            dbAdapter.create_tables("DB.sql");
             launch(args);
         } finally {
-            dbAdapter.disconnect();
+            DbAdapter.disconnect();
         }
     }
 }

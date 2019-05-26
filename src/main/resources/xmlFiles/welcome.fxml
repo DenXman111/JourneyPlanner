@@ -4,6 +4,7 @@
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -12,7 +13,6 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-
 
 <GridPane alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="450.0" prefWidth="700.0" stylesheets="@../styleSheet.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="WelcomeController">
    <columnConstraints>
@@ -23,13 +23,19 @@
       <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" vgrow="SOMETIMES" />
    </rowConstraints>
    <VBox fx:id="ButtonsBox" alignment="CENTER" styleClass="background-prague" GridPane.rowIndex="1">
-      <Button fx:id="WelcomeSceneStartButton" alignment="CENTER" mnemonicParsing="false" onAction="#startButtonPressed"
-              prefHeight="40.0" prefWidth="300.0" style="-fx-background-insets: 0, 1, 1;" styleClass="mainButton"
-              stylesheets="@../styleSheet.css" text="Plan my trip">
+      <Button fx:id="WelcomeSceneStartButton" alignment="CENTER" mnemonicParsing="false" onAction="#startButtonPressed" prefHeight="40.0" prefWidth="300.0" style="-fx-background-insets: 0, 1, 1;" styleClass="mainButton" stylesheets="@../styleSheet.css" text="Plan my trip">
          <font>
-            <Font size="18.0"/>
+            <Font size="18.0" />
          </font>
       </Button>
+      <ProgressIndicator fx:id="progressIndicator" progress="0.0">
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <VBox.margin>
+            <Insets top="-50.0" />
+         </VBox.margin>
+      </ProgressIndicator>
    </VBox>
    <GridPane maxHeight="-Infinity" styleClass="scroll-pane">
       <columnConstraints>

@@ -1,3 +1,5 @@
+import javafx.concurrent.Task;
+
 import java.io.FileInputStream;
 import java.sql.*;
 import java.sql.Date;
@@ -7,60 +9,40 @@ import java.util.*;
 
 @SuppressWarnings("all")
 public class DbAdapter {
-    private String jdbUrl = "jdbc:postgresql://localhost:5432/";
-    private String usename = "postgres";
-    private String password = "postgres";
+    private static String user = "application_user";
+
+    private static String password = "qjNds5HVPTMTuCy";
+
+    private static String socketFactory = "com.google.cloud.sql.postgres.SocketFactory";
+
+    private static String jdbcUrl = "jdbc:postgresql://google/postgres?cloudSqlInstance=ferrous-phoenix-241520:europe-north1:journey-planer";
 
     private static Connection connection = null;
-    private static Statement statement = null;
 
-    public DbAdapter(){
 
-    }
-
-    public void connect(){
+    public static synchronized void connect(){
         try {
-            connection = DriverManager.getConnection(jdbUrl, usename, password);
+            connection = DriverManager.getConnection(jdbcUrl + "&socketFactory=" + socketFactory + "&user=" + user + "&password=" + password);
         } catch (SQLException e){
             e.printStackTrace();
             System.exit(0);
         }
     }
-    public void create(){
-        try {
-            statement = connection.createStatement();
-            statement.executeUpdate("DROP DATABASE IF EXISTS JourneyPlanner");
-            statement.executeUpdate("CREATE DATABASE JourneyPlanner");
-            System.out.println("Database created successfully...");
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }
 
-    public void disconnect(){
+    public static synchronized void disconnect(){
         try {
-            if (statement != null) statement.close();
             if (connection != null) connection.close();
         } catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    public void create_tables(String arg) {
-        try {
-            statement = connection.createStatement();
-            Scanner scanner = new Scanner(new FileInputStream("src/main/Database/" + arg));
-            String tmp = "";
-            while (scanner.hasNext()) {
-                tmp = tmp + scanner.nextLine();
-            }
-            statement.executeUpdate(tmp);
-            System.out.println("Tables created successfully...");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public static boolean connected(){
+        return connection != null;
     }
-    public static Integer getCityID(String name){
+
+    public static Integer getCityID(String name) throws SQLException {
+        Statement statement = null;
         try {
             statement = connection.createStatement();
             String query="Select id from cities where name=\'"+name+"\'";
@@ -71,9 +53,13 @@ public class DbAdapter {
             e.printStackTrace();
             return -1;
         }
+        finally {
+            if (statement != null) statement.close();
+        }
     }
 
-    public static City getCityFromID(Integer ID) throws DatabaseException{
+    public static City getCityFromID(Integer ID) throws DatabaseException, SQLException {
+        Statement statement = null;
         try {
             statement = connection.createStatement();
             String query="Select * from cities where id=\'"+ID+"\'";
@@ -84,10 +70,14 @@ public class DbAdapter {
         } catch (Exception e){
             e.printStackTrace();
         }
+        finally {
+            if (statement != null) statement.close();
+        }
         return null;
     }
 
-    public static String getCountryFromID(Integer ID){
+    public static String getCountryFromID(Integer ID) throws SQLException {
+        Statement statement = null;
         try {
             statement = connection.createStatement();
             String query="Select * from cities where id=\'"+ID+"\'";
@@ -98,12 +88,15 @@ public class DbAdapter {
         } catch (Exception e){
             e.printStackTrace();
         }
+        finally {
+            if (statement != null) statement.close();
+        }
         return null;
     }
 
     public static void addNewUser(String username, String password, String email, String name, String surname) throws SQLException{
-        statement = connection.createStatement();
-        String query="INSERT INTO users(username, password, email, name, surname) VALUES(?, ?, ?, ?, ?)";
+        Statement statement = connection.createStatement();
+        String query="INSERT INTO new_users(username, password, email_address, name, surname) VALUES(?, ?, ?, ?, ?)";
         PreparedStatement pst = connection.prepareStatement(query);
         pst.setString(1, username);
         pst.setString(2, password);
@@ -111,9 +104,10 @@ public class DbAdapter {
         pst.setString(4, name);
         pst.setString(5, surname);
         pst.executeUpdate();
+        statement.close();
     }
     public static void addNewBus(String cityA, String cityB, int price, LocalDate departure, LocalDate arrival, int places) throws SQLException{
-        statement = connection.createStatement();
+        Statement statement = connection.createStatement();
         String query = "INSERT INTO buses VALUES(nextval(\'buses_seq\'), ?, ?, ?, ?, ?, ?)";
         PreparedStatement pst = connection.prepareStatement(query);
         pst.setInt(1, getCityID(cityA));
@@ -123,13 +117,15 @@ public class DbAdapter {
         pst.setDate(5, Date.valueOf(arrival));
         pst.setInt(6, places);
         pst.executeUpdate();
+        statement.close();
     }
 
     public static boolean haveBusWithID(int id) throws SQLException{
 
-        statement = connection.createStatement();
-        String query="Select count(*) from buses where id = \'"+id+"\'";
+        Statement statement = connection.createStatement();
+        String query = "Select count(*) from transits where id = \'"+id+"\'";
         ResultSet result=statement.executeQuery(query);
+        statement.close();
         if (result.next()){
             if (result.getInt("count") == 0) return false; else
                 return true;
@@ -138,14 +134,16 @@ public class DbAdapter {
 
     public static void removeBusByID(int id) throws SQLException{
         if (!haveBusWithID(id)) throw new SQLException();
-        statement = connection.createStatement();
-        String query = "DELETE FROM buses WHERE id = ?";
+        Statement statement = connection.createStatement();
+        String query = "DELETE FROM transits WHERE id = ?";
         PreparedStatement pst = connection.prepareStatement(query);
         pst.setInt(1, id);
         pst.executeUpdate();
+        statement.close();
     }
 
-    public static boolean haveUser(String username, String password){
+    public static boolean userExists(String username, String password) throws SQLException {
+        Statement statement = null;
         try {
             statement = connection.createStatement();
             String query="Select count(*) from users where username = \'"+username+"\' AND password = \'"+password+"\'";
@@ -158,9 +156,13 @@ public class DbAdapter {
             e.printStackTrace();
             return false;
         }
+        finally {
+            if (statement != null) statement.close();
+        }
     }
 
-    public static boolean haveModer(String username, String password){
+    public static boolean haveModer(String username, String password) throws SQLException {
+        Statement statement = null;
         try {
             statement = connection.createStatement();
             String query="Select count(*) from moderators where username = \'"+username+"\' AND password = \'"+password+"\'";
@@ -173,32 +175,45 @@ public class DbAdapter {
             e.printStackTrace();
             return false;
         }
+        finally {
+            if (statement != null) statement.close();
+        }
     }
 
-    public static List< Edge > getNeighbours(Integer cityID){ //geting list of cityID's neighbours
+    //geting list of cityID's neighbours
+    public static List< Edge > getNeighbours(City stratCity, Timestamp begin, Timestamp end) throws SQLException {
         ArrayList<Edge> a=new ArrayList<>();
+        Statement statement = null;
         try {
             statement = connection.createStatement();
-            String query="Select * from buses where start_city=\'"+cityID+"\'";
+            String query="Select * from buses_from_city(" + stratCity.getID() + ", '"
+                    + begin.toLocalDateTime() + "'::date, '" + end.toLocalDateTime() + "'::date)";
             ResultSet result=statement.executeQuery(query);
             while (result.next()) {
-                City r1=getCityFromID(cityID);
-                City r2=getCityFromID(result.getInt("end_city"));
-                Edge b=new Edge(result.getInt("id"),r1,r2,result.getInt("price"),
-                        result.getDate("departure").toLocalDate(),
-                        result.getDate("arrival").toLocalDate());
-//                        result.getDate("departure").toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
-//                        result.getDate("arrival").toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+                City r2=new City(
+                        result.getInt("end_city"),
+                        result.getString("end_city_name"),
+                        result.getDouble("end_city_rating"),
+                        result.getInt("end_city_avg_price")
+                );
+                Edge b=new Edge(result.getInt("id_transit"), stratCity, r2,
+                        result.getInt("price"),
+                        result.getTimestamp("departure"),
+                        result.getTimestamp("arrival"));
                 a.add(b);
             }
         } catch (Exception e){
             e.printStackTrace();
         }
+        finally {
+            if (statement != null) statement.close();
+        }
         return a;
     }
 
-    public static ArrayList<String> getCityList(){
+    public static ArrayList<String> getCityList() throws SQLException {
         ArrayList<String> a =new ArrayList<>();
+        Statement statement = null;
         try {
             statement = connection.createStatement();
             String query="Select name from cities";
@@ -209,35 +224,46 @@ public class DbAdapter {
         } catch (Exception e){
             e.printStackTrace();
         }
+        finally {
+            if (statement != null) statement.close();
+        }
         Collections.sort(a);
         return a;
     }
-    public static List< EdgesInOut > getCitiesBetween(Integer prev_cityID,Integer next_cityID){
+    public static List< EdgesInOut > getCitiesBetween(Integer prev_cityID,Integer next_cityID, Timestamp begin, Timestamp end) throws SQLException {
+        Statement statement = null;
         ArrayList<EdgesInOut> a=new ArrayList<>();
         try {
             statement = connection.createStatement();
-            String query="Select * from( select end_city as ec1, id as id1, price as p1, departure as d1, arrival as a1 from buses where start_city=\'"+prev_cityID+"\') b1 join (select start_city as sc2, end_city as ec2, id as id2, price as p2, departure as d2, arrival as a2 from buses where end_city=\'"+next_cityID+"\') b2 on ec1=sc2";
+            String query="select * from optional_visits(" + prev_cityID + ", '" + begin + "'::timestamp ,"
+                    + next_cityID +", '" + end + "'::timestamp )";
             ResultSet result=statement.executeQuery(query);
             while (result.next()) {
                 City r1=getCityFromID(prev_cityID);
-                City r2=getCityFromID(result.getInt("ec1"));
-                Edge b=new Edge(result.getInt("id1"),r1,r2,result.getInt("p1"),
-                        result.getDate("d1").toLocalDate(),
-                        result.getDate("a1").toLocalDate());
+                City r2=getCityFromID(result.getInt("tr1_end_city"));
+                Edge b=new Edge(result.getInt("id_tr1"),r1,r2,
+                        result.getInt("tr1_price"),
+                        result.getTimestamp("tr1_departure"),
+                        result.getTimestamp("tr1_arrival"));
                 City r3=getCityFromID(next_cityID);
-                Edge c=new Edge(result.getInt("id2"),r2,r3,result.getInt("p2"),
-                        result.getDate("d2").toLocalDate(),
-                        result.getDate("a2").toLocalDate());
+                Edge c=new Edge(result.getInt("id_tr2"),r2,r3,
+                        result.getInt("tr2_price"),
+                        result.getTimestamp("tr2_departure"),
+                        result.getTimestamp("tr2_arrival"));
                 EdgesInOut d=new EdgesInOut(b,c);
                 a.add(d);
             }
         } catch (Exception e){
             e.printStackTrace();
         }
+        finally {
+            if (statement != null) statement.close();
+        }
         return a;
     }
-    public static ArrayList <Trip> getHistory(String user) {
+    public static ArrayList <Trip> getHistory(String user) throws SQLException {
         ArrayList <Trip> out=new ArrayList();
+        Statement statement = null;
         try {
             statement = connection.createStatement();
             String query="select distinct id from trips where traveler=\'"+user+"\'";
@@ -256,8 +282,8 @@ public class DbAdapter {
                     City r1 = getCityFromID(result2.getInt("start_city"));
                     City r2 = getCityFromID(result2.getInt("end_city"));
                     Edge b = new Edge(result2.getInt("id"), r1, r2, result2.getInt("price"),
-                            result2.getDate("departure").toLocalDate(),
-                            result2.getDate("arrival").toLocalDate());
+                            result2.getTimestamp("departure"),
+                            result2.getTimestamp("arrival"));
                     tmp.pushEdge(b);
                 }
                 out.add(tmp);
@@ -266,9 +292,13 @@ public class DbAdapter {
         catch (Exception e){
             e.printStackTrace();
         }
+        finally {
+            if (statement != null) statement.close();
+        }
         return out;
     }
-    public static void reserve(Trip arg,String user){
+    public static void reserve(Trip arg,String user) throws SQLException {
+        Statement statement = null;
         try {
             statement = connection.createStatement();
             List<Edge> a=arg.getPlan();
@@ -286,6 +316,9 @@ public class DbAdapter {
         }
         catch (Exception e) {
             e.printStackTrace();
+        }
+        finally {
+            if (statement != null) statement.close();
         }
     }
 }

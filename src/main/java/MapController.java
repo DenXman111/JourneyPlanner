@@ -29,7 +29,7 @@ public class MapController implements Initializable, MapComponentInitializedList
 
     @SuppressWarnings("unused")
     private void createStartMarker(City startCity){
-        LatLong latLong = new DirectionsWaypoint(startCity.getName() + ", " + startCity.getCountry()).getLocation();
+        LatLong latLong = new DirectionsWaypoint(startCity.getName()).getLocation();
 
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLong);
@@ -57,14 +57,15 @@ public class MapController implements Initializable, MapComponentInitializedList
         List<DirectionsWaypoint> points = new ArrayList<>();
         for (Edge edge : FormController.tripToShowing.getPlan()){
             if (startCity.getName().equals(edge.getEndCity().getName())) break;
-            points.add(new DirectionsWaypoint(edge.getEndCity().getName() + ", " + edge.getEndCity().getCountry()));
+            String message = edge.getEndCity().getName();
+            points.add(new DirectionsWaypoint(message));
         }
         Collections.reverse(points);
 
         //noinspection ToArrayCallWithZeroLengthArrayArgument
         DirectionsRequest request =
-                new DirectionsRequest(startCity.getName() + ", " + startCity.getCountry(),
-                        startCity.getName() + ", " + startCity.getCountry(), TravelModes.DRIVING, points.toArray(new DirectionsWaypoint[points.size()]));
+                new DirectionsRequest(startCity.getName(),
+                        startCity.getName(), TravelModes.DRIVING, points.toArray(new DirectionsWaypoint[points.size()]));
 
         directionsRenderer = new DirectionsRenderer(true, mapView.getMap(), directionsPane);
         directionsService.getRoute(request, this, directionsRenderer);

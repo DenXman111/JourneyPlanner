@@ -1,3 +1,5 @@
+-- noinspection SqlNoDataSourceInspectionForFile
+
 -- noinspection SqlResolveForFile
 
 -- email used in users table
@@ -535,9 +537,61 @@ begin
             JOIN bus_stops bsa ON tr.arrival_stop = bsa.id
             JOIN spans sp ON tr.id_transit = sp.transit
             JOIN buses_in_span(sp.id, L, R) bii ON sp.id = bii.span
+        WHERE  GREATEST(L, sp.begin_date) <= LEAST(R, sp.end_date)
     ;
 end;
 $$
+language plpgsql;
+
+
+create or replace function buses_from_city( city_id numeric, L date, R date)
+returns TABLE(id_transit numeric, end_city numeric, end_city_name varchar(63), end_city_avg_price integer, end_city_rating integer,
+    price numeric(6, 2), departure timestamp, arrival timestamp) as
+    $$
+    begin
+        return QUERY
+        SELECT tr.id_transit, bsa.city, c.name, c.average_price, c.rating, tr.price, bii.departure, bii.arrival
+        FROM transits tr
+            JOIN bus_stops bsd ON tr.departure_stop = bsd.id
+            JOIN bus_stops bsa ON tr.arrival_stop = bsa.id
+            JOIN cities c ON c.id = bsa.city
+            JOIN spans sp ON tr.id_transit = sp.transit
+            JOIN buses_in_span(sp.id, L, R) bii ON sp.id = bii.span
+        WHERE bsd.city = city_id and GREATEST(L, sp.begin_date) <= LEAST(R, sp.end_date)
+    ;
+    end;
+    $$
+language plpgsql;
+
+create or replace function optional_visits(start_city numeric, start_time timestamp, end_city numeric, end_time timestamp)
+returns TABLE(id_tr1 numeric, tr1_str_city numeric, tr1_end_city numeric, tr1_price numeric(6, 2), tr1_departure timestamp, tr1_arrival timestamp,
+              id_tr2 numeric, tr2_str_city numeric, tr2_end_city numeric, tr2_price numeric(6, 2), tr2_departure timestamp, tr2_arrival timestamp)
+as
+    $$
+    begin
+        return query
+        select tr1.id_transit, tr1_bsd.city, tr1_bsa.city, tr1.price, bii1.departure, bii1.arrival,
+               tr2.id_transit, tr2_bsd.city, tr2_bsa.city, tr2.price, bii2.departure, bii2.arrival
+        from transits tr1
+            join bus_stops tr1_bsd on tr1.departure_stop = tr1_bsd.id
+            join bus_stops tr1_bsa on tr1.arrival_stop = tr1_bsd.id
+            join bus_stops tr2_bsd on tr2_bsd.city = tr1_bsa.city
+            join transits tr2 on tr2.departure_stop = tr2_bsd.id
+            join bus_stops tr2_bsa on tr2_bsa.id = tr2.arrival_stop
+            join spans sp1 on sp1.transit = tr1.id_transit
+            join spans sp2 on sp2.transit = tr2.id_transit
+            join buses_in_span(sp1.id, start_time::date, end_time::date) bii1 ON bii1.span = sp1.id
+            join buses_in_span(sp2.id, start_time::date, end_time::date) bii2 ON bii2.span = sp2.id
+        where tr1_bsd.city = start_city
+            and tr2_bsa.city = end_city
+            and GREATEST(start_time::date, sp1.begin_date) <= LEAST(end_time::date, sp1.end_date)
+            and GREATEST(start_time::date, sp2.begin_date) <= LEAST(end_time::date, sp2.end_date)
+            and bii1.arrival <= bii2.departure
+            and start_time <= bii1.departure
+            and bii2.arrival <= end_time
+        ;
+    end;
+    $$
 language plpgsql;
 
 

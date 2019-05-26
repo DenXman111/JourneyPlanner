@@ -1,3 +1,5 @@
+-- noinspection SqlNoDataSourceInspectionForFile
+
 -- noinspection SqlResolveForFile
 
 -- script used for removing all data created after running file JourneyPlannerDB.sql
@@ -42,3 +44,4 @@ DROP FUNCTION IF EXISTS transit_reservation_check();
 DROP DOMAIN IF EXISTS email;
 DROP EXTENSION IF EXISTS citext;
 DROP EXTENSION IF EXISTS pgcrypto;
+DROP TYPE IF EXISTS day;

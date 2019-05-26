@@ -56,7 +56,12 @@ public class ModerController implements Initializable{
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        ObservableList<String> observableCitiesList = FXCollections.observableArrayList(DbAdapter.getCityList());
+        ObservableList<String> observableCitiesList = null;
+        try {
+            observableCitiesList = FXCollections.observableArrayList(DbAdapter.getCityList());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         CityAChoiceBox.setItems(observableCitiesList);
         CityBChoiceBox.setItems(observableCitiesList);
     }

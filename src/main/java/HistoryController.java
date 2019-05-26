@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -29,7 +30,12 @@ public class HistoryController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         Trip.displayBookButton = false;
-        List<Trip> history = DbAdapter.getHistory(LoginController.username);
+        List<Trip> history = null;
+        try {
+            history = DbAdapter.getHistory(LoginController.username);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         assert history != null;
         answersVBox.getChildren().clear();
         history.stream().

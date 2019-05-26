@@ -1,4 +1,3 @@
-import com.jfoenix.controls.JFXDatePicker;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -10,10 +9,10 @@ import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.scene.control.ProgressBar;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 
@@ -54,7 +53,13 @@ public class FormController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        ObservableList<String> observableCitiesList = FXCollections.observableArrayList(DbAdapter.getCityList());
+
+        ObservableList<String> observableCitiesList = null;
+        try {
+            observableCitiesList = FXCollections.observableArrayList(DbAdapter.getCityList());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         MainCityChoiceBox.setItems(observableCitiesList);
 
         progressBar.setVisible(false);

@@ -14,6 +14,8 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +28,7 @@ public class Trip implements Displayable{
     private double rating;
     private int daysInTrip;
     private VBox mainPane;
-    private LocalDate beginDate, endDate;
+    private Timestamp beginTime, endTime;
 
     static private FormController formController;
     static boolean displayBookButton = true;
@@ -44,8 +46,8 @@ public class Trip implements Displayable{
         this.plan = new ArrayList<>(obj.plan);
         this.rating = obj.rating;
         this.daysInTrip = obj.daysInTrip;
-        this.beginDate = obj.beginDate;
-        this.endDate = obj.endDate;
+        this.beginTime = obj.beginTime;
+        this.endTime = obj.endTime;
         this.mainPane = null;
     }
 
@@ -62,7 +64,7 @@ public class Trip implements Displayable{
         Edge prev = null;
         for (Edge now : plan){
             if (prev != null){
-                int days = (int)DAYS.between(prev.getEndingDate(), now.getStartDate()) - 1;
+                int days = (int)DAYS.between(prev.getEndingDate().toLocalDateTime(), now.getStartDate().toLocalDateTime()) - 1;
                 this.rating = this.rating * this.daysInTrip + now.getStartCity().getRating() * days;
                 this.daysInTrip += days;
                 if (this.daysInTrip > 0) this.rating /= this.daysInTrip; else this.rating = 0;
@@ -75,7 +77,7 @@ public class Trip implements Displayable{
     public void pushEdge(Edge edge){
         if (!plan.isEmpty()){
             Edge last = plan.get(plan.size() - 1);
-            int days = (int)DAYS.between(last.getEndingDate(), edge.getStartDate()) - 1;
+            int days = (int)DAYS.between(last.getEndingDate().toLocalDateTime(), edge.getStartDate().toLocalDateTime()) - 1;
             this.rating = this.rating * this.daysInTrip + edge.getStartCity().getRating() * days;
             this.daysInTrip += days;
             if (this.daysInTrip > 0) this.rating /= this.daysInTrip; else this.rating = 0;
@@ -89,7 +91,7 @@ public class Trip implements Displayable{
         if (plan.size() > 1) {
             Edge last = plan.get(plan.size() - 1);
             Edge prev = plan.get(plan.size() - 2);
-            int days = (int)DAYS.between(prev.getEndingDate(), last.getStartDate()) - 1;
+            int days = (int)DAYS.between(prev.getEndingDate().toLocalDateTime(), last.getStartDate().toLocalDateTime()) - 1;
             this.rating *= this.daysInTrip;
             this.daysInTrip -= days;
             this.rating -= last.getStartCity().getRating() * days;
@@ -116,7 +118,7 @@ public class Trip implements Displayable{
     public int getLivingPrice(Edge edge){
         if (plan.isEmpty()) return 0;
         Edge last = plan.get(plan.size() - 1);
-        int days = (int)DAYS.between(last.getEndingDate(), edge.getStartDate());
+        int days = (int)DAYS.between(last.getEndingDate().toLocalDateTime(), edge.getStartDate().toLocalDateTime());
         return edge.getStartCity().getNightPrice() * days;
     }
 
@@ -134,18 +136,18 @@ public class Trip implements Displayable{
     class ModificationsFinder extends Task<Integer> {
 
         @Override
-        protected Integer call() {
+        protected Integer call() throws SQLException {
             if (plan == null || plan.isEmpty()) return null;
-            beginDate = beginDate == null ? plan.get(0).getStartDate() : beginDate;
-            endDate = endDate == null && !plan.isEmpty() ? plan.get(plan.size() - 1).getEndingDate() : endDate;
+            beginTime = beginTime == null ? plan.get(0).getStartDate() : beginTime;
+            endTime = endTime == null && !plan.isEmpty() ? plan.get(plan.size() - 1).getEndingDate() : endTime;
             for (int i = 0; i < plan.size(); i++) {
 
                 updateProgress(i, plan.size());
 
                 Edge edge = plan.get(i);
                 Edge nextEdge = i < plan.size() - 1 ? plan.get(i + 1) : null;
-                LocalDate begin = 0 < i ? plan.get(i - 1).getEndingDate() : beginDate.minusDays(1);
-                LocalDate end = nextEdge != null ? nextEdge.getStartDate() : endDate.plusDays(1);
+                Timestamp begin = 0 < i ? plan.get(i - 1).getEndingDate() : beginTime;
+                Timestamp end = nextEdge != null ? nextEdge.getStartDate() : endTime;
                 edge.findAdditionalVisits(begin, end);
                 edge.findOmittingEdge(nextEdge);
             }
@@ -204,12 +206,12 @@ public class Trip implements Displayable{
         return mainPane;
     }
 
-    private void fillHBox(Pane pane){
-        beginDate = beginDate == null && !plan.isEmpty() ? plan.get(0).getStartDate() : beginDate;
-        endDate = endDate == null && !plan.isEmpty() ? plan.get(plan.size() - 1).getEndingDate() : endDate;
+    private void fillHBox(Pane pane) throws SQLException {
+        beginTime = beginTime == null && !plan.isEmpty() ? plan.get(0).getStartDate() : beginTime;
+        endTime = endTime == null && !plan.isEmpty() ? plan.get(plan.size() - 1).getEndingDate() : endTime;
         pane.getChildren().clear();
         if (!plan.isEmpty()) {
-            plan.get(0).getStartCity().setDays(DAYS.between(beginDate, plan.get(0).getStartDate()));
+            //plan.get(0).getStartCity().setDays(DAYS.between(beginTime, plan.get(0).getStartDate()));
             pane.getChildren().add(plan.get(0).getStartCity().display(-1, this, null));
         }
         int index = 0;
@@ -266,7 +268,11 @@ public class Trip implements Displayable{
         tripBox.setMaxWidth(Region.USE_PREF_SIZE);
         tripBox.setPrefHeight(60);
         tripBox.getStyleClass().add("boxes");
-        fillHBox(tripBox);
+        try {
+            fillHBox(tripBox);
+        } catch (SQLException e) {
+            tripBox.getChildren().clear();
+        }
 
         Button showButton = new Button("map");
         showButton.getStyleClass().add("map-button");
@@ -291,10 +297,14 @@ public class Trip implements Displayable{
 
         if (displayBookButton  && LoginController.username != null) {
             bookButton.setOnMouseClicked( mouseEvent -> {
-                DbAdapter.reserve(this, LoginController.username);
-                bookButton.getStyleClass().add("booked");
-                bookButton.setText("booked");
-                bookButton.setOnMouseClicked( mouseEvent1 -> {});
+                try {
+                    DbAdapter.reserve(this, LoginController.username);
+                    bookButton.getStyleClass().add("booked");
+                    bookButton.setText("booked");
+                    bookButton.setOnMouseClicked( mouseEvent1 -> {});
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             });
             boxesAbove.getChildren().add(bookButton);
         }

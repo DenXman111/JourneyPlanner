@@ -1,9 +1,12 @@
+import ch.qos.logback.classic.db.DBAppender;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
 
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -46,22 +49,27 @@ public class Planner extends Task<Integer> {
     protected Integer call() {
         TripPlans trips = new TripPlans();
 
-        Integer startID = DbAdapter.getCityID(startPoint);
+        Integer startID;
+        try {
+            startID = DbAdapter.getCityID(startPoint);
+            trips.findBest(startID, funds, startDate, endDate);
+            List < Trip > propositions = new ArrayList<>(trips.getSet());
+            Collections.reverse(propositions);
 
-        trips.findBest(startID, funds, startDate, endDate);
-        List < Trip > propositions = new ArrayList<>(trips.getSet());
-        Collections.reverse(propositions);
+            propositions.forEach(trip -> System.out.println("Rating of trip: " + trip.getRating()));
 
-        propositions.forEach(trip -> System.out.println("Rating of trip: " + trip.getRating()));
+            if(box != null && progressBar != null)
+                displayTrips(propositions);
 
-        if(box != null && progressBar != null)
-            displayTrips(propositions);
-
-        return propositions.size();
+            return propositions.size();
+        } catch (SQLException | DatabaseException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public class TripPlans {
-        private Set < Integer > inCurrent;
+        private Set < City > inCurrent;
         private Set< Trip > TripsList;
         private Trip current;
 
@@ -69,7 +77,7 @@ public class Planner extends Task<Integer> {
 
         @SuppressWarnings("WeakerAccess")
         public TripPlans(){
-            inCurrent = new TreeSet<>();
+            inCurrent = new TreeSet<>(Comparator.comparingInt(City::getID));
             TripsList = new TreeSet<>(Comparator.comparingDouble(Trip::getRating));
             current = new Trip();
         }
@@ -79,45 +87,45 @@ public class Planner extends Task<Integer> {
             return TripsList;
         }
 
-        private void dfs(Integer nowID, int fund, LocalDate currentDate, LocalDate tripEndingDate){
+        private void dfs(City currentCity, int fund, Timestamp currentDate, Timestamp tripEndingDate) throws SQLException {
 
             int maxTripsNumber = 25;
             if(TripsList.size() >= maxTripsNumber)
                 return;
 
-            inCurrent.add(nowID);
-            if (nowID.equals(start) && !current.isEmpty()){
+            inCurrent.add(currentCity);
+            if (currentCity.getID().equals(start) && !current.isEmpty()){
 //            System.out.println("Found trip " + nowID + " " + current.getRating() + " " + current.getPlan());
                 TripsList.add(new Trip(current));
 
                 //used for progress bar
                 updateProgress(TripsList.size(), maxTripsNumber);
 
-                inCurrent.remove(nowID);
+                inCurrent.remove(currentCity);
                 return;
             }
 
 //        System.out.println("dfs in " + nowID + " " + fund + " " + currentDate + " " + current.getRating());
 
-            List < Edge > neighbours = DbAdapter.getNeighbours(nowID);
+            List < Edge > neighbours = DbAdapter.getNeighbours(currentCity, currentDate, tripEndingDate);
             for (Edge e : neighbours){
-                if (e.getEndingDate().isAfter(tripEndingDate)) continue;
-                if (!e.getStartDate().isAfter(currentDate)) continue;
+                if (e.getEndingDate().after(tripEndingDate)) continue;
+                if (!e.getStartDate().after(currentDate)) continue;
                 if (e.getPrice() > fund) continue;
-                if (inCurrent.contains(e.getEndCity().getID()) && !e.getEndCity().getID().equals(start)) continue;
+                if (inCurrent.contains(e.getEndCity()) && !e.getEndCity().getID().equals(start)) continue;
                 int livingPrice = current.getLivingPrice(e);
                 if (fund < e.getPrice() + livingPrice) continue;
                 current.pushEdge(e);
-                dfs(e.getEndCity().getID(), fund - e.getPrice() - livingPrice, e.getEndingDate(), tripEndingDate);
+                dfs(e.getEndCity(), fund - e.getPrice() - livingPrice, e.getEndingDate(), tripEndingDate);
                 current.removeLastEdge();
             }
 
-            inCurrent.remove(nowID);
+            inCurrent.remove(currentCity);
         }
         @SuppressWarnings("WeakerAccess")
-        public void findBest(Integer startID, int fund, LocalDate startDate, LocalDate endingDate){
+        public void findBest(Integer startID, int fund, LocalDate startDate, LocalDate endingDate) throws SQLException, DatabaseException {
             start = startID;
-            dfs(startID, fund, startDate, endingDate);
+            dfs(DbAdapter.getCityFromID(startID), fund, Timestamp.valueOf(startDate.atStartOfDay()), Timestamp.valueOf(endingDate.atStartOfDay()));
         }
     }
 }

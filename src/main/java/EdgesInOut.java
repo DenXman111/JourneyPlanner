@@ -1,8 +1,10 @@
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.sql.Timestamp;
 
 /**
  * Wrapper over pair of edges, inEdge should lead to the city where outEdge starts.
@@ -35,12 +37,12 @@ public class EdgesInOut implements Comparable<EdgesInOut>{
         return inEdge.getEndCity();
     }
 
-    private boolean isBetween(LocalDate begin, LocalDate end){
-        return begin.isBefore(inEdge.getStartDate()) && end.isAfter(outEdge.getEndingDate());
+    private boolean isBetween(Timestamp begin, Timestamp end){
+        return begin.before(inEdge.getStartDate()) && end.after(outEdge.getEndingDate());
     }
 
     private boolean dateIsProper(){
-        return inEdge.getEndingDate().isBefore(outEdge.getStartDate());
+        return inEdge.getEndingDate().before(outEdge.getStartDate());
     }
 
     /*
@@ -48,9 +50,10 @@ public class EdgesInOut implements Comparable<EdgesInOut>{
      *      |
      *      V
      */
-    public static List<EdgesInOut> possibleInserts(Edge edge, LocalDate begin, LocalDate end){
+    public static List<EdgesInOut> possibleInserts(Edge edge, Timestamp begin, Timestamp end) throws SQLException {
         if (edge == null || begin == null || end == null) return null;
-        List<EdgesInOut> listAll = DbAdapter.getCitiesBetween(edge.getStartCity().getID(), edge.getEndCity().getID())
+
+        List<EdgesInOut> listAll = DbAdapter.getCitiesBetween(edge.getStartCity().getID(), edge.getEndCity().getID(), begin, end)
                 .stream().filter(EdgesInOut::dateIsProper).collect(Collectors.toList());
         /*
          * In future we are should add here checking repeats cites

@@ -1,9 +1,13 @@
+import ch.qos.logback.classic.db.DBAppender;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -18,6 +22,7 @@ public class WelcomeController implements Initializable {
     public Button Login;
     public Button WelcomeSceneStartButton;
     public VBox ButtonsBox;
+    public ProgressIndicator progressIndicator;
     private Stage prevStage;
 
     @SuppressWarnings("WeakerAccess")
@@ -28,25 +33,31 @@ public class WelcomeController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle){
 
-        // EXAMPLE how to use task and update gui from other thread
-        /*Task<String> task = new Task<String>() {
+        if (DbAdapter.connected()) {
+            progressIndicator.setVisible(false);
+            return;
+        }
+        Login.setVisible(false);
+        SignUp.setVisible(false);
+        WelcomeSceneStartButton.setVisible(false);
+        Task<Integer> connectTask = new Task<Integer>() {
             @Override
-            protected String call() throws Exception {
-                System.out.println("Start");
-                updateValue("Start working");
-                try {
-                    TimeUnit.SECONDS.sleep(3);
-                } catch (InterruptedException ignored) { }
-                System.out.println("End");
-                updateValue("End working");
-                Platform.runLater(() -> ButtonsBox.getChildren().add(new Button("new button")));
-                return "BAM";
+            protected Integer call() {
+                DbAdapter.connect();
+
+                Platform.runLater(() -> {
+                    Login.setVisible(true);
+                    SignUp.setVisible(true);
+                    WelcomeSceneStartButton.setVisible(true);
+                    progressIndicator.setVisible(false);
+                });
+                return 100;
             }
         };
-        WelcomeSceneStartButton.textProperty().bind(task.valueProperty());
-        new Thread(task).start();
 
-         */
+        progressIndicator.progressProperty().bind(connectTask.progressProperty());
+        new Thread(connectTask).start();
+
     }
 
     @SuppressWarnings({"Duplicates", "unused"})
