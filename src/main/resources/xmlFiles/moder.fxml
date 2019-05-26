@@ -42,5 +42,14 @@
             <Font size="17.0" />
          </font>
       </Button>
+      <ChoiceBox fx:id="CityCChoiceBox" accessibleText="Starting city" layoutX="111.0" layoutY="351.0" prefHeight="38.0" prefWidth="273.0" style="-fx-background-insets: 0, 1, 1;" />
+      <ChoiceBox fx:id="CityDChoiceBox" accessibleText="Starting city" layoutX="410.0" layoutY="351.0" prefHeight="38.0" prefWidth="273.0" style="-fx-background-insets: 0, 1, 1;" />
+      <DatePicker fx:id="DepartureDate2" layoutX="111.0" layoutY="402.0" maxWidth="-Infinity" prefHeight="29.0" prefWidth="273.0" promptText="Departure date" style="-fx-background-insets: 0, 1, 1;" />
+      <DatePicker fx:id="ArrivalDate2" layoutX="410.0" layoutY="402.0" maxWidth="-Infinity" prefHeight="29.0" prefWidth="273.0" promptText="Arrival date" style="-fx-background-insets: 0, 1, 1;" />
+      <Button fx:id="DeleteByParametersButton" layoutX="339.0" layoutY="440.0" mnemonicParsing="false" onAction="#deleteBusByParametersPressed" prefHeight="38.0" prefWidth="116.0" style="-fx-background-insets: 0, 0, 0;" text="Delete bus" textFill="#14a085">
+         <font>
+            <Font size="17.0" />
+         </font>
+      </Button>
    </children>
 </AnchorPane>

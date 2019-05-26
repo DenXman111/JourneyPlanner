@@ -145,6 +145,23 @@ public class DbAdapter {
         pst.executeUpdate();
     }
 
+    public static boolean haveBusWithParameters(int id1, int id2, LocalDate departure, LocalDate arrival) throws SQLException{
+
+        statement = connection.createStatement();
+        String query="Select count(*) from buses WHERE start_city =\'"+id1+"\' and end_city=\'"+id2+"\' and departure=\'"+departure+"\' and arrival=\'"+arrival+"\'";
+        ResultSet result=statement.executeQuery(query);
+        if (result.next()){
+            if (result.getInt("count") == 0) return false; else
+                return true;
+        } else return false;
+    }
+
+    public static void removeBusByParameters(int id1,int id2, LocalDate departure, LocalDate arrival) throws SQLException{
+        if (!haveBusWithParameters(id1,id2,departure,arrival)) throw new SQLException();
+        statement = connection.createStatement();
+        String query = "DELETE FROM buses WHERE start_city =\'"+id1+"\' and end_city=\'"+id2+"\' and departure=\'"+departure+"\' and arrival=\'"+arrival+"\'";
+        statement.executeUpdate(query);
+    }
     public static boolean haveUser(String username, String password){
         try {
             statement = connection.createStatement();
