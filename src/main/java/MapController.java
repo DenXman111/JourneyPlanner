@@ -2,7 +2,6 @@ import com.lynden.gmapsfx.GoogleMapView;
 import com.lynden.gmapsfx.MapComponentInitializedListener;
 import com.lynden.gmapsfx.javascript.object.*;
 import com.lynden.gmapsfx.service.directions.*;
-import netscape.javascript.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 
@@ -10,11 +9,12 @@ import java.net.URL;
 import java.util.*;
 
 public class MapController implements Initializable, MapComponentInitializedListener, DirectionsServiceCallback {
-    protected DirectionsService directionsService;
-    protected DirectionsPane directionsPane;
+    private DirectionsService directionsService;
+    private DirectionsPane directionsPane;
 
     protected String from;
     protected String to;
+    @SuppressWarnings("WeakerAccess")
     protected DirectionsRenderer directionsRenderer = null;
     private GoogleMap map;
 
@@ -27,6 +27,7 @@ public class MapController implements Initializable, MapComponentInitializedList
         mapView.addMapInializedListener(this);
     }
 
+    @SuppressWarnings("unused")
     private void createStartMarker(City startCity){
         LatLong latLong = new DirectionsWaypoint(startCity.getName() + ", " + startCity.getCountry()).getLocation();
 
@@ -60,6 +61,7 @@ public class MapController implements Initializable, MapComponentInitializedList
         }
         Collections.reverse(points);
 
+        //noinspection ToArrayCallWithZeroLengthArrayArgument
         DirectionsRequest request =
                 new DirectionsRequest(startCity.getName() + ", " + startCity.getCountry(),
                         startCity.getName() + ", " + startCity.getCountry(), TravelModes.DRIVING, points.toArray(new DirectionsWaypoint[points.size()]));

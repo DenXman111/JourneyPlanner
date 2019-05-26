@@ -40,6 +40,16 @@
     -fx-background-color: rgba(124, 46, 43, 0.98);
 }
 
+.map-button{
+    -fx-background-color: #1a7754;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+}
+
+.map-button:hover{
+    -fx-background-color: #145a4b;
+}
+
 .booked{
     -fx-background-color: rgb(122, 174, 106);
     -fx-text-fill: white;
@@ -60,11 +70,11 @@
     -fx-background-color: white;
     -fx-background-radius: 15;
     -fx-padding: 10 10 10 10;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.55), 30, 0, 0, 9);
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.33), 10, 0, 0, 8);
 }
 
 .boxes:hover{
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 30, 0, 0, 8);
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 10, 0, 0, 6);
 }
 
 .rating-box{
@@ -117,3 +127,4 @@
 .icon:hover{
     -fx-opacity: 0.9;
 }
+

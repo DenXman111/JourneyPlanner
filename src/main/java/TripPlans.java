@@ -1,11 +1,14 @@
+/*
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.*;
 
 
-/**
- * Class have list of best trips and fill it.
- */
+*/
+/*
+  Class have list of best trips and fill it.
+ *//*
+
 @SuppressWarnings("WeakerAccess")
 public class TripPlans {
     private Set < Integer > inCurrent;
@@ -56,6 +59,6 @@ public class TripPlans {
     public void findBest(Integer startID, int fund, LocalDate startDate, LocalDate endingDate){
         start = startID;
         dfs(startID, fund, startDate, endingDate);
-//        System.out.println("TRIPSLIST " + TripsList.toArray().length);
     }
 }
+*/

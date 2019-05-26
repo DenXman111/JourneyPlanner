@@ -25,6 +25,9 @@ public class Edge implements Displayable{
     private LocalDate endingDate;
     private int price;
 
+    private List<EdgesInOut> additionalVisits;
+    private Edge edgeOmittingEndCity;
+
     Edge(Integer busID, City startCity, City endCity, int price, LocalDate startDate, LocalDate endingDate){
         this.busID = busID;
         this.startCity = startCity;
@@ -34,6 +37,7 @@ public class Edge implements Displayable{
         this.endingDate = endingDate;
     }
 
+    @SuppressWarnings("unused")
     private Edge(Edge edge){
         this.busID = edge.busID;
         this.startCity = edge.startCity;
@@ -41,6 +45,23 @@ public class Edge implements Displayable{
         this.startDate = edge.startDate;
         this.endingDate = edge.endingDate;
         this.price = edge.price;
+        this.additionalVisits = edge.additionalVisits;
+        this.edgeOmittingEndCity = edge.edgeOmittingEndCity;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public void findOmittingEdge(Edge nextEdge){
+        edgeOmittingEndCity = mergeEdges(this, nextEdge);
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public void findAdditionalVisits(LocalDate begin, LocalDate end){
+        additionalVisits = EdgesInOut.possibleInserts(this, begin, end);
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public Edge getEdgeOmittingEndCity(){
+        return edgeOmittingEndCity;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -53,7 +74,6 @@ public class Edge implements Displayable{
         return endCity;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public int getPrice() { return price; }
 
     @SuppressWarnings("WeakerAccess")
@@ -84,7 +104,7 @@ public class Edge implements Displayable{
     }
 
     @SuppressWarnings("WeakerAccess")
-    public Pane display(Trip trip, int index, List<EdgesInOut> edges){
+    public Pane display(Trip trip, int index){
         Pane box = display();
 
         ImageView addIcon = new ImageView("plus-sign.png");
@@ -93,11 +113,11 @@ public class Edge implements Displayable{
         addIcon.getStyleClass().add("icon");
         VBox.setMargin(addIcon, new Insets(7, 0, 0, 0));
         addIcon.setVisible(false);
-        if (trip != null && edges != null && !edges.isEmpty() && Trip.displayBookButton) {
+        if (trip != null && additionalVisits != null && !additionalVisits.isEmpty() && Trip.displayBookButton) {
             addIcon.setVisible(true);
             ContextMenu citiesMenu = new ContextMenu();
 
-            Stream<MenuItem> itemsStream = edges.stream().map(inOut -> {
+            Stream<MenuItem> itemsStream = additionalVisits.stream().map(inOut -> {
                 MenuItem item = new MenuItem(inOut.getMiddleCity().getName());
                 item.setOnAction(actionEvent -> trip.insertEdges(index, inOut.getInEdge(), inOut.getOutEdge()));
                 return item;
@@ -114,6 +134,8 @@ public class Edge implements Displayable{
     private boolean isBetween(LocalDate begin, LocalDate end){
         return !begin.isAfter(startDate) && !end.isBefore(endingDate);
     }
+
+
     /*
      * Function requires improvement
      *      |

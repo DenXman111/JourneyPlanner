@@ -5,18 +5,16 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.scene.control.ProgressBar;
 
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public class FormController implements Initializable {
@@ -45,6 +43,9 @@ public class FormController implements Initializable {
     private Button ReturnButton;
 
     @FXML
+    private ProgressBar progressBar;
+
+    @FXML
     private VBox answersVBox;
 
     void setPrevStage(Stage stage){
@@ -56,8 +57,11 @@ public class FormController implements Initializable {
         ObservableList<String> observableCitiesList = FXCollections.observableArrayList(DbAdapter.getCityList());
         MainCityChoiceBox.setItems(observableCitiesList);
 
+        progressBar.setVisible(false);
+
         if (LoginController.username != null)
             loginLabel.setText("logged as " + LoginController.username);
+
     }
 
     private void check() throws FieldsDataException{
@@ -83,24 +87,20 @@ public class FormController implements Initializable {
         try {
             check(); //without checking for debug
             Trip.displayBookButton = true;
-            List<Trip> propositions = Planner.
-                    plan(   MainCityChoiceBox.getValue(),
-                            Integer.valueOf(MainFieldFunds.getText()),
-                            MainFieldStartDate.getValue(),
-                            MainFieldEndingDate.getValue() );
-            assert propositions != null;
+            progressBar.setVisible(true);
             answersVBox.getChildren().clear();
-
             Trip.setFormController(this);
-
-            propositions.stream().
-                    map(Trip::display).
-                    forEach(node -> {
-                        answersVBox.getChildren().add(node);
-                        VBox.setMargin(node, new Insets(20, 10, 10, 20));
-                    });
-
             MainButtonFind.setPrefWidth(170);
+
+            Planner planing = new Planner(MainCityChoiceBox.getValue(),
+                    Integer.valueOf(MainFieldFunds.getText()),
+                    MainFieldStartDate.getValue(),
+                    MainFieldEndingDate.getValue());
+
+            planing.setDisplayData(answersVBox, progressBar);
+
+            progressBar.progressProperty().bind(planing.progressProperty());
+            new Thread(planing).start();
 
         } catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
@@ -126,6 +126,7 @@ public class FormController implements Initializable {
         stage.show();
     }
 
+    @SuppressWarnings("WeakerAccess")
     protected static Trip tripToShowing;
     void showButtonPressed(Trip trip) throws IOException {
         tripToShowing = trip;

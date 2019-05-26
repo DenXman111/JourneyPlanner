@@ -1,23 +1,52 @@
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class WelcomeController {
+public class WelcomeController implements Initializable {
 
     public Button SignUp;
     public Button Login;
     public Button WelcomeSceneStartButton;
+    public VBox ButtonsBox;
     private Stage prevStage;
 
     @SuppressWarnings("WeakerAccess")
     public void setPrevStage(Stage stage){
         this.prevStage = stage;
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle){
+
+        // EXAMPLE how to use task and update gui from other thread
+        /*Task<String> task = new Task<String>() {
+            @Override
+            protected String call() throws Exception {
+                System.out.println("Start");
+                updateValue("Start working");
+                try {
+                    TimeUnit.SECONDS.sleep(3);
+                } catch (InterruptedException ignored) { }
+                System.out.println("End");
+                updateValue("End working");
+                Platform.runLater(() -> ButtonsBox.getChildren().add(new Button("new button")));
+                return "BAM";
+            }
+        };
+        WelcomeSceneStartButton.textProperty().bind(task.valueProperty());
+        new Thread(task).start();
+
+         */
     }
 
     @SuppressWarnings({"Duplicates", "unused"})

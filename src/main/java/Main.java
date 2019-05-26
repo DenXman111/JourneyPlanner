@@ -3,15 +3,24 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import com.lynden.gmapsfx.*;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class Main extends Application {
+
+    @SuppressWarnings("WeakerAccess")
+    public static final ExecutorService daemonExecutor = Executors.newFixedThreadPool(1,
+            r -> {
+                Thread t = Executors.defaultThreadFactory().newThread(r);
+                t.setDaemon(true);
+                return t;
+            });
+
     @Override
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setTitle("JourneyPlanner");
-
-        com.lynden.gmapsfx.GoogleMapView googleMapView = null;
 
         FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
 

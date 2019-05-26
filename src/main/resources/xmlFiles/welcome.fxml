@@ -22,7 +22,7 @@
       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
       <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" vgrow="SOMETIMES" />
    </rowConstraints>
-   <VBox alignment="CENTER" styleClass="background-prague" GridPane.rowIndex="1">
+   <VBox fx:id="ButtonsBox" alignment="CENTER" styleClass="background-prague" GridPane.rowIndex="1">
       <Button fx:id="WelcomeSceneStartButton" alignment="CENTER" mnemonicParsing="false" onAction="#startButtonPressed"
               prefHeight="40.0" prefWidth="300.0" style="-fx-background-insets: 0, 1, 1;" styleClass="mainButton"
               stylesheets="@../styleSheet.css" text="Plan my trip">

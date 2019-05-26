@@ -1,13 +1,12 @@
-import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -26,8 +25,7 @@ public class Trip implements Displayable{
     private List<Edge> plan;
     private double rating;
     private int daysInTrip;
-    private HBox createdTripBox, createdInformationBox;
-    private Pane mainPane;
+    private VBox mainPane;
     private LocalDate beginDate, endDate;
 
     static private FormController formController;
@@ -48,21 +46,14 @@ public class Trip implements Displayable{
         this.daysInTrip = obj.daysInTrip;
         this.beginDate = obj.beginDate;
         this.endDate = obj.endDate;
-        this.createdTripBox = null;
         this.mainPane = null;
-        this.createdInformationBox = null;
     }
 
+    @SuppressWarnings("WeakerAccess")
     static public void setFormController(FormController controller){
         formController = controller;
     }
-    /*
-    // Used for generating random trips during testing trip.display
-    public Trip(List<Edge> plan){
-        this.plan = plan;
-        rating = new Random().nextInt(500) / 100.0;
-    }
-    */
+
 
     @SuppressWarnings({"WeakerAccess", "Duplicates"})
     public void countRating(){
@@ -90,11 +81,7 @@ public class Trip implements Displayable{
             if (this.daysInTrip > 0) this.rating /= this.daysInTrip; else this.rating = 0;
             //this.rating = Math.round(this.rating * 100) / 100;
         }
-
         plan.add(edge);
-        //System.out.println("----");
-        //System.out.println("Wanna add edge " + e.getStartCity().getID() + " " + e.getEndCity().getID());
-        //System.out.println(plan.size());
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -116,6 +103,7 @@ public class Trip implements Displayable{
         return plan.isEmpty();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public City getStartCity(){
         return plan.get(0).getStartCity();
     }
@@ -142,6 +130,33 @@ public class Trip implements Displayable{
         this.rating = rating;
     }
 
+
+    class ModificationsFinder extends Task<Integer> {
+
+        @Override
+        protected Integer call() {
+            if (plan == null || plan.isEmpty()) return null;
+            beginDate = beginDate == null ? plan.get(0).getStartDate() : beginDate;
+            endDate = endDate == null && !plan.isEmpty() ? plan.get(plan.size() - 1).getEndingDate() : endDate;
+            for (int i = 0; i < plan.size(); i++) {
+
+                updateProgress(i, plan.size());
+
+                Edge edge = plan.get(i);
+                Edge nextEdge = i < plan.size() - 1 ? plan.get(i + 1) : null;
+                LocalDate begin = 0 < i ? plan.get(i - 1).getEndingDate() : beginDate.minusDays(1);
+                LocalDate end = nextEdge != null ? nextEdge.getStartDate() : endDate.plusDays(1);
+                edge.findAdditionalVisits(begin, end);
+                edge.findOmittingEdge(nextEdge);
+            }
+
+            Platform.runLater(Trip.this::displayTripData);
+            return 100;
+        }
+    }
+
+
+
     /**
      * Removes from plan two consecutive edges and inserts new edge bypassing their common city
      * @param index index of edge in the plan list whose endCity is to be removed
@@ -155,8 +170,7 @@ public class Trip implements Displayable{
         iterator.next();
         iterator.remove();
         countRating();
-        if (createdTripBox != null) fillHBox(createdTripBox);
-        if (createdInformationBox != null) fillInformationPane(createdInformationBox);
+        if (mainPane != null) display();
     }
 
     void insertEdges(int index, Edge first, Edge second){
@@ -166,13 +180,28 @@ public class Trip implements Displayable{
         plan.add(index + 1, second);
 
         countRating();
-        if (createdTripBox != null) fillHBox(createdTripBox);
-        if (createdInformationBox != null) fillInformationPane(createdInformationBox);
+        if (mainPane != null) display();
     }
 
     @Override
     public Node display() {
-        return mainPane != null ? mainPane : createNode();
+        if (mainPane == null){
+            mainPane = new VBox();
+            mainPane.setAlignment(Pos.CENTER_LEFT);
+            mainPane.setMaxWidth(Region.USE_PREF_SIZE);
+        }
+
+        mainPane.getChildren().clear();
+        ProgressIndicator indicator = new ProgressIndicator();
+
+        ModificationsFinder finder = new ModificationsFinder();
+        indicator.progressProperty().bind(finder.progressProperty());
+
+        Main.daemonExecutor.submit(finder);
+
+        mainPane.getChildren().add(indicator);
+
+        return mainPane;
     }
 
     private void fillHBox(Pane pane){
@@ -184,15 +213,10 @@ public class Trip implements Displayable{
             pane.getChildren().add(plan.get(0).getStartCity().display(-1, this, null));
         }
         int index = 0;
-        for (int i = 0; i < plan.size(); i++) {
-            Edge edge = plan.get(i);
-            Edge nextEdge = i < plan.size() - 1 ? plan.get(i + 1) : null;
-            LocalDate begin = 0 < i ? plan.get(i - 1).getEndingDate() : beginDate.minusDays(1);
-            LocalDate end = nextEdge != null  ? nextEdge.getStartDate() : endDate.plusDays(1);
-            //edge.getEndCity().setDays(DAYS.between(edge.getEndingDate(), nextEdge.getStartDate()));
+        for (Edge edge : plan) {
             pane.getChildren().addAll(
-                    edge.display(this, index, EdgesInOut.possibleInserts(edge, begin, end)),
-                    edge.getEndCity().display(index++, this, Edge.mergeEdges(edge, nextEdge))
+                    edge.display(this, index),
+                    edge.getEndCity().display(index++, this, Edge.mergeEdges(edge, edge.getEdgeOmittingEndCity()))
             );
         }
     }
@@ -224,11 +248,10 @@ public class Trip implements Displayable{
         ratingPane.getChildren().addAll(ratingLabel, stars, numberLabel, travelTimeLabel);
     }
 
-    private Node createNode(){
+    private void displayTripData(){
         //box wraps rating and drawn trip plan
-        VBox box = new VBox();
-        box.setAlignment(Pos.CENTER_LEFT);
-        box.setMaxWidth(Region.USE_PREF_SIZE);
+
+        mainPane.getChildren().clear();
 
         HBox informationBox = new HBox();
         informationBox.setAlignment(Pos.BOTTOM_LEFT);
@@ -237,8 +260,6 @@ public class Trip implements Displayable{
 
         fillInformationPane(informationBox);
 
-        createdInformationBox = informationBox;
-
         // display all information about trip in HBox
         HBox tripBox = new HBox();
         tripBox.setAlignment(Pos.CENTER_LEFT);
@@ -246,10 +267,9 @@ public class Trip implements Displayable{
         tripBox.setPrefHeight(60);
         tripBox.getStyleClass().add("boxes");
         fillHBox(tripBox);
-        createdTripBox = tripBox;
 
-        Button showButton = new Button("show");
-        showButton.getStyleClass().add("booked");
+        Button showButton = new Button("map");
+        showButton.getStyleClass().add("map-button");
         HBox.setMargin(showButton, new Insets(0, 10, 0, 0));
 
         Button bookButton = new Button("book");
@@ -280,7 +300,6 @@ public class Trip implements Displayable{
         }
         boxesAbove.getChildren().add(informationBox);
 
-        box.getChildren().addAll(boxesAbove, tripBox);
-        return box;
+        mainPane.getChildren().addAll(boxesAbove, tripBox);
     }
 }
