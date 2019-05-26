@@ -348,3 +348,4 @@ insert into users values('q','b','d','d','e');
 insert into trips values(1,1,'a');
 insert into trips values(1,8,'a');
 insert into trips values(2,15,'a');
+insert into trips values(3,8,'q');

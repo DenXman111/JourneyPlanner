@@ -1,3 +1,4 @@
+import ch.qos.logback.classic.db.DBAppender;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -109,14 +110,20 @@ public class ModerController implements Initializable{
         try{
             if (BusNumberField.getText().length() == 0) throw new FieldsDataException("Bus number field is empty");
             if (!BusNumberField.getText().matches("\\d+")) throw new FieldsDataException("Write number to bus number field");
-
             DbAdapter.removeBusByID(Integer.valueOf(BusNumberField.getText()));
             new ErrorWindow("Deleted!");
         } catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
         }
         catch (SQLException e){
-            new ErrorWindow("Bus in Reservation");
+            try {
+                DbAdapter.removeReservationsByID(Integer.valueOf(BusNumberField.getText()));
+                DbAdapter.removeBusByID(Integer.valueOf(BusNumberField.getText()));
+            }
+            catch(Exception f){
+                new ErrorWindow("Bus in Reservation");
+            }
+
         }
         catch (Exception e)
         {
@@ -136,7 +143,13 @@ public class ModerController implements Initializable{
             new ErrorWindow(e.getMessage());
         }
         catch (SQLException e) {
-            new ErrorWindow("Bus in Reservation");
+            try{
+            int idd=DbAdapter.getIDFromParameters(DbAdapter.getCityID(CityCChoiceBox.getValue()), DbAdapter.getCityID(CityDChoiceBox.getValue()),DepartureDate2.getValue(), ArrivalDate2.getValue());
+            DbAdapter.removeReservationsByID(idd);
+            DbAdapter.removeBusByID(idd);
+            } catch (Exception f){
+                new ErrorWindow("Bus in Reservation");
+            }
         }
         catch (Exception e)
         {

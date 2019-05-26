@@ -145,6 +145,30 @@ public class DbAdapter {
         pst.executeUpdate();
     }
 
+    public static void removeReservationsByID(int id) throws Exception {
+        statement = connection.createStatement();
+        String query = "select id from trips where bus_id=\'" + id + "\'";
+        ResultSet result = statement.executeQuery(query);
+        while (result.next()) {
+            int i=result.getInt("id");
+            String query2 ="delete from trips where id = ?";
+            PreparedStatement pst = connection.prepareStatement(query2);
+            pst.setInt(1, i);
+            pst.executeUpdate();
+        }
+    }
+
+    public static int getIDFromParameters(int id1, int id2, LocalDate departure, LocalDate arrival) throws Exception
+    {
+        statement = connection.createStatement();
+        String query="Select id from buses WHERE start_city =\'"+id1+"\' and end_city=\'"+id2+"\' and departure=\'"+departure+"\' and arrival=\'"+arrival+"\'";
+        ResultSet result=statement.executeQuery(query);
+        if(result.next()){
+            return result.getInt("id");
+        }
+        return -1;
+    }
+
     public static boolean haveBusWithParameters(int id1, int id2, LocalDate departure, LocalDate arrival) throws SQLException{
 
         statement = connection.createStatement();
@@ -269,7 +293,6 @@ public class DbAdapter {
                 String query2 = "Select buses.* from buses join (select * from trips where id=\'" + tr + "\' and traveler=\'"+user+"\') as a on buses.id=a.bus_id order by a.id,departure;";
                 ResultSet result2 = statement.executeQuery(query2);
                 while (result2.next()) {
-                    System.out.println(tr);
                     City r1 = getCityFromID(result2.getInt("start_city"));
                     City r2 = getCityFromID(result2.getInt("end_city"));
                     Edge b = new Edge(result2.getInt("id"), r1, r2, result2.getInt("price"),
