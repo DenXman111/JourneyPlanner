@@ -3,20 +3,14 @@ import com.lynden.gmapsfx.MapComponentInitializedListener;
 import com.lynden.gmapsfx.javascript.object.*;
 import com.lynden.gmapsfx.service.directions.*;
 import com.lynden.gmapsfx.service.geocoding.*;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ProgressBar;
 
-import javax.swing.plaf.PanelUI;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.*;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 public class MapController implements Initializable, MapComponentInitializedListener, DirectionsServiceCallback {
     private DirectionsService directionsService;
@@ -51,14 +45,20 @@ public class MapController implements Initializable, MapComponentInitializedList
                     MarkerOptions markerOptions = new MarkerOptions();
                     markerOptions.position(new LatLong(latitude, longitude));
                     markerOptions.title(city.getName());
-                    //markerOptions.icon(BitmapDescriptorFactory.fromResource());
+                    //markerOptions.icon("");
                     Marker marker = new Marker(markerOptions);
                     map.addMarker(marker);
 
                     InfoWindowOptions infoWindowOptions = new InfoWindowOptions();
-                    infoWindowOptions.content("<h2>" + title + "</h2>"
-                            + "Rating: " + city.getRating() + "<br>"
-                            + "Price for night: " + city.getNightPrice() + "€");
+                    if (title.equals("Start")) infoWindowOptions.content("<h2>" + title + "</h2>");
+                        else {
+                            infoWindowOptions.content("<h2>" + title + "</h2>"
+                                + "Rating: " + city.getRating() + "<br>"
+                                + "Days here: " + ((int) DAYS.between(startDates.get(city.getName()), endingDates.get(city.getName())) - 1) + "<br>"
+                                + "Arrival date: " + startDates.get(city.getName()) + "<br>"
+                                + "Departure date: " + endingDates.get(city.getName()) + "<br>"
+                                + "Apartment price: " + city.getNightPrice() * ((int) DAYS.between(startDates.get(city.getName()), endingDates.get(city.getName()))) + "€");
+                        }
 
                     InfoWindow infoWindow = new InfoWindow(infoWindowOptions);
                     infoWindow.open(map, marker);
@@ -67,22 +67,44 @@ public class MapController implements Initializable, MapComponentInitializedList
         );
     }
 
+    private Map<String, LocalDate> startDates = new HashMap<>();
+    private Map<String, LocalDate> endingDates = new HashMap<>();
+
     private void showCurrentTrip(){
         City startCity = FormController.tripToShowing.getStartCity();
-        //Setting DirectionsWaypoints
 
-        int number = 1, len = FormController.tripToShowing.getPlan().size();
-        List<DirectionsWaypoint> points = new ArrayList<>();
+        int number = 1;
+        //List<DirectionsWaypoint> points = new ArrayList<>();
+        addMarker(startCity, "Start");
+
         for (Edge edge : FormController.tripToShowing.getPlan()){
-            if (startCity.getName().equals(edge.getEndCity().getName())) break;
-            addMarker(edge.getEndCity(), NumberConventer.convertNumber(number));
-            number++;
-            points.add(new DirectionsWaypoint(edge.getEndCity().getName() + ", " + edge.getEndCity().getCountry()));
+            startDates.put(edge.getEndCity().getName(), edge.getEndingDate());
+            endingDates.put(edge.getStartCity().getName(), edge.getStartDate());
+
+            if (!startCity.getName().equals(edge.getEndCity().getName())) {
+                addMarker(edge.getEndCity(), NumberConventer.convertNumber(number));
+                number++;
+            }
+//            points.add(new DirectionsWaypoint(edge.getEndCity().getName() + ", " + edge.getEndCity().getCountry()));
+//            System.out.println(edge.getEndCity().getName() + ", " + edge.getEndCity().getCountry() + "  :::  " + points.get(points.size() - 1).getVariableName());
+
+            City A = edge.getStartCity();
+            City B = edge.getEndCity();
+
+            DirectionsRequest request =
+                    new DirectionsRequest(A.getName() + ", " + A.getCountry(),
+                            B.getName() + ", " + B.getCountry(), TravelModes.DRIVING);
+
+            directionsRenderer = new DirectionsRenderer(true, mapView.getMap(), directionsPane);
+            directionsService.getRoute(request, this, directionsRenderer);
+
         }
-        Collections.reverse(points);
+        //Collections.reverse(points);
 
         //Direction adding
 
+        //BUILD ROAD IN BAD ORDER
+/*
         Platform.runLater(()->{
             DirectionsRequest request =
                     new DirectionsRequest(startCity.getName() + ", " + startCity.getCountry(),
@@ -92,6 +114,8 @@ public class MapController implements Initializable, MapComponentInitializedList
             directionsService.getRoute(request, this, directionsRenderer);
             addMarker(startCity, "Start");
         });
+
+ */
 
     }
     @Override
