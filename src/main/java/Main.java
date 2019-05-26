@@ -9,6 +9,8 @@ import java.util.concurrent.Executors;
 
 
 public class Main extends Application {
+    @SuppressWarnings("WeakerAccess")
+    protected static String APIkey = "AIzaSyAE3KHmNCMilnkhmDhdMLvM2Nvpcbc1XaA";
 
     @SuppressWarnings("WeakerAccess")
     public static final ExecutorService daemonExecutor = Executors.newFixedThreadPool(1,
