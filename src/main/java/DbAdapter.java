@@ -87,6 +87,20 @@ public class DbAdapter {
         return null;
     }
 
+    public static String getCountryFromID(Integer ID){
+        try {
+            statement = connection.createStatement();
+            String query="Select * from cities where id=\'"+ID+"\'";
+            ResultSet result=statement.executeQuery(query);
+            while (result.next()){
+                return result.getString("country");
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static void addNewUser(String username, String password, String email, String name, String surname) throws SQLException{
         statement = connection.createStatement();
         String query="INSERT INTO users(username, password, email, name, surname) VALUES(?, ?, ?, ?, ?)";

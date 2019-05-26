@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: java.desktop.modpatch:java.desktop.modpatch:1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/java/desktop/modpatch/java.desktop.modpatch/1/java.desktop.modpatch-1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/java/desktop/modpatch/java.desktop.modpatch/1/java.desktop.modpatch-1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/java/desktop/modpatch/java.desktop.modpatch/1/java.desktop.modpatch-1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

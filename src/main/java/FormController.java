@@ -126,7 +126,10 @@ public class FormController implements Initializable {
         stage.show();
     }
 
-    void showButtonPressed(ActionEvent event) throws IOException {
+    protected static Trip tripToShowing;
+    void showButtonPressed(Trip trip) throws IOException {
+        tripToShowing = trip;
+
         FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/map.fxml"));
         Pane myPane = myLoader.load();
 

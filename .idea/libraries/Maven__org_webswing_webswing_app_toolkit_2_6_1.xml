@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.webswing:webswing-app-toolkit:2.6.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/webswing/webswing-app-toolkit/2.6.1/webswing-app-toolkit-2.6.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/webswing/webswing-app-toolkit/2.6.1/webswing-app-toolkit-2.6.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/webswing/webswing-app-toolkit/2.6.1/webswing-app-toolkit-2.6.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

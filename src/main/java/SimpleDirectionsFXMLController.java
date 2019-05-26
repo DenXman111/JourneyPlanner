@@ -31,7 +31,9 @@ public class SimpleDirectionsFXMLController implements Initializable, MapCompone
 
     @FXML
     private void toTextFieldAction(ActionEvent event) {
+        System.out.println(from.get() + " " + to.get());
         DirectionsRequest request = new DirectionsRequest(from.get(), to.get(), TravelModes.DRIVING);
+
         directionsRenderer = new DirectionsRenderer(true, mapView.getMap(), directionsPane);
         directionsService.getRoute(request, this, directionsRenderer);
     }
@@ -47,7 +49,7 @@ public class SimpleDirectionsFXMLController implements Initializable, MapCompone
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        //mapView.setKey("API key");
+        mapView.setKey("AIzaSyAE3KHmNCMilnkhmDhdMLvM2Nvpcbc1XaA");
         mapView.addMapInializedListener(this);
         to.bindBidirectional(toTextField.textProperty());
         from.bindBidirectional(fromTextField.textProperty());

@@ -37,11 +37,13 @@ public class City implements Displayable {
     @SuppressWarnings({"unused"})
     public double getRating() { return rating; }
 
-    @SuppressWarnings({"unused", "WeakerAccess"})
+    @SuppressWarnings("WeakerAccess")
     public int getNightPrice() { return nightPrice; }
 
-    @SuppressWarnings({"unused"})
     public String getName() { return name; }
+
+    @SuppressWarnings("WeakerAccess")
+    public String getCountry() { return DbAdapter.getCountryFromID(cityID); }
 
     /**
      * Wraps small circle and city name in VBox.

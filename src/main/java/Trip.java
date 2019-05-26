@@ -116,9 +116,8 @@ public class Trip implements Displayable{
         return plan.isEmpty();
     }
 
-    @SuppressWarnings("unused")
-    public Trip getTrip(){
-        return this;
+    public City getStartCity(){
+        return plan.get(0).getStartCity();
     }
 
     public double getRating(){
@@ -263,7 +262,7 @@ public class Trip implements Displayable{
 
         showButton.setOnAction( (event) -> {
             try {
-                formController.showButtonPressed(event);
+                formController.showButtonPressed(this);
             } catch (IOException e){
                 e.printStackTrace();
             }

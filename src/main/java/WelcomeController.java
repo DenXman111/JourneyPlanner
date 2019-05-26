@@ -35,6 +35,18 @@ public class WelcomeController {
         stage.setScene(scene);
         prevStage.close();
         stage.show();
+
+/*
+        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/map.fxml"));
+        Pane myPane = myLoader.load();
+
+        Scene scene = new Scene(myPane);
+        Stage stage = new Stage();
+        stage.setTitle("Map");
+        stage.setScene(scene);
+        stage.show();
+
+ */
     }
     @SuppressWarnings("unused")
     @FXML
