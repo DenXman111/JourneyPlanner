@@ -136,8 +136,8 @@ public class DbAdapter {
         } else return false;
     }
 
-    public static void removeBusByID(int id) throws SQLException{
-        if (!haveBusWithID(id)) throw new SQLException();
+    public static void removeBusByID(int id) throws Exception{
+        if (!haveBusWithID(id)) throw new Exception();
         statement = connection.createStatement();
         String query = "DELETE FROM buses WHERE id = ?";
         PreparedStatement pst = connection.prepareStatement(query);
@@ -156,8 +156,8 @@ public class DbAdapter {
         } else return false;
     }
 
-    public static void removeBusByParameters(int id1,int id2, LocalDate departure, LocalDate arrival) throws SQLException{
-        if (!haveBusWithParameters(id1,id2,departure,arrival)) throw new SQLException();
+    public static void removeBusByParameters(int id1,int id2, LocalDate departure, LocalDate arrival) throws Exception{
+        if (!haveBusWithParameters(id1,id2,departure,arrival)) throw new Exception();
         statement = connection.createStatement();
         String query = "DELETE FROM buses WHERE start_city =\'"+id1+"\' and end_city=\'"+id2+"\' and departure=\'"+departure+"\' and arrival=\'"+arrival+"\'";
         statement.executeUpdate(query);

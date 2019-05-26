@@ -116,6 +116,10 @@ public class ModerController implements Initializable{
             new ErrorWindow(e.getMessage());
         }
         catch (SQLException e){
+            new ErrorWindow("Bus in Reservation");
+        }
+        catch (Exception e)
+        {
             new ErrorWindow("Wrong bus ID");
         }
     }
@@ -131,8 +135,12 @@ public class ModerController implements Initializable{
         } catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
         }
-        catch (SQLException e){
-            new ErrorWindow("Wrong bus parameters!");
+        catch (SQLException e) {
+            new ErrorWindow("Bus in Reservation");
+        }
+        catch (Exception e)
+        {
+            new ErrorWindow("Wrong bus parameters");
         }
     }
 
