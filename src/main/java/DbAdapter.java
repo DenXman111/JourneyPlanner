@@ -59,13 +59,17 @@ public class DbAdapter {
     }
 
     public static City getCityFromID(Integer ID) throws DatabaseException, SQLException {
+        if (City.dowlnoadedCities.containsKey(ID))
+            return City.dowlnoadedCities.get(ID);
         Statement statement = null;
         try {
             statement = connection.createStatement();
             String query="Select * from cities where id=\'"+ID+"\'";
             ResultSet result=statement.executeQuery(query);
             while (result.next()){
-                return new City(ID,result.getString("name"),result.getDouble("rating"),result.getInt("average_price"));
+                City city = new City(ID,result.getString("name"),result.getDouble("rating"),result.getInt("average_price"));
+                City.dowlnoadedCities.putIfAbsent(ID, city);
+                return city;
             }
         } catch (Exception e){
             e.printStackTrace();
@@ -146,11 +150,10 @@ public class DbAdapter {
         Statement statement = null;
         try {
             statement = connection.createStatement();
-            String query="Select count(*) from users where username = \'"+username+"\' AND password = \'"+password+"\'";
+            String query="Select * from loginUser('"+ username + "', '" + password  + "')";
             ResultSet result=statement.executeQuery(query);
             if (result.next()){
-                if (result.getInt("count") == 0) return false; else
-                    return true;
+                 return result.getBoolean(1);
             } else return false;
         } catch (SQLException e){
             e.printStackTrace();
@@ -161,15 +164,14 @@ public class DbAdapter {
         }
     }
 
-    public static boolean haveModer(String username, String password) throws SQLException {
+    public static boolean loginModerator(String username, String password) throws SQLException {
         Statement statement = null;
         try {
             statement = connection.createStatement();
-            String query="Select count(*) from moderators where username = \'"+username+"\' AND password = \'"+password+"\'";
+            String query="Select * from loginModerator('"+ username + "', '" + password  + "')";
             ResultSet result=statement.executeQuery(query);
             if (result.next()){
-                if (result.getInt("count") == 0) return false; else
-                    return true;
+                return result.getBoolean(1);
             } else return false;
         } catch (SQLException e){
             e.printStackTrace();
@@ -190,12 +192,7 @@ public class DbAdapter {
                     + begin.toLocalDateTime() + "'::date, '" + end.toLocalDateTime() + "'::date)";
             ResultSet result=statement.executeQuery(query);
             while (result.next()) {
-                City r2=new City(
-                        result.getInt("end_city"),
-                        result.getString("end_city_name"),
-                        result.getDouble("end_city_rating"),
-                        result.getInt("end_city_avg_price")
-                );
+                City r2= getCityFromID(result.getInt("end_city"));
                 Edge b=new Edge(result.getInt("id_transit"), stratCity, r2,
                         result.getInt("price"),
                         result.getTimestamp("departure"),
@@ -216,7 +213,7 @@ public class DbAdapter {
         Statement statement = null;
         try {
             statement = connection.createStatement();
-            String query="Select name from cities";
+            String query="Select name from cities where country = 'Poland'";
             ResultSet result=statement.executeQuery(query);
             while (result.next()){a.add(result.getString("name"));}
             Collections.sort(a);

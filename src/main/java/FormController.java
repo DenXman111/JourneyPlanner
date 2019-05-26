@@ -105,7 +105,7 @@ public class FormController implements Initializable {
             planing.setDisplayData(answersVBox, progressBar);
 
             progressBar.progressProperty().bind(planing.progressProperty());
-            new Thread(planing).start();
+            Main.executors.submit(planing);
 
         } catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());

@@ -9,10 +9,16 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * City class stores all data about cites read from database.
  */
 public class City implements Displayable {
+
+    @SuppressWarnings("WeakerAccess")
+    public static Map<Integer, City> dowlnoadedCities = new ConcurrentHashMap<>();
 
     private String name;
     private Integer cityID;

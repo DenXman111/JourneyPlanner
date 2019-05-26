@@ -78,7 +78,7 @@ public class LoginController {
     @FXML
     void loginAsModeratorPressed(ActionEvent event) throws IOException{
         try{
-            if (!DbAdapter.haveModer(UsernameField.getText(), PasswordField.getText())) throw new FieldsDataException("User data wrong");
+            if (!DbAdapter.loginModerator(UsernameField.getText(), PasswordField.getText())) throw new FieldsDataException("User data wrong");
 
             Stage stage = new Stage();
             stage.setTitle("AppSettings");

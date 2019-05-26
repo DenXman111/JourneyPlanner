@@ -79,7 +79,7 @@ Create sequence transit_reservation_id_seq
 CREATE TABLE cities (
     id NUMERIC  NOT NULL DEFAULT NEXTVAL('cities_id_seq'),
     name varchar(63)  NOT NULL,
-    rating int  NOT NULL,
+    rating numeric(3, 2)  NOT NULL,
     average_price int  NOT NULL,
     country varchar(63)  NOT NULL,
     CONSTRAINT cities_pk PRIMARY KEY (id),
@@ -545,19 +545,19 @@ language plpgsql;
 
 
 create or replace function buses_from_city( city_id numeric, L date, R date)
-returns TABLE(id_transit numeric, end_city numeric, end_city_name varchar(63), end_city_avg_price integer, end_city_rating integer,
-    price numeric(6, 2), departure timestamp, arrival timestamp) as
+returns TABLE(id_transit numeric, end_city numeric, price numeric(6, 2), departure timestamp, arrival timestamp) as
     $$
     begin
         return QUERY
-        SELECT tr.id_transit, bsa.city, c.name, c.average_price, c.rating, tr.price, bii.departure, bii.arrival
+        SELECT tr.id_transit, bsa.city, tr.price, bii.departure, bii.arrival
         FROM transits tr
             JOIN bus_stops bsd ON tr.departure_stop = bsd.id
             JOIN bus_stops bsa ON tr.arrival_stop = bsa.id
-            JOIN cities c ON c.id = bsa.city
             JOIN spans sp ON tr.id_transit = sp.transit
+            join cities c on bsa.city = c.id
             JOIN buses_in_span(sp.id, L, R) bii ON sp.id = bii.span
-        WHERE bsd.city = city_id and GREATEST(L, sp.begin_date) <= LEAST(R, sp.end_date)
+        WHERE bsd.city = city_id and GREATEST(L, sp.begin_date) <= LEAST(R, sp.end_date) and c.country = 'Poland'
+        ORDER BY tr.price desc limit 10
     ;
     end;
     $$
@@ -594,7 +594,35 @@ as
     $$
 language plpgsql;
 
+create table moderators(
+    username varchar(50) references users(username)
+);
+
+INSERT INTO moderators(username) values ('admin1');
 
 
+create or replace function loginUser(given_username varchar(50), user_password varchar(50)) returns boolean as
+    $$
+    begin
+        return (select count(*) from users u where u.username = given_username and u.password = ENCODE(DIGEST(user_password, 'sha1'), 'hex')) <> 0;
+    end;
+    $$language plpgsql;
+
+create or replace function loginModerator(given_username varchar(50), user_password varchar(50)) returns boolean as
+    $$
+    begin
+        return loginUser(given_username, user_password) and (select count(*) from moderators where username = given_username) <> 0;
+    end;
+    $$ language plpgsql;
+
+select loginModerator('admin1', 'admin1');
+
+
+
+select ENCODE(DIGEST('admin1', 'sha1'), 'hex');
+
+select username, password from users where username = 'admin1';
+
+select * from users;
 -- End of file.
 

@@ -68,10 +68,13 @@ public class Planner extends Task<Integer> {
         return 0;
     }
 
+    @SuppressWarnings("FieldCanBeLocal")
     public class TripPlans {
         private Set < City > inCurrent;
         private Set< Trip > TripsList;
         private Trip current;
+        private final int  maxTripsNumber = 20;
+        private final int maxTripLength = 10;
 
         private Integer start; //used in dfs to remember startID
 
@@ -89,7 +92,6 @@ public class Planner extends Task<Integer> {
 
         private void dfs(City currentCity, int fund, Timestamp currentDate, Timestamp tripEndingDate) throws SQLException {
 
-            int maxTripsNumber = 25;
             if(TripsList.size() >= maxTripsNumber)
                 return;
 
@@ -106,6 +108,11 @@ public class Planner extends Task<Integer> {
             }
 
 //        System.out.println("dfs in " + nowID + " " + fund + " " + currentDate + " " + current.getRating());
+
+            if (current.getPlan().size() > maxTripLength){
+                inCurrent.remove(currentCity);
+                return;
+            }
 
             List < Edge > neighbours = DbAdapter.getNeighbours(currentCity, currentDate, tripEndingDate);
             for (Edge e : neighbours){

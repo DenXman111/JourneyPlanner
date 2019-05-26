@@ -18,6 +18,14 @@ public class Main extends Application {
                 return t;
             });
 
+    @SuppressWarnings("WeakerAccess")
+    public static final ExecutorService executors = Executors.newFixedThreadPool(3,
+            r -> {
+                Thread t = Executors.defaultThreadFactory().newThread(r);
+                t.setDaemon(true);
+                return t;
+            });
+
     @Override
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setTitle("JourneyPlanner");
