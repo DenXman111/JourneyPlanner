@@ -2,9 +2,19 @@ import com.lynden.gmapsfx.GoogleMapView;
 import com.lynden.gmapsfx.MapComponentInitializedListener;
 import com.lynden.gmapsfx.javascript.object.*;
 import com.lynden.gmapsfx.service.directions.*;
+import com.lynden.gmapsfx.service.geocoding.*;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ProgressBar;
 
+import javax.swing.plaf.PanelUI;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
@@ -23,51 +33,66 @@ public class MapController implements Initializable, MapComponentInitializedList
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        mapView.setKey("AIzaSyAE3KHmNCMilnkhmDhdMLvM2Nvpcbc1XaA");
+        mapView.setKey(Main.APIkey);
         mapView.addMapInializedListener(this);
     }
 
-    @SuppressWarnings("unused")
-    private void createStartMarker(City startCity){
-        LatLong latLong = new DirectionsWaypoint(startCity.getName() + ", " + startCity.getCountry()).getLocation();
+    private void addMarker(City city, String title){
+        String address = city.getName() + ", " + city.getCountry();
+        GeocodingService geocodingService = new GeocodingService();
+        geocodingService.geocode(address,
+                (GeocodingResult[] geocodingResults, GeocoderStatus geocoderStatus) -> {
+//                    System.out.println("Step 1");
+                    GeocoderGeometry geometry = geocodingResults[0].getGeometry();
+//                    System.out.println("Step 2");
+                    double latitude = geometry.getLocation().getLatitude();
+                    double longitude = geometry.getLocation().getLongitude();
+//                    System.out.println("Step 3");
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(new LatLong(latitude, longitude));
+                    markerOptions.title(city.getName());
+                    //markerOptions.icon(BitmapDescriptorFactory.fromResource());
+                    Marker marker = new Marker(markerOptions);
+                    map.addMarker(marker);
 
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLong);
-        markerOptions.title(startCity.getName());
-        Marker marker = new Marker(markerOptions);
-        map.addMarker(marker);
+                    InfoWindowOptions infoWindowOptions = new InfoWindowOptions();
+                    infoWindowOptions.content("<h2>" + title + "</h2>"
+                            + "Rating: " + city.getRating() + "<br>"
+                            + "Price for night: " + city.getNightPrice() + "€");
 
-        InfoWindowOptions infoWindowOptions = new InfoWindowOptions();
-        infoWindowOptions.content("<h2>Start</h2>"
-                + "Rating: " + startCity.getRating() + "<br>"
-                + "Price for night: " + startCity.getNightPrice() + "€");
-
-        InfoWindow infoWindow = new InfoWindow(infoWindowOptions);
-        infoWindow.open(map, marker);
+                    InfoWindow infoWindow = new InfoWindow(infoWindowOptions);
+                    infoWindow.open(map, marker);
+                    System.out.println("Marker " + title + " added");
+                }
+        );
     }
 
     private void showCurrentTrip(){
         City startCity = FormController.tripToShowing.getStartCity();
-//        LatLong latLong = new DirectionsWaypoint(startCity.getName() + ", " + startCity.getCountry()).getLocation();
+        //Setting DirectionsWaypoints
 
-//                                      Can't take LatLong from String address
-
-//        createStartMarker(startCity);
-
+        int number = 1, len = FormController.tripToShowing.getPlan().size();
         List<DirectionsWaypoint> points = new ArrayList<>();
         for (Edge edge : FormController.tripToShowing.getPlan()){
             if (startCity.getName().equals(edge.getEndCity().getName())) break;
+            addMarker(edge.getEndCity(), NumberConventer.convertNumber(number));
+            number++;
             points.add(new DirectionsWaypoint(edge.getEndCity().getName() + ", " + edge.getEndCity().getCountry()));
         }
         Collections.reverse(points);
 
-        //noinspection ToArrayCallWithZeroLengthArrayArgument
-        DirectionsRequest request =
-                new DirectionsRequest(startCity.getName() + ", " + startCity.getCountry(),
-                        startCity.getName() + ", " + startCity.getCountry(), TravelModes.DRIVING, points.toArray(new DirectionsWaypoint[points.size()]));
+        //Direction adding
 
-        directionsRenderer = new DirectionsRenderer(true, mapView.getMap(), directionsPane);
-        directionsService.getRoute(request, this, directionsRenderer);
+        Platform.runLater(()->{
+            DirectionsRequest request =
+                    new DirectionsRequest(startCity.getName() + ", " + startCity.getCountry(),
+                            startCity.getName() + ", " + startCity.getCountry(), TravelModes.DRIVING, points.toArray(new DirectionsWaypoint[points.size()]));
+
+            directionsRenderer = new DirectionsRenderer(true, mapView.getMap(), directionsPane);
+            directionsService.getRoute(request, this, directionsRenderer);
+            addMarker(startCity, "Start");
+        });
+
     }
     @Override
     public void mapInitialized() {
