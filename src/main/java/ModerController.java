@@ -1,3 +1,4 @@
+import ch.qos.logback.classic.db.DBAppender;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -30,6 +31,12 @@ public class ModerController implements Initializable{
     private ChoiceBox<String> CityBChoiceBox;
 
     @FXML
+    private ChoiceBox<String> CityCChoiceBox;
+
+    @FXML
+    private ChoiceBox<String> CityDChoiceBox;
+
+    @FXML
     private TextField SeatPlacesField;
 
     @FXML
@@ -42,6 +49,12 @@ public class ModerController implements Initializable{
     private DatePicker ArrivalDate;
 
     @FXML
+    private DatePicker DepartureDate2;
+
+    @FXML
+    private DatePicker ArrivalDate2;
+
+    @FXML
     private Button AddNewBusButton;
 
     @FXML
@@ -50,6 +63,8 @@ public class ModerController implements Initializable{
     @FXML
     private Button DeleteByIDButton;
 
+    @FXML
+    private Button DeleteByParametersButton;
     void setPrevStage(Stage stage){
         this.prevStage = stage;
     }
@@ -64,6 +79,8 @@ public class ModerController implements Initializable{
         }
         CityAChoiceBox.setItems(observableCitiesList);
         CityBChoiceBox.setItems(observableCitiesList);
+        CityCChoiceBox.setItems(observableCitiesList);
+        CityDChoiceBox.setItems(observableCitiesList);
     }
 
 
@@ -98,14 +115,50 @@ public class ModerController implements Initializable{
         try{
             if (BusNumberField.getText().length() == 0) throw new FieldsDataException("Bus number field is empty");
             if (!BusNumberField.getText().matches("\\d+")) throw new FieldsDataException("Write number to bus number field");
-
             DbAdapter.removeBusByID(Integer.valueOf(BusNumberField.getText()));
             new ErrorWindow("Deleted!");
         } catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
         }
         catch (SQLException e){
+            try {
+                DbAdapter.removeReservationsByID(Integer.valueOf(BusNumberField.getText()));
+                DbAdapter.removeBusByID(Integer.valueOf(BusNumberField.getText()));
+            }
+            catch(Exception f){
+                new ErrorWindow("Bus in Reservation");
+            }
+
+        }
+        catch (Exception e)
+        {
             new ErrorWindow("Wrong bus ID");
+        }
+    }
+    @FXML
+    void deleteBusByParametersPressed(ActionEvent event) {
+        try{
+            if (CityCChoiceBox.getValue() == null) throw new FieldsDataException("Set departure city");
+            if (CityDChoiceBox.getValue() == null) throw new FieldsDataException("Set arrival city");
+            if (DepartureDate2.getValue() == null) throw new FieldsDataException("Departure is empty");
+            if (ArrivalDate2.getValue() == null) throw new FieldsDataException("Arrival date is empty");
+            DbAdapter.removeBusByParameters(DbAdapter.getCityID(CityCChoiceBox.getValue()), DbAdapter.getCityID(CityDChoiceBox.getValue()),DepartureDate2.getValue(), ArrivalDate2.getValue());
+            new ErrorWindow("Deleted!");
+        } catch (FieldsDataException e){
+            new ErrorWindow(e.getMessage());
+        }
+        catch (SQLException e) {
+            try{
+            int idd=DbAdapter.getIDFromParameters(DbAdapter.getCityID(CityCChoiceBox.getValue()), DbAdapter.getCityID(CityDChoiceBox.getValue()),DepartureDate2.getValue(), ArrivalDate2.getValue());
+            DbAdapter.removeReservationsByID(idd);
+            DbAdapter.removeBusByID(idd);
+            } catch (Exception f){
+                new ErrorWindow("Bus in Reservation");
+            }
+        }
+        catch (Exception e)
+        {
+            new ErrorWindow("Wrong bus parameters");
         }
     }
 
