@@ -18,13 +18,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class City implements Displayable {
 
     @SuppressWarnings("WeakerAccess")
-    public static Map<Integer, City> dowlnoadedCities = new ConcurrentHashMap<>();
+    public static Map<Integer, City> downloadedCities = new ConcurrentHashMap<>();
 
     private String name;
     private Integer cityID;
     private double rating;
     private int nightPrice;
-    private long days;
+    //private long days = 0;
 
     @SuppressWarnings("WeakerAccess")
     public City(Integer id, String name, double rating, int price){
@@ -34,7 +34,16 @@ public class City implements Displayable {
         this.cityID = id;
         this.rating = rating;
         this.nightPrice = price;
-        this.days = 0;
+        //this.days = 2;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public City(City city){
+        name = city.name;
+        cityID = city.cityID;
+        rating = city.rating;
+        nightPrice = city.nightPrice;
+        //days = 0;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -49,6 +58,8 @@ public class City implements Displayable {
     public String getName() { return name; }
 
     //public String getCountry() { return DbAdapter.getCountryFromID(cityID); }
+
+    //public void setDays(int days) { this.days = days; }
 
     @Override
     public Pane display() {
@@ -67,11 +78,11 @@ public class City implements Displayable {
         Tooltip.install(circle, tooltip);
 
         // Displays label with city name
-        Label label = new Label();
-        label.setText(name + "\n");
-        label.getStyleClass().add("description");
+        Label nameLabel = new Label();
+        nameLabel.setText(name + "\n");
+        nameLabel.getStyleClass().add("description");
 
-        box.getChildren().addAll(circle, label);
+        box.getChildren().addAll(circle, nameLabel);
         return box;
     }
 
@@ -100,8 +111,5 @@ public class City implements Displayable {
         return box;
     }
 
-    @SuppressWarnings("unused")
-    public void setDays(long days) {
-        this.days = days;
-    }
+
 }

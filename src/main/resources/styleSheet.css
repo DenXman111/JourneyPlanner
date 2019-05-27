@@ -110,6 +110,11 @@
     -fx-font-size: 13px;
 }
 
+.grey-description{
+    -fx-text-fill: #4b6560;
+    -fx-font-size: 11px;
+}
+
 .rating-text{
     -fx-text-fill: #ffffff;
     -fx-font-size: 12px;

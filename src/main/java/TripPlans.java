@@ -42,14 +42,14 @@ public class TripPlans {
 
         List < Edge > neighbours = DbAdapter.getNeighbours(nowID);
         for (Edge e : neighbours){
-            if (e.getEndingDate().isAfter(tripEndingDate)) continue;
+            if (e.getEndTime().isAfter(tripEndingDate)) continue;
             if (!e.getStartDate().isAfter(currentDate)) continue;
             if (e.getPrice() > fund) continue;
             if (inCurrent.contains(e.getEndCity().getID()) && !e.getEndCity().getID().equals(start)) continue;
             int livingPrice = current.getLivingPrice(e);
             if (fund < e.getPrice() + livingPrice) continue;
             current.pushEdge(e);
-            dfs(e.getEndCity().getID(), fund - e.getPrice() - livingPrice, e.getEndingDate(), tripEndingDate);
+            dfs(e.getEndCity().getID(), fund - e.getPrice() - livingPrice, e.getEndTime(), tripEndingDate);
             current.removeLastEdge();
         }
 

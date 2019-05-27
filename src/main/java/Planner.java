@@ -1,4 +1,3 @@
-import ch.qos.logback.classic.db.DBAppender;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -116,14 +115,14 @@ public class Planner extends Task<Integer> {
 
             List < Edge > neighbours = DbAdapter.getNeighbours(currentCity, currentDate, tripEndingDate);
             for (Edge e : neighbours){
-                if (e.getEndingDate().after(tripEndingDate)) continue;
+                if (e.getEndTime().after(tripEndingDate)) continue;
                 if (!e.getStartDate().after(currentDate)) continue;
                 if (e.getPrice() > fund) continue;
                 if (inCurrent.contains(e.getEndCity()) && !e.getEndCity().getID().equals(start)) continue;
                 int livingPrice = current.getLivingPrice(e);
                 if (fund < e.getPrice() + livingPrice) continue;
                 current.pushEdge(e);
-                dfs(e.getEndCity(), fund - e.getPrice() - livingPrice, e.getEndingDate(), tripEndingDate);
+                dfs(e.getEndCity(), fund - e.getPrice() - livingPrice, e.getEndTime(), tripEndingDate);
                 current.removeLastEdge();
             }
 

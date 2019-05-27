@@ -1,5 +1,4 @@
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
@@ -38,11 +37,11 @@ public class EdgesInOut implements Comparable<EdgesInOut>{
     }
 
     private boolean isBetween(Timestamp begin, Timestamp end){
-        return begin.before(inEdge.getStartDate()) && end.after(outEdge.getEndingDate());
+        return begin.before(inEdge.getStartDate()) && end.after(outEdge.getEndTime());
     }
 
     private boolean dateIsProper(){
-        return inEdge.getEndingDate().before(outEdge.getStartDate());
+        return inEdge.getEndTime().before(outEdge.getStartDate());
     }
 
     /*
@@ -78,6 +77,6 @@ public class EdgesInOut implements Comparable<EdgesInOut>{
                 + inEdge.getStartCity().getName() + " -- " + inEdge.getBusId() + " -> "
                 + getMiddleCity().getName() + " -- " + outEdge.getBusId() + " -> "
                 + outEdge.getEndCity().getName() + " : "
-                + outEdge.getEndingDate();
+                + outEdge.getEndTime();
     }
 }

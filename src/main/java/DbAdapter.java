@@ -1,10 +1,6 @@
-import javafx.concurrent.Task;
-
-import java.io.FileInputStream;
 import java.sql.*;
 import java.sql.Date;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @SuppressWarnings("all")
@@ -59,8 +55,8 @@ public class DbAdapter {
     }
 
     public static City getCityFromID(Integer ID) throws DatabaseException, SQLException {
-        if (City.dowlnoadedCities.containsKey(ID))
-            return City.dowlnoadedCities.get(ID);
+        if (City.downloadedCities.containsKey(ID))
+            return new City(City.downloadedCities.get(ID));
         Statement statement = null;
         try {
             statement = connection.createStatement();
@@ -68,7 +64,7 @@ public class DbAdapter {
             ResultSet result=statement.executeQuery(query);
             while (result.next()){
                 City city = new City(ID,result.getString("name"),result.getDouble("rating"),result.getInt("average_price"));
-                City.dowlnoadedCities.putIfAbsent(ID, city);
+                City.downloadedCities.putIfAbsent(ID, city);
                 return city;
             }
         } catch (Exception e){
@@ -294,10 +290,16 @@ public class DbAdapter {
         }
         return out;
     }
-    public static void reserve(Trip arg,String user) throws SQLException {
+    public static void reserve(Trip arg, String user, int places) throws SQLException {
         Statement statement = null;
+
+        if (arg == null || user == null) return;
+
+        StringBuilder sb = new StringBuilder();
         try {
             statement = connection.createStatement();
+
+            statement.executeQuery("INSERT INTO ");
             List<Edge> a=arg.getPlan();
             for (int i = 0; i < a.size(); i++) {
                 int g = a.get(i).getBusId();

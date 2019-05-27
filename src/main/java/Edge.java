@@ -10,7 +10,6 @@ import javafx.scene.shape.Line;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,13 +17,14 @@ import java.util.stream.Stream;
 /**
  * Edge class stores information about single transit between cities.
  */
+@SuppressWarnings("deprecation")
 public class Edge implements Displayable{
 
     private Integer busID;
     private City startCity;
     private City endCity;
     private Timestamp startTime;
-    private Timestamp endingDate;
+    private Timestamp endTime;
     private int price;
 
     private List<EdgesInOut> additionalVisits;
@@ -36,7 +36,7 @@ public class Edge implements Displayable{
         this.endCity = endCity;
         this.price = price;
         this.startTime = startDate;
-        this.endingDate = endingDate;
+        this.endTime = endingDate;
     }
 
     @SuppressWarnings("unused")
@@ -45,7 +45,7 @@ public class Edge implements Displayable{
         this.startCity = edge.startCity;
         this.endCity = edge.endCity;
         this.startTime = edge.startTime;
-        this.endingDate = edge.endingDate;
+        this.endTime = edge.endTime;
         this.price = edge.price;
         this.additionalVisits = edge.additionalVisits;
         this.edgeOmittingEndCity = edge.edgeOmittingEndCity;
@@ -84,24 +84,40 @@ public class Edge implements Displayable{
     }
 
     @SuppressWarnings("WeakerAccess")
-    public Timestamp getEndingDate() {
-        return endingDate;
+    public Timestamp getEndTime() {
+        return endTime;
     }
 
     @SuppressWarnings({"unused", "WeakerAccess"})
     public int getBusId() {return busID; }
+
+    private static String timeFormat(Timestamp time){
+        return  time.toLocaleString().substring(12, 17);
+    }
+
+    private static String dateFormat(Timestamp time){
+        return  time.toLocaleString().substring(0, 10);
+    }
+
+    private Label timeInformation(){
+        Label dateLabel = new Label( dateFormat(startTime) + ":     " + timeFormat(startTime) + " - " + timeFormat(endTime));
+        dateLabel.getStyleClass().addAll("grey-description");
+        return dateLabel;
+    }
 
     @Override
     public Pane display() {
         VBox box = new VBox();
         box.setAlignment(Pos.CENTER);
         //draws line with description
-        Line line = new Line(-50, 0, 50, 0);
+        Line line = new Line(-100, 0, 100, 0);
         line.getStyleClass().add("line");
         Label label = new Label("Bus " + busID);
         label.getStyleClass().add("description");
 
-        box.getChildren().addAll(line, label);
+        Label informationLabel = new Label(startTime.getTime() + "    " + endTime.getTime());
+        informationLabel.getStyleClass().add("grey-description");
+        box.getChildren().addAll(line, label, timeInformation());
         return box;
     }
 
@@ -134,7 +150,7 @@ public class Edge implements Displayable{
     }
 
     private boolean isBetween(Timestamp begin, Timestamp end){
-        return !begin.after(startTime) && !end.before(endingDate);
+        return !begin.after(startTime) && !end.before(endTime);
     }
 
 
@@ -147,9 +163,9 @@ public class Edge implements Displayable{
     public static Edge mergeEdges(Edge first, Edge second) throws SQLException {
         if (first == null || second == null) return null;
         Integer endId = second.getEndCity().getID();
-        List<Edge> options = DbAdapter.getNeighbours(first.getStartCity(), first.getStartDate(), second.getEndingDate())
+        List<Edge> options = DbAdapter.getNeighbours(first.getStartCity(), first.getStartDate(), second.getEndTime())
                 .stream()
-                .filter( edge -> edge.getEndCity().getID().equals(endId) && edge.isBetween(first.startTime, second.endingDate))
+                .filter( edge -> edge.getEndCity().getID().equals(endId) && edge.isBetween(first.startTime, second.endTime))
                 .collect(Collectors.toList());
         return !options.isEmpty() ? options.get(0) : null;
     }
