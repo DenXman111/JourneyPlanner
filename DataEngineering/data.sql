@@ -4602,3 +4602,7 @@ INSERT INTO seat_reservation(seat, transit_reservation_id) VALUES
 (2, 799),
 (3, 799),
 (1, 800);
+
+select setval('reservation_id_seq', 401);
+
+select setval('transit_reservation_id_seq', 801);

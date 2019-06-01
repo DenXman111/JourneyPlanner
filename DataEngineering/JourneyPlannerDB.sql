@@ -11,6 +11,13 @@ CREATE DOMAIN email AS citext
 -- day enum for departure_time
 CREATE TYPE day as ENUM ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
 
+-- reservation_type for reservation function
+
+CREATE TYPE reservation_type AS (
+    transit numeric,
+    departure timestamp
+);
+
 -- casting day to int
 CREATE OR REPLACE FUNCTION day_to_int(day) returns int as
 $$
@@ -402,6 +409,25 @@ CREATE TRIGGER seat_reservation_departure_date_check BEFORE INSERT OR UPDATE ON 
     FOR EACH ROW EXECUTE PROCEDURE seat_reservation_departure_date_check();
 
 
+CREATE OR REPLACE FUNCTION reservations_delete() RETURNS TRIGGER AS
+    $reservations_delete$
+    begin
+        delete from transit_reservation where reservation = old.id;
+    end;
+    $reservations_delete$ LANGUAGE plpgsql;
+CREATE TRIGGER reservations_delete BEFORE DELETE ON reservations
+    FOR EACH ROW EXECUTE PROCEDURE reservations_delete();
+
+
+CREATE OR REPLACE function transit_reservation_delete() RETURNS TRIGGER AS
+    $transit_reservation_delete$
+    begin
+        delete from seat_reservation st where st.transit_reservation_id = old.id;
+    end;
+    $transit_reservation_delete$ LANGUAGE plpgsql;
+CREATE TRIGGER transit_reservation_delete BEFORE DELETE ON transit_reservation
+    FOR EACH ROW EXECUTE PROCEDURE transit_reservation_delete();
+
 -- trigger on transit_reservation checks if given transit exists (there is a bus in database which leaves on given time)
 -- @author Łukasz Selwa + Denis Pivovarov
 CREATE OR REPLACE FUNCTION transit_reservation_check() RETURNS TRIGGER AS
@@ -432,9 +458,12 @@ CREATE TRIGGER transit_reservation_check BEFORE INSERT OR UPDATE ON transit_rese
 
 --trigger on reservations checks [date_reservation before all buses]
 -- @author Denis Pivovarov
-CREATE OR REPLACE FUNCTION date_reservation_check() RETURNS trigger AS $date_reservation_check$
+
+--
+
+/*CREATE OR REPLACE FUNCTION date_reservation_check() RETURNS trigger AS $date_reservation_check$
 BEGIN
-    IF (SELECT min(departure_date) FROM transit_reservation WHERE transit = NEW.id) < NEW.date_reservation THEN
+    IF (SELECT min(departure_date) FROM transit_reservation WHERE reservation = NEW.id) < NEW.date_reservation THEN
         RAISE EXCEPTION 'some departure_date in reservation is before date_reservation';
     END IF;
     return NEW;
@@ -443,7 +472,7 @@ $date_reservation_check$ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER date_reservation_check BEFORE INSERT OR UPDATE ON reservations
-    FOR EACH ROW EXECUTE PROCEDURE date_reservation_check();
+    FOR EACH ROW EXECUTE PROCEDURE date_reservation_check();*/
 
 
 --trigger on seat_reservation that checks if seat number < all seats when somebody tries to make a bus reservation
@@ -694,6 +723,51 @@ language plpgsql;
 
 select *
 from get_buses('2019-06-01'::date, '2019-06-07'::date);
+
+
+
+create or replace function reserve(user_id varchar(30), seats integer, res variadic reservation_type array) returns
+    table (reserved_seats integer array )as
+    $$
+    declare
+        my_reservation numeric = null;
+        my_transit_id numeric = null;
+        my_seat integer;
+        trans record;
+    begin
+        my_reservation = NEXTVAL('reservation_id_seq');
+        insert into reservations(id, "user", date_reservation) VALUES (my_reservation, user_id, current_timestamp);
+        for trans in select * from unnest(res) loop
+            my_transit_id =  NEXTVAL('transit_reservation_id_seq');
+            insert into transit_reservation(id, transit, departure_date, reservation)
+            VALUES(my_transit_id, trans.transit, trans.departure, my_reservation);
+            reserved_seats = array(select seat_number from first_free_seats(trans.transit::integer, trans.departure, seats));
+
+            for my_seat in select * from unnest(reserved_seats) rs loop
+
+                insert into seat_reservation(seat, transit_reservation_id) VALUES (my_seat, my_transit_id);
+
+            end loop;
+
+            return next;
+
+        end loop;
+    exception
+        when others then
+            if my_reservation is not null then
+                delete from reservations where id = my_reservation;
+            end if;
+            raise exception 'reservation fail';
+    end;
+    $$ language plpgsql;
+
+select *
+from get_buses('2019-06-02'::date, '2019-06-03'::date );
+
+select * from reserve('admin1', 3, row ( 39, '2019-06-03 08:00'::timestamp ), row ( 30, '2019-06-03 11:00:00'::timestamp ));
+
+select *
+from seat_reservation st join transit_reservation tr on st.transit_reservation_id = tr.id join reservations r on tr.reservation = r.id;
 
 -- End of file
 

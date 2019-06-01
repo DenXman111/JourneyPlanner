@@ -308,7 +308,10 @@ public class DbAdapter {
         }
         return out;
     }
-    public static void reserve(Trip arg, String user, int places) throws SQLException {
+
+
+
+    public static void reserve(Trip arg, String user, int seats) throws SQLException {
         Statement statement = null;
 
         if (arg == null || user == null) return;
