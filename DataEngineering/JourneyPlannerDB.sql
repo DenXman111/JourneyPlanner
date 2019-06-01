@@ -615,14 +615,85 @@ create or replace function loginModerator(given_username varchar(50), user_passw
     end;
     $$ language plpgsql;
 
-select loginModerator('admin1', 'admin1');
+
+create or replace function enough_seats(transit_id integer, departure timestamp, seats integer) returns boolean as
+    $$
+    begin
+        return
+            -- capacity
+            (
+                select bm.seats
+                from transits t join buses_models bm on t.bus_model = bm.id
+                where t.id_transit = transit_id limit 1
+            )
+            >=
+            -- reserved seats
+            (
+                select count(*)
+                from seat_reservation st join transit_reservation tr on st.transit_reservation_id = tr.id
+                where tr.transit = transit_id and tr.departure_date = departure
+            )
+            + seats
+            ;
+
+    end;
+    $$ language plpgsql;
 
 
+-- function returns first unreserved seats in given bus or throws exception if there are not enough seats left
+create or replace function first_free_seats(transit_id integer, departure timestamp, seats integer)
+returns table(seat_number integer) as
+    $$
+    declare
+        capacity integer;
+        reserved_seats integer;
+    begin
+        capacity =
+            (
+                select bm.seats
+                from transits t join buses_models bm on t.bus_model = bm.id
+                where t.id_transit = transit_id
+            );
+        reserved_seats =
+            (
+                select count(*)
+                from seat_reservation st join transit_reservation tr on st.transit_reservation_id = tr.id
+                where tr.transit = transit_id and tr.departure_date = departure
+            );
+        if capacity < seats + reserved_seats then
+            raise exception 'no enough seats left';
+        end if;
+        return query
+            with reserved as (
+                select st.seat
+                from seat_reservation st join transit_reservation tr on st.transit_reservation_id = tr.id
+                where tr.transit = transit_id and tr.departure_date = departure
+                )
+            select * from generate_series(1, capacity, 1) num where num not in (select * from reserved) limit seats;
+    end;
+    $$ language plpgsql;
 
-select ENCODE(DIGEST('admin1', 'sha1'), 'hex');
 
-select username, password from users where username = 'admin1';
+create or replace function get_buses_with_seats_left(L date, R date, seats integer)
+ returns TABLE(id_transit numeric, start_city numeric, end_city numeric, price numeric(6, 2), departure timestamp, arrival timestamp) as
+$$
+begin
+    return QUERY
+        SELECT tr.id_transit, bsd.city, bsa.city, tr.price, bii.departure, bii.arrival
+        FROM transits tr
+            JOIN bus_stops bsd ON tr.departure_stop = bsd.id
+            JOIN bus_stops bsa ON tr.arrival_stop = bsa.id
+            JOIN spans sp ON tr.id_transit = sp.transit
+            JOIN buses_in_span(sp.id, L, R) bii ON sp.id = bii.span
+        WHERE  GREATEST(L, sp.begin_date) <= LEAST(R, sp.end_date)
+            and enough_seats(tr.id_transit::integer, bii.departure, seats)
+    ;
+end;
+$$
+language plpgsql;
 
-select * from users;
--- End of file.
+select *
+from get_buses('2019-06-01'::date, '2019-06-07'::date);
+
+-- End of file
 

@@ -29,6 +29,9 @@ public class FormController implements Initializable {
     private TextField MainFieldFunds;
 
     @FXML
+    private TextField seatsField;
+
+    @FXML
     private DatePicker MainFieldStartDate;
 
     @FXML
@@ -72,14 +75,23 @@ public class FormController implements Initializable {
     private void check() throws FieldsDataException{
         if (MainCityChoiceBox.getSelectionModel().isEmpty()) throw new FieldsDataException("Choose any city");
         if (MainFieldFunds.getText().isEmpty()) throw new FieldsDataException("Write your funds");
+        if (seatsField.getText().isEmpty()) throw new FieldsDataException("Specify number of seats");
         if (MainFieldStartDate.getValue() == null) throw new FieldsDataException("Fill start date");
         if (MainFieldEndingDate.getValue() == null) throw new FieldsDataException("Fill ending date");
+
+        int founds, seats;
         try{
-            Integer.valueOf(MainFieldFunds.getText());
+            founds = Integer.valueOf(MainFieldFunds.getText());
         } catch (RuntimeException e){
-            e.getStackTrace();
             throw new FieldsDataException("Should be number in Funds");
         }
+        try{
+            seats = Integer.valueOf(seatsField.getText());
+        } catch (RuntimeException e){
+            throw new FieldsDataException("Insert number in seats field");
+        }
+        if (founds <= 0) throw new FieldsDataException("Founds should be a positive number");
+        if (seats <= 0) throw new FieldsDataException("Number of seats should be positive");
 
         if (LocalDate.now().isAfter(MainFieldStartDate.getValue()))
             throw new FieldsDataException("Start date should be in future");
@@ -99,6 +111,7 @@ public class FormController implements Initializable {
 
             Planner planing = new Planner(MainCityChoiceBox.getValue(),
                     Integer.valueOf(MainFieldFunds.getText()),
+                    Integer.valueOf(seatsField.getText()),
                     MainFieldStartDate.getValue(),
                     MainFieldEndingDate.getValue());
 

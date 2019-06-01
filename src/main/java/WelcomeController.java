@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 public class WelcomeController implements Initializable {
@@ -39,22 +40,34 @@ public class WelcomeController implements Initializable {
         }
         Login.setVisible(false);
         SignUp.setVisible(false);
-        WelcomeSceneStartButton.setVisible(false);
+        WelcomeSceneStartButton.setDisable(true);
         Task<Integer> connectTask = new Task<Integer>() {
             @Override
             protected Integer call() {
-                DbAdapter.connect();
+                updateMessage("Connecting to database...");
+                try {
+                    DbAdapter.connect();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    System.out.println("Failed to connect to database");
+                    updateMessage("Failed to connect to database");
+                    Platform.runLater(() -> progressIndicator.setVisible(false));
+                    return 0;
+                }
+
 
                 Platform.runLater(() -> {
                     Login.setVisible(true);
                     SignUp.setVisible(true);
-                    WelcomeSceneStartButton.setVisible(true);
                     progressIndicator.setVisible(false);
+                    WelcomeSceneStartButton.setDisable(false);
                 });
+                updateMessage("Plan my trip");
                 return 100;
             }
         };
 
+        WelcomeSceneStartButton.textProperty().bind(connectTask.messageProperty());
         progressIndicator.progressProperty().bind(connectTask.progressProperty());
         new Thread(connectTask).start();
 

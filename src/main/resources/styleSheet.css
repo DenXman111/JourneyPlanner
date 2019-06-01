@@ -36,6 +36,13 @@
     -fx-background-radius: 20;
 }
 
+.message-label{
+    -fx-background-color: rgba(174, 68, 58, 0.98);
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 10px;
+}
+
 .ratting-button:hover{
     -fx-background-color: rgba(124, 46, 43, 0.98);
 }

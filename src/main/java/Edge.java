@@ -111,6 +111,7 @@ public class Edge implements Displayable{
         box.setAlignment(Pos.CENTER);
         //draws line with description
         Line line = new Line(-100, 0, 100, 0);
+        VBox.setMargin(line, new Insets(5, 0, 0, 0));
         line.getStyleClass().add("line");
         Label label = new Label("Bus " + busID);
         label.getStyleClass().add("description");

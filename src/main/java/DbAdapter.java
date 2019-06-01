@@ -2,6 +2,7 @@ import java.sql.*;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("all")
 public class DbAdapter {
@@ -16,13 +17,8 @@ public class DbAdapter {
     private static Connection connection = null;
 
 
-    public static synchronized void connect(){
-        try {
-            connection = DriverManager.getConnection(jdbcUrl + "&socketFactory=" + socketFactory + "&user=" + user + "&password=" + password);
-        } catch (SQLException e){
-            e.printStackTrace();
-            System.exit(0);
-        }
+    public static synchronized void connect() throws SQLException {
+        connection = DriverManager.getConnection(jdbcUrl + "&socketFactory=" + socketFactory + "&user=" + user + "&password=" + password);
     }
 
     public static synchronized void disconnect(){
@@ -76,23 +72,6 @@ public class DbAdapter {
         return null;
     }
 
-    public static String getCountryFromID(Integer ID) throws SQLException {
-        Statement statement = null;
-        try {
-            statement = connection.createStatement();
-            String query="Select * from cities where id=\'"+ID+"\'";
-            ResultSet result=statement.executeQuery(query);
-            while (result.next()){
-                return result.getString("country");
-            }
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        finally {
-            if (statement != null) statement.close();
-        }
-        return null;
-    }
 
     public static void addNewUser(String username, String password, String email, String name, String surname) throws SQLException{
         Statement statement = connection.createStatement();
@@ -132,58 +111,18 @@ public class DbAdapter {
         } else return false;
     }
 
-    public static void removeBusByID(int id) throws Exception{
-        if (!haveBusWithID(id)) throw new Exception();
-        statement = connection.createStatement();
-        String query = "DELETE FROM buses WHERE id = ?";
+    public static void removeBusByID(int id) throws SQLException{
+        if (!haveBusWithID(id)) throw new SQLException();
+        Statement statement = connection.createStatement();
+        String query = "DELETE FROM transits WHERE id = ?";
         PreparedStatement pst = connection.prepareStatement(query);
         pst.setInt(1, id);
         pst.executeUpdate();
         statement.close();
     }
 
-    public static void removeReservationsByID(int id) throws Exception {
-        statement = connection.createStatement();
-        String query = "select id from trips where bus_id=\'" + id + "\'";
-        ResultSet result = statement.executeQuery(query);
-        while (result.next()) {
-            int i=result.getInt("id");
-            String query2 ="delete from trips where id = ?";
-            PreparedStatement pst = connection.prepareStatement(query2);
-            pst.setInt(1, i);
-            pst.executeUpdate();
-        }
-    }
-
-    public static int getIDFromParameters(int id1, int id2, LocalDate departure, LocalDate arrival) throws Exception
-    {
-        statement = connection.createStatement();
-        String query="Select id from buses WHERE start_city =\'"+id1+"\' and end_city=\'"+id2+"\' and departure=\'"+departure+"\' and arrival=\'"+arrival+"\'";
-        ResultSet result=statement.executeQuery(query);
-        if(result.next()){
-            return result.getInt("id");
-        }
-        return -1;
-    }
-
-    public static boolean haveBusWithParameters(int id1, int id2, LocalDate departure, LocalDate arrival) throws SQLException{
-
-        statement = connection.createStatement();
-        String query="Select count(*) from buses WHERE start_city =\'"+id1+"\' and end_city=\'"+id2+"\' and departure=\'"+departure+"\' and arrival=\'"+arrival+"\'";
-        ResultSet result=statement.executeQuery(query);
-        if (result.next()){
-            if (result.getInt("count") == 0) return false; else
-                return true;
-        } else return false;
-    }
-
-    public static void removeBusByParameters(int id1,int id2, LocalDate departure, LocalDate arrival) throws Exception{
-        if (!haveBusWithParameters(id1,id2,departure,arrival)) throw new Exception();
-        statement = connection.createStatement();
-        String query = "DELETE FROM buses WHERE start_city =\'"+id1+"\' and end_city=\'"+id2+"\' and departure=\'"+departure+"\' and arrival=\'"+arrival+"\'";
-        statement.executeUpdate(query);
-    }
-    public static boolean haveUser(String username, String password){
+    public static boolean userExists(String username, String password) throws SQLException {
+        Statement statement = null;
         try {
             statement = connection.createStatement();
             String query="Select * from loginUser('"+ username + "', '" + password  + "')";
@@ -226,7 +165,7 @@ public class DbAdapter {
             statement = connection.createStatement();
             String query="Select * from buses_from_city(" + stratCity.getID() + ", '"
                     + begin.toLocalDateTime() + "'::date, '" + end.toLocalDateTime() + "'::date)";
-            ResultSet result=statement.executeQuery(query);
+            ResultSet result = statement.executeQuery(query);
             while (result.next()) {
                 City r2= getCityFromID(result.getInt("end_city"));
                 Edge b=new Edge(result.getInt("id_transit"), stratCity, r2,
@@ -235,21 +174,59 @@ public class DbAdapter {
                         result.getTimestamp("arrival"));
                 a.add(b);
             }
-        } catch (Exception e){
+        } catch (DatabaseException e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             if (statement != null) statement.close();
         }
         return a;
     }
+
+
+
+    public static Map<Integer, List<Edge>> getAllAvailableTransits(Date begin, Date end, int seats) throws SQLException {
+        Map<Integer, List<Edge>> map = new ConcurrentHashMap<>();
+
+        Statement statement = null;
+        try{
+            statement = connection.createStatement();
+
+            String query = "select * from get_buses_with_seats_left('"
+                    + begin + "'::date, '" + end + "'::date, " + seats + " )";
+
+            ResultSet result = statement.executeQuery(query);
+
+            while (result.next()){
+                City startCity = getCityFromID(result.getInt("start_city"));
+                City endCity = getCityFromID(result.getInt("end_city"));
+                Edge edge = new Edge(
+                        result.getInt("id_transit"),
+                        startCity,
+                        endCity,
+                        result.getInt("price"),
+                        result.getTimestamp("departure"),
+                        result.getTimestamp("arrival") );
+
+                map.putIfAbsent(startCity.getID(), new ArrayList<>());
+                map.get(startCity.getID()).add(edge);
+            }
+        } catch (DatabaseException e) {
+            e.printStackTrace();
+        } finally {
+            if (statement != null) statement.close();
+        }
+
+        return map;
+    }
+
+
 
     public static ArrayList<String> getCityList() throws SQLException {
         ArrayList<String> a =new ArrayList<>();
         Statement statement = null;
         try {
             statement = connection.createStatement();
-            String query="Select name from cities where country = 'Poland'";
+            String query="Select name from cities";
             ResultSet result=statement.executeQuery(query);
             while (result.next()){a.add(result.getString("name"));}
             Collections.sort(a);
@@ -263,6 +240,7 @@ public class DbAdapter {
         Collections.sort(a);
         return a;
     }
+
     public static List< EdgesInOut > getCitiesBetween(Integer prev_cityID,Integer next_cityID, Timestamp begin, Timestamp end) throws SQLException {
         Statement statement = null;
         ArrayList<EdgesInOut> a=new ArrayList<>();

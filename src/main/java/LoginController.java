@@ -20,7 +20,6 @@ public class LoginController {
     public Button ReturnButton;
     public Button ModerLoginButton;
     public Button ShowHistoryButton;
-    public Button LoginButton;
     private Stage prevStage;
     static String username = null;
 

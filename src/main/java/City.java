@@ -18,6 +18,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class City implements Displayable {
 
     @SuppressWarnings("WeakerAccess")
+    public String getCountry() { return "Poland"; }
+
+    @SuppressWarnings("WeakerAccess")
     public static Map<Integer, City> downloadedCities = new ConcurrentHashMap<>();
 
     private String name;

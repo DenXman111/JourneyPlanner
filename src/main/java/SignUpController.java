@@ -62,6 +62,7 @@ public class SignUpController {
             prevStage.setScene(myScene);
 
         } catch (SQLException e){
+            e.printStackTrace();
             new ErrorWindow("User with this username or email already exists");
         } catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());

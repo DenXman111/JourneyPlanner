@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 
 import java.net.URL;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -51,14 +52,14 @@ public class MapController implements Initializable, MapComponentInitializedList
 
                     InfoWindowOptions infoWindowOptions = new InfoWindowOptions();
                     if (title.equals("Start")) infoWindowOptions.content("<h2>" + title + "</h2>");
-                        else {
-                            infoWindowOptions.content("<h2>" + title + "</h2>"
+                    else {
+                        infoWindowOptions.content("<h2>" + title + "</h2>"
                                 + "Rating: " + city.getRating() + "<br>"
-                                + "Days here: " + ((int) DAYS.between(startDates.get(city.getName()), endingDates.get(city.getName())) - 1) + "<br>"
+                                //+ "Days here: " + ((int) DAYS.between(startDates.get(city.getName()), endingDates.get(city.getName())) - 1) + "<br>"
                                 + "Arrival date: " + startDates.get(city.getName()) + "<br>"
                                 + "Departure date: " + endingDates.get(city.getName()) + "<br>"
-                                + "Apartment price: " + city.getNightPrice() * ((int) DAYS.between(startDates.get(city.getName()), endingDates.get(city.getName()))) + "€");
-                        }
+                                + "Apartment price: " + city.getNightPrice() + "€");
+                    }
 
                     InfoWindow infoWindow = new InfoWindow(infoWindowOptions);
                     infoWindow.open(map, marker);
@@ -67,8 +68,8 @@ public class MapController implements Initializable, MapComponentInitializedList
         );
     }
 
-    private Map<String, LocalDate> startDates = new HashMap<>();
-    private Map<String, LocalDate> endingDates = new HashMap<>();
+    private Map<String, Timestamp> startDates = new HashMap<>();
+    private Map<String, Timestamp> endingDates = new HashMap<>();
 
     private void showCurrentTrip(){
         City startCity = FormController.tripToShowing.getStartCity();
@@ -78,7 +79,7 @@ public class MapController implements Initializable, MapComponentInitializedList
         addMarker(startCity, "Start");
 
         for (Edge edge : FormController.tripToShowing.getPlan()){
-            startDates.put(edge.getEndCity().getName(), edge.getEndingDate());
+            startDates.put(edge.getEndCity().getName(), edge.getEndTime());
             endingDates.put(edge.getStartCity().getName(), edge.getStartDate());
 
             if (!startCity.getName().equals(edge.getEndCity().getName())) {
@@ -109,12 +110,10 @@ public class MapController implements Initializable, MapComponentInitializedList
             DirectionsRequest request =
                     new DirectionsRequest(startCity.getName() + ", " + startCity.getCountry(),
                             startCity.getName() + ", " + startCity.getCountry(), TravelModes.DRIVING, points.toArray(new DirectionsWaypoint[points.size()]));
-
             directionsRenderer = new DirectionsRenderer(true, mapView.getMap(), directionsPane);
             directionsService.getRoute(request, this, directionsRenderer);
             addMarker(startCity, "Start");
         });
-
  */
 
     }
@@ -135,100 +134,75 @@ public class MapController implements Initializable, MapComponentInitializedList
         showCurrentTrip();
 
 /*
-
         //Markers and info in that  --SAMPLE
-
         LatLong latLong = new LatLong(62.047472,29.243783);
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLong);
         markerOptions.title("ABC");
         Marker marker = new Marker(markerOptions);
         map.addMarker(marker);
-
         InfoWindowOptions infoWindowOptions = new InfoWindowOptions();
         infoWindowOptions.content("<h2>My sample marker</h2>"
                 + "Current Location: Safeway<br>"
                 + "ETA: 45 minutes" );
-
         InfoWindow infoWindow = new InfoWindow(infoWindowOptions);
         infoWindow.open(map, marker);
-
-
         LatLong latLong2 = new LatLong(52.047472,29.243783);
         MarkerOptions markerOptions2 = new MarkerOptions();
         markerOptions2.position(latLong2);
         markerOptions2.title("ABC");
         Marker marker2 = new Marker(markerOptions2);
         map.addMarker(marker2);
-
         InfoWindowOptions infoWindowOptions2 = new InfoWindowOptions();
         infoWindowOptions2.content("<h2>My sample marker 2</h2>"
                 + "Current Location: Safeway<br>"
                 + "ETA: 45 minutes" );
-
         InfoWindow infoWindow2 = new InfoWindow(infoWindowOptions2);
         infoWindow2.open(map, marker2);
-
-
         //Directions    --SAMPLE
-
         DirectionsWaypoint[] directionsWaypoints = {new DirectionsWaypoint("Vienna, Austria"),
                 new DirectionsWaypoint("Berlin, Germany"),
                 new DirectionsWaypoint("Warszaw, Poland"),
                 new DirectionsWaypoint("Mink, Belarus"),
                 new DirectionsWaypoint("Moskow, Russia"),
                 new DirectionsWaypoint("Mozyr, Belarus")};
-
         DirectionsRequest request =
         new DirectionsRequest(latLong.getLatitude() + ", " + latLong.getLongitude(),
                 latLong.getLatitude() + ", " + latLong.getLongitude(), TravelModes.DRIVING, directionsWaypoints);
         directionsRenderer = new DirectionsRenderer(true, mapView.getMap(), directionsPane);
         directionsService.getRoute(request, this, directionsRenderer);
-
  */
 /*
         from = "Krakow";
         to = "Krakow, Poland";
-
         DirectionsRequest request = new DirectionsRequest(from, to, TravelModes.DRIVING, directionsWaypoints);
         directionsRenderer = new DirectionsRenderer(true, mapView.getMap(), directionsPane);
         directionsService.getRoute(request, this, directionsRenderer);
-
-
  */
 
 
         /*
         to = "Warszaw, Poland";
         from = "Krakow";
-
         DirectionsRequest request = new DirectionsRequest(from, to, TravelModes.DRIVING);
         directionsRenderer = new DirectionsRenderer(true, mapView.getMap(), directionsPane);
         directionsService.getRoute(request, this, directionsRenderer);
-
         from = to;
         to = "Mozyr";
-
         request = new DirectionsRequest(from, to, TravelModes.DRIVING);
         directionsRenderer = new DirectionsRenderer(true, mapView.getMap(), directionsPane);
         directionsService.getRoute(request, this, directionsRenderer);
-
         from = to;
         to = "Kiev";
-
         request = new DirectionsRequest(from, to, TravelModes.DRIVING);
         directionsRenderer = new DirectionsRenderer(true, mapView.getMap(), directionsPane);
         directionsRenderer.setOptions("name: C  ");
         directionsService.getRoute(request, this, directionsRenderer);
-
         from = to;
         to = "Kraków";
-
         request = new DirectionsRequest(from, to, TravelModes.DRIVING);
         directionsRenderer = new DirectionsRenderer(true, mapView.getMap(), directionsPane);
         directionsService.getRoute(request, this, directionsRenderer);
-
-
  */
         System.out.println("map initialized");
     }

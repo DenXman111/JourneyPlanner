@@ -1,9 +1,11 @@
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -13,15 +15,19 @@ public class Planner extends Task<Integer> {
 
     private String startPoint;
     private int funds;
+    private int seats;
     private LocalDate startDate;
     private LocalDate endDate;
 
     private VBox box;
     private ProgressBar progressBar;
 
-    public Planner(String startPoint, int funds, LocalDate startDate, LocalDate endDate){
+    private Map<Integer, List<Edge>> map;
+
+    public Planner(String startPoint, int funds, int seats, LocalDate startDate, LocalDate endDate){
         this.startPoint = startPoint;
         this.funds = funds;
+        this.seats = seats;
         this.startDate = startDate;
         this.endDate = endDate;
     }
@@ -34,6 +40,14 @@ public class Planner extends Task<Integer> {
 
     private void displayTrips(List<Trip> propositions){
         Platform.runLater(()-> {
+
+            if (propositions.isEmpty()){
+                Label messageLabel = new Label("No trips found");
+                messageLabel.getStyleClass().add("message-label");
+                VBox.setMargin(messageLabel, new Insets(0, 0, 0, 250));
+                box.getChildren().add(messageLabel);
+            }
+
             propositions.stream().
                 map(Trip::display).
                 forEach(node -> {
@@ -51,6 +65,12 @@ public class Planner extends Task<Integer> {
         Integer startID;
         try {
             startID = DbAdapter.getCityID(startPoint);
+
+            //System.out.println("Start downloading map");
+            map = DbAdapter.getAllAvailableTransits(Date.valueOf(startDate), Date.valueOf(endDate), seats);
+            //System.out.println("Downloaded map");
+
+            //System.out.println("Start looking for trips");
             trips.findBest(startID, funds, startDate, endDate);
             List < Trip > propositions = new ArrayList<>(trips.getSet());
             Collections.reverse(propositions);
@@ -72,8 +92,8 @@ public class Planner extends Task<Integer> {
         private Set < City > inCurrent;
         private Set< Trip > TripsList;
         private Trip current;
-        private final int  maxTripsNumber = 20;
-        private final int maxTripLength = 10;
+        private final int  maxTripsNumber = 25;
+        private final int maxTripLength = 50;
 
         private Integer start; //used in dfs to remember startID
 
@@ -89,14 +109,14 @@ public class Planner extends Task<Integer> {
             return TripsList;
         }
 
-        private void dfs(City currentCity, int fund, Timestamp currentDate, Timestamp tripEndingDate) throws SQLException {
+        private void dfs(City currentCity, int fund, Timestamp currentDate, Timestamp tripEndingDate) {
 
             if(TripsList.size() >= maxTripsNumber)
                 return;
 
             inCurrent.add(currentCity);
             if (currentCity.getID().equals(start) && !current.isEmpty()){
-//            System.out.println("Found trip " + nowID + " " + current.getRating() + " " + current.getPlan());
+               //System.out.println("Found trip " + currentCity.getID() + " " + current.getRating() + " " + current.getPlan());
                 TripsList.add(new Trip(current));
 
                 //used for progress bar
@@ -106,14 +126,20 @@ public class Planner extends Task<Integer> {
                 return;
             }
 
-//        System.out.println("dfs in " + nowID + " " + fund + " " + currentDate + " " + current.getRating());
+            //System.out.println("dfs in " + currentCity.getID() + " " + fund + " " + currentDate + " " + current.getRating());
 
             if (current.getPlan().size() > maxTripLength){
                 inCurrent.remove(currentCity);
                 return;
             }
 
-            List < Edge > neighbours = DbAdapter.getNeighbours(currentCity, currentDate, tripEndingDate);
+            if (!map.containsKey(currentCity.getID())){
+                //System.out.println("No neighbours");
+                inCurrent.remove(currentCity);
+                return;
+            }
+            List < Edge > neighbours = map.get(currentCity.getID());
+            //System.out.println("list size: :" + neighbours.size());
             for (Edge e : neighbours){
                 if (e.getEndTime().after(tripEndingDate)) continue;
                 if (!e.getStartDate().after(currentDate)) continue;
