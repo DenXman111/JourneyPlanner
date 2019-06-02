@@ -17,13 +17,18 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class HistoryController implements Initializable {
-    public ProgressIndicator progressIndicator;
+
     private Stage prevStage;
 
     @FXML
+    private ProgressIndicator progressIndicator;
+
+    @FXML
     private Button ReturnButton;
+
     @FXML
     private VBox answersVBox;
+
     @SuppressWarnings("WeakerAccess")
     protected void setPrevStage(Stage stage){
         this.prevStage = stage;
@@ -50,7 +55,7 @@ public class HistoryController implements Initializable {
 
     @FXML
     @SuppressWarnings("Duplicates")
-    void returnButtonPressed(ActionEvent event) throws IOException {
+    void returnButtonPressed() throws IOException {
         FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
         Pane myPane = myLoader.load();
 
@@ -65,6 +70,5 @@ public class HistoryController implements Initializable {
         stage.setResizable(false);
         prevStage.close();
         stage.show();
-
     }
 }

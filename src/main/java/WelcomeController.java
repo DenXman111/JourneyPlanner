@@ -47,7 +47,7 @@ public class WelcomeController implements Initializable {
                 updateMessage("Connecting to database...");
                 try {
                     DbAdapter.connect();
-                } catch (SQLException e) {
+                } catch (SQLException | IOException e) {
                     e.printStackTrace();
                     System.out.println("Failed to connect to database");
                     updateMessage("Failed to connect to database");

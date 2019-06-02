@@ -1,9 +1,16 @@
+import com.google.api.gax.paging.Page;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
+import com.google.common.collect.Lists;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -46,6 +53,22 @@ public class Main extends Application {
 
 
     public static void main(String[] args) {
+
+        GoogleCredentials credentials;
+        try {
+            credentials = GoogleCredentials.fromStream(Main.class.getResourceAsStream("jpConnection.json"))
+                    .createScoped(Lists.newArrayList("https://www.googleapis.com/auth/cloud-platform"));
+            Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
+
+            System.out.println("Buckets:");
+            Page<Bucket> buckets = storage.list();
+            for (Bucket bucket : buckets.iterateAll()) {
+                System.out.println(bucket.toString());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         try{
             launch(args);
         } finally {

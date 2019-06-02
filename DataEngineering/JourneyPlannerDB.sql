@@ -765,6 +765,20 @@ create or replace function reserve(user_id varchar(30), seats integer, res varia
     end;
     $$ language plpgsql;
 
+
+/*create or replace function user_reservations(given_username varchar(50))
+returns table() as
+    $$
+    begin
+        return query
+            select *
+            from seat_reservation sr
+                join transit_reservation tr on sr.transit_reservation_id = tr.id
+                join reservations r on r.id = tr.reservation
+            where r."user" = given_username;
+    end;
+    $$ language plpgsql;*/
+
 select *
 from get_buses('2019-06-04'::date, '2019-06-05'::date );
 
