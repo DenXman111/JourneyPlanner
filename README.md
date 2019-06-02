@@ -25,3 +25,5 @@ https://jdbc.postgresql.org/download.html
     
     
 4. If you want use elements from .jar in Scene Builder you should add .jar to Scene Builder.
+
+5. If you work on IntelliJ install cloud code plugin by google

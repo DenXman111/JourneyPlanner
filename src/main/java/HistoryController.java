@@ -5,6 +5,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class HistoryController implements Initializable {
+    public ProgressIndicator progressIndicator;
     private Stage prevStage;
 
     @FXML

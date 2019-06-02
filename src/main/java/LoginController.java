@@ -20,6 +20,7 @@ public class LoginController {
     public Button ReturnButton;
     public Button ModerLoginButton;
     public Button ShowHistoryButton;
+    public Button LoginButton;
     private Stage prevStage;
     static String username = null;
 
@@ -134,7 +135,6 @@ public class LoginController {
 
             Scene scene = new Scene(myPane);
             stage.setScene(scene);
-            stage.setResizable(false);
             prevStage.close();
             stage.show();
         } catch (FieldsDataException e){
