@@ -8,10 +8,7 @@ import javafx.fxml.Initializable;
 
 import java.net.URL;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.*;
-
-import static java.time.temporal.ChronoUnit.DAYS;
 
 public class MapController implements Initializable, MapComponentInitializedListener, DirectionsServiceCallback {
     private DirectionsService directionsService;
@@ -80,7 +77,7 @@ public class MapController implements Initializable, MapComponentInitializedList
 
         for (Edge edge : FormController.tripToShowing.getPlan()){
             startDates.put(edge.getEndCity().getName(), edge.getEndTime());
-            endingDates.put(edge.getStartCity().getName(), edge.getStartDate());
+            endingDates.put(edge.getStartCity().getName(), edge.getStartTime());
 
             if (!startCity.getName().equals(edge.getEndCity().getName())) {
                 addMarker(edge.getEndCity(), NumberConventer.convertNumber(number));

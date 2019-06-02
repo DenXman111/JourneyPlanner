@@ -284,7 +284,7 @@ public class DbAdapter {
                 id_list.add(result.getString("id"));
             }
             for(int i=0;i<id_list.size();i++) {
-                Trip tmp=new Trip();
+                Trip tmp = new Trip(0);
                 String tr = id_list.get(i);
                 String query2 = "Select buses.* from buses join (select * from trips where id=\'" + tr + "\' and traveler=\'"+user+"\') as a on buses.id=a.bus_id order by a.id,departure;";
                 ResultSet result2 = statement.executeQuery(query2);
@@ -311,34 +311,40 @@ public class DbAdapter {
 
 
 
-    public static void reserve(Trip arg, String user, int seats) throws SQLException {
+    public static Reservation reserve(Trip trip, String user, int seats) throws SQLException {
         Statement statement = null;
 
-        if (arg == null || user == null) return;
+        if (trip == null || user == null) return null;
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder queryBuilder = new StringBuilder();
+
+        queryBuilder.append("select * from reserve('" + user + "', " + seats);
+        trip.getPlan().forEach( edge -> {
+            queryBuilder.append(", row(" + edge.getBusId() + ", '" + edge.getStartTime() + "'::timestamp )");
+        });
+        queryBuilder.append(" )");
+        Reservation reservation = new Reservation();
+
         try {
             statement = connection.createStatement();
 
-            statement.executeQuery("INSERT INTO ");
-            List<Edge> a=arg.getPlan();
-            for (int i = 0; i < a.size(); i++) {
-                int g = a.get(i).getBusId();
-                if (i==0){
-                    String query = "insert into trips values (nextval('res_id'), "+g+", '"+user+"')";
-                    statement.executeUpdate(query);
-                }
-                else {
-                    String query = "insert into trips values (currval('res_id'), " + g + ", '" + user + "')";
-                    statement.executeUpdate(query);
-                }
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
+            ResultSet result =  statement.executeQuery(queryBuilder.toString());
+
+            while (result.next())
+                reservation.addTransitReservation(
+                        reservation.new TransitReservation(
+                                result.getInt("transit_id"),
+                                result.getTimestamp("departure_time"),
+                                result.getString("departure_stop"),
+                                result.getString("arrival_stop"),
+                                (Integer[])result.getArray("reserved_seats").getArray()
+                        ));
+
         }
         finally {
             if (statement != null) statement.close();
         }
+
+        return reservation;
     }
 }

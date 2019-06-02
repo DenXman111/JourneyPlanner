@@ -43,7 +43,7 @@ public class TripPlans {
         List < Edge > neighbours = DbAdapter.getNeighbours(nowID);
         for (Edge e : neighbours){
             if (e.getEndTime().isAfter(tripEndingDate)) continue;
-            if (!e.getStartDate().isAfter(currentDate)) continue;
+            if (!e.getStartTime().isAfter(currentDate)) continue;
             if (e.getPrice() > fund) continue;
             if (inCurrent.contains(e.getEndCity().getID()) && !e.getEndCity().getID().equals(start)) continue;
             int livingPrice = current.getLivingPrice(e);

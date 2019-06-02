@@ -727,7 +727,7 @@ from get_buses('2019-06-01'::date, '2019-06-07'::date);
 
 
 create or replace function reserve(user_id varchar(30), seats integer, res variadic reservation_type array) returns
-    table (reserved_seats integer array )as
+    table (transit_id integer, departure_time timestamp, departure_stop varchar(127), arrival_stop varchar(127), reserved_seats integer array )as
     $$
     declare
         my_reservation numeric = null;
@@ -741,6 +741,10 @@ create or replace function reserve(user_id varchar(30), seats integer, res varia
             my_transit_id =  NEXTVAL('transit_reservation_id_seq');
             insert into transit_reservation(id, transit, departure_date, reservation)
             VALUES(my_transit_id, trans.transit, trans.departure, my_reservation);
+            transit_id = trans.transit;
+            departure_time = trans.departure;
+            departure_stop = (select bs.stop_name from transits t join bus_stops bs on t.departure_stop = bs.id where t.id_transit = trans.transit);
+            arrival_stop = (select bs.stop_name from transits t join bus_stops bs on t.arrival_stop = bs.id where t.id_transit = trans.transit);
             reserved_seats = array(select seat_number from first_free_seats(trans.transit::integer, trans.departure, seats));
 
             for my_seat in select * from unnest(reserved_seats) rs loop
@@ -762,9 +766,9 @@ create or replace function reserve(user_id varchar(30), seats integer, res varia
     $$ language plpgsql;
 
 select *
-from get_buses('2019-06-02'::date, '2019-06-03'::date );
+from get_buses('2019-06-04'::date, '2019-06-05'::date );
 
-select * from reserve('admin1', 3, row ( 39, '2019-06-03 08:00'::timestamp ), row ( 30, '2019-06-03 11:00:00'::timestamp ));
+select * from reserve('admin1', 3, row ( 39, '2019-06-05 07:00'::timestamp ), row ( 30, '2019-06-05 07:00:00'::timestamp ));
 
 select *
 from seat_reservation st join transit_reservation tr on st.transit_reservation_id = tr.id join reservations r on tr.reservation = r.id;

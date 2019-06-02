@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 /**
  * Edge class stores information about single transit between cities.
  */
-@SuppressWarnings("deprecation")
 public class Edge implements Displayable{
 
     private Integer busID;
@@ -79,7 +78,7 @@ public class Edge implements Displayable{
     public int getPrice() { return price; }
 
     @SuppressWarnings("WeakerAccess")
-    public Timestamp getStartDate() {
+    public Timestamp getStartTime() {
         return startTime;
     }
 
@@ -91,16 +90,9 @@ public class Edge implements Displayable{
     @SuppressWarnings({"unused", "WeakerAccess"})
     public int getBusId() {return busID; }
 
-    private static String timeFormat(Timestamp time){
-        return  time.toLocaleString().substring(12, 17);
-    }
-
-    private static String dateFormat(Timestamp time){
-        return  time.toLocaleString().substring(0, 10);
-    }
-
     private Label timeInformation(){
-        Label dateLabel = new Label( dateFormat(startTime) + ":     " + timeFormat(startTime) + " - " + timeFormat(endTime));
+        Label dateLabel = new Label(Formater.dateFormat(startTime) + ":     " +
+                        Formater.timeFormat(startTime) + " - " + Formater.timeFormat(endTime));
         dateLabel.getStyleClass().addAll("grey-description");
         return dateLabel;
     }
@@ -164,7 +156,7 @@ public class Edge implements Displayable{
     public static Edge mergeEdges(Edge first, Edge second) throws SQLException {
         if (first == null || second == null) return null;
         Integer endId = second.getEndCity().getID();
-        List<Edge> options = DbAdapter.getNeighbours(first.getStartCity(), first.getStartDate(), second.getEndTime())
+        List<Edge> options = DbAdapter.getNeighbours(first.getStartCity(), first.getStartTime(), second.getEndTime())
                 .stream()
                 .filter( edge -> edge.getEndCity().getID().equals(endId) && edge.isBetween(first.startTime, second.endTime))
                 .collect(Collectors.toList());

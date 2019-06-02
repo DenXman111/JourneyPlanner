@@ -146,3 +146,7 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 30, 0, 0, 8);
 }
 
+.text-area{
+    -fx-text-fill: #696969;
+    -fx-font-size: 11px;
+}

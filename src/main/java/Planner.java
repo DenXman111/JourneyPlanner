@@ -68,7 +68,8 @@ public class Planner extends Task<Integer> {
 
             //System.out.println("Start downloading map");
             map = DbAdapter.getAllAvailableTransits(Date.valueOf(startDate), Date.valueOf(endDate), seats);
-            //System.out.println("Downloaded map");
+            System.out.println("Downloaded map");
+            System.out.println("Cities: " + map.size());
 
             //System.out.println("Start looking for trips");
             trips.findBest(startID, funds, startDate, endDate);
@@ -101,7 +102,7 @@ public class Planner extends Task<Integer> {
         public TripPlans(){
             inCurrent = new TreeSet<>(Comparator.comparingInt(City::getID));
             TripsList = new TreeSet<>(Comparator.comparingDouble(Trip::getRating));
-            current = new Trip();
+            current = new Trip(seats);
         }
 
         @SuppressWarnings("WeakerAccess")
@@ -116,7 +117,7 @@ public class Planner extends Task<Integer> {
 
             inCurrent.add(currentCity);
             if (currentCity.getID().equals(start) && !current.isEmpty()){
-               //System.out.println("Found trip " + currentCity.getID() + " " + current.getRating() + " " + current.getPlan());
+               System.out.println("Found trip " + currentCity.getID() + " " + current.getRating() + " " + current.getPlan());
                 TripsList.add(new Trip(current));
 
                 //used for progress bar
@@ -126,7 +127,7 @@ public class Planner extends Task<Integer> {
                 return;
             }
 
-            //System.out.println("dfs in " + currentCity.getID() + " " + fund + " " + currentDate + " " + current.getRating());
+            System.out.println("dfs in " + currentCity.getID() + " " + fund + " " + currentDate + " " + current.getRating());
 
             if (current.getPlan().size() > maxTripLength){
                 inCurrent.remove(currentCity);
@@ -134,15 +135,15 @@ public class Planner extends Task<Integer> {
             }
 
             if (!map.containsKey(currentCity.getID())){
-                //System.out.println("No neighbours");
+                System.out.println("No neighbours");
                 inCurrent.remove(currentCity);
                 return;
             }
             List < Edge > neighbours = map.get(currentCity.getID());
-            //System.out.println("list size: :" + neighbours.size());
+            System.out.println("list size: :" + neighbours.size());
             for (Edge e : neighbours){
                 if (e.getEndTime().after(tripEndingDate)) continue;
-                if (!e.getStartDate().after(currentDate)) continue;
+                if (!e.getStartTime().after(currentDate)) continue;
                 if (e.getPrice() > fund) continue;
                 if (inCurrent.contains(e.getEndCity()) && !e.getEndCity().getID().equals(start)) continue;
                 int livingPrice = current.getLivingPrice(e);
