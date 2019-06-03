@@ -10,6 +10,8 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.util.*;
 
+import static java.time.temporal.ChronoUnit.HOURS;
+
 public class MapController implements Initializable, MapComponentInitializedListener, DirectionsServiceCallback {
     private DirectionsService directionsService;
     private DirectionsPane directionsPane;
@@ -50,11 +52,12 @@ public class MapController implements Initializable, MapComponentInitializedList
                     InfoWindowOptions infoWindowOptions = new InfoWindowOptions();
                     if (title.equals("Start")) infoWindowOptions.content("<h2>" + title + "</h2>");
                     else {
+                        int currentHours = (int) HOURS.between(startDates.get(city.getName()).toLocalDateTime(), endingDates.get(city.getName()).toLocalDateTime());
                         infoWindowOptions.content("<h2>" + title + "</h2>"
                                 + "Rating: " + city.getRating() + "<br>"
-                                //+ "Days here: " + ((int) DAYS.between(startDates.get(city.getName()), endingDates.get(city.getName())) - 1) + "<br>"
-                                + "Arrival date: " + startDates.get(city.getName()) + "<br>"
-                                + "Departure date: " + endingDates.get(city.getName()) + "<br>"
+                                + "Time here: " + currentHours / 24 +  ( currentHours / 24 == 1 ? " day " : " days ") + currentHours % 24 +  ( currentHours % 24 == 1 ? " hour" : " hours") + "<br>"
+                                + "Arrival date: " + startDates.get(city.getName()).toLocalDateTime().toLocalDate() + " " + startDates.get(city.getName()).toLocalDateTime().toLocalTime() + "<br>"
+                                + "Departure date: " + endingDates.get(city.getName()).toLocalDateTime().toLocalDate() + " " + endingDates.get(city.getName()).toLocalDateTime().toLocalTime() + "<br>"
                                 + "Apartment price: " + city.getNightPrice() + "€");
                     }
 

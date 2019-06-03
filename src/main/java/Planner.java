@@ -11,6 +11,8 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
 
+import static java.time.temporal.ChronoUnit.HOURS;
+
 public class Planner extends Task<Integer> {
 
     private String startPoint;
@@ -72,7 +74,7 @@ public class Planner extends Task<Integer> {
             System.out.println("Cities: " + map.size());
 
             //System.out.println("Start looking for trips");
-            trips.findBest(startID, funds, startDate, endDate);
+            trips.findBest(startID, funds / seats, startDate, endDate);
             List < Trip > propositions = new ArrayList<>(trips.getSet());
             Collections.reverse(propositions);
 
@@ -90,8 +92,8 @@ public class Planner extends Task<Integer> {
 
     @SuppressWarnings("FieldCanBeLocal")
     public class TripPlans {
-        private Set < City > inCurrent;
-        private Set< Trip > TripsList;
+        private TreeSet < City > inCurrent;
+        private TreeSet < Trip > tripsList;
         private Trip current;
         private final int  maxTripsNumber = 25;
         private final int maxTripLength = 50;
@@ -101,33 +103,33 @@ public class Planner extends Task<Integer> {
         @SuppressWarnings("WeakerAccess")
         public TripPlans(){
             inCurrent = new TreeSet<>(Comparator.comparingInt(City::getID));
-            TripsList = new TreeSet<>(Comparator.comparingDouble(Trip::getRating));
+            tripsList = new TreeSet<>(Comparator.comparingDouble(Trip::getRating));
             current = new Trip(seats);
         }
 
         @SuppressWarnings("WeakerAccess")
         public Set< Trip > getSet(){
-            return TripsList;
+            return tripsList;
         }
 
         private void dfs(City currentCity, int fund, Timestamp currentDate, Timestamp tripEndingDate) {
 
-            if(TripsList.size() >= maxTripsNumber)
-                return;
+            //if(tripsList.size() >= maxTripsNumber) return; //BAD - don't find best ways
 
             inCurrent.add(currentCity);
             if (currentCity.getID().equals(start) && !current.isEmpty()){
                System.out.println("Found trip " + currentCity.getID() + " " + current.getRating() + " " + current.getPlan());
-                TripsList.add(new Trip(current));
+                tripsList.add(new Trip(current));
+                if(tripsList.size() > maxTripsNumber) tripsList.remove(tripsList.first());
 
                 //used for progress bar
-                updateProgress(TripsList.size(), maxTripsNumber);
+                updateProgress(tripsList.size(), maxTripsNumber);
 
                 inCurrent.remove(currentCity);
                 return;
             }
 
-            System.out.println("dfs in " + currentCity.getID() + " " + fund + " " + currentDate + " " + current.getRating());
+            //System.out.println("dfs in " + currentCity.getID() + " " + fund + " " + currentDate + " " + current.getRating());
 
             if (current.getPlan().size() > maxTripLength){
                 inCurrent.remove(currentCity);
@@ -135,15 +137,16 @@ public class Planner extends Task<Integer> {
             }
 
             if (!map.containsKey(currentCity.getID())){
-                System.out.println("No neighbours");
+                //System.out.println("No neighbours");
                 inCurrent.remove(currentCity);
                 return;
             }
             List < Edge > neighbours = map.get(currentCity.getID());
-            System.out.println("list size: :" + neighbours.size());
+            //System.out.println("list size: :" + neighbours.size());
             for (Edge e : neighbours){
                 if (e.getEndTime().after(tripEndingDate)) continue;
                 if (!e.getStartTime().after(currentDate)) continue;
+                if (!current.isEmpty() && (int)HOURS.between(currentDate.toLocalDateTime(), e.getStartTime().toLocalDateTime()) < 2) continue; //Time to change bus -- min 1 hour
                 if (e.getPrice() > fund) continue;
                 if (inCurrent.contains(e.getEndCity()) && !e.getEndCity().getID().equals(start)) continue;
                 int livingPrice = current.getLivingPrice(e);
