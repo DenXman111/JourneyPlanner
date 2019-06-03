@@ -11,6 +11,8 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
 
+import static java.time.temporal.ChronoUnit.HOURS;
+
 public class Planner extends Task<Integer> {
 
     private String startPoint;
@@ -144,6 +146,7 @@ public class Planner extends Task<Integer> {
             for (Edge e : neighbours){
                 if (e.getEndTime().after(tripEndingDate)) continue;
                 if (!e.getStartTime().after(currentDate)) continue;
+                if (!current.isEmpty() && (int)HOURS.between(currentDate.toLocalDateTime(), e.getStartTime().toLocalDateTime()) < 2) continue; //Time to change bus -- min 1 hour
                 if (e.getPrice() > fund) continue;
                 if (inCurrent.contains(e.getEndCity()) && !e.getEndCity().getID().equals(start)) continue;
                 int livingPrice = current.getLivingPrice(e);
