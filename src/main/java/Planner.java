@@ -43,7 +43,7 @@ public class Planner extends Task<Integer> {
 
             if (propositions.isEmpty()){
                 Label messageLabel = new Label("No trips found");
-                messageLabel.getStyleClass().add("message-label");
+                messageLabel.getStyleClass().add("red-message-label");
                 VBox.setMargin(messageLabel, new Insets(0, 0, 0, 250));
                 box.getChildren().add(messageLabel);
             }

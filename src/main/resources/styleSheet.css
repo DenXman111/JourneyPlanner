@@ -36,11 +36,30 @@
     -fx-background-radius: 20;
 }
 
-.message-label{
+.red-message-label{
     -fx-background-color: rgba(174, 68, 58, 0.98);
     -fx-text-fill: white;
     -fx-background-radius: 20;
     -fx-padding: 10px;
+}
+
+.canceled-label{
+    -fx-background-color: rgba(41, 80, 203, 0.98);
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 5px;
+}
+
+.cancel-button{
+    -fx-background-color: rgba(41, 80, 203, 0.98);
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 7px;
+}
+
+.cancel-button:hover{
+    -fx-background-color: rgba(23, 38, 131, 0.98);
+    -fx-text-fill: #cdcdcd;
 }
 
 .ratting-button:hover{

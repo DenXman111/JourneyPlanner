@@ -323,6 +323,7 @@ public class DbAdapter {
                         result.getTimestamp("arrival")
                 ));
             }
+            if (pastTrip != null) tripList.add(pastTrip);
         }
         catch (Exception e){
             e.printStackTrace();
@@ -370,5 +371,12 @@ public class DbAdapter {
         }
 
         return reservation;
+    }
+
+
+    public static void cancelReservation(int reservation_id) throws SQLException {
+        String deleteStatement = "delete from reservations where id = " + reservation_id;
+        PreparedStatement preparedStatement = connection.prepareStatement(deleteStatement);
+        preparedStatement.executeUpdate();
     }
 }

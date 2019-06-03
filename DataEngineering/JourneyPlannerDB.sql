@@ -414,6 +414,7 @@ CREATE OR REPLACE FUNCTION reservations_delete() RETURNS TRIGGER AS
     $reservations_delete$
     begin
         delete from transit_reservation where reservation = old.id;
+        return old;
     end;
     $reservations_delete$ LANGUAGE plpgsql;
 CREATE TRIGGER reservations_delete BEFORE DELETE ON reservations
@@ -424,6 +425,7 @@ CREATE OR REPLACE function transit_reservation_delete() RETURNS TRIGGER AS
     $transit_reservation_delete$
     begin
         delete from seat_reservation st where st.transit_reservation_id = old.id;
+        return old;
     end;
     $transit_reservation_delete$ LANGUAGE plpgsql;
 CREATE TRIGGER transit_reservation_delete BEFORE DELETE ON transit_reservation

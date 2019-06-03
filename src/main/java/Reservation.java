@@ -7,6 +7,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Line;
 import javafx.util.Duration;
 
 import java.sql.Timestamp;
@@ -81,10 +82,14 @@ public class Reservation implements Displayable{
         VBox.setMargin(box, new Insets(15, 0, 0, 0));
         reservations.forEach(reservation -> {
             Node reservationNode = reservation.display();
-            HBox.setMargin(reservationNode, new Insets(0, 20, 0, 0));
+            HBox.setMargin(reservationNode, new Insets(0, 20, 0, 20));
             box.getChildren().add(reservationNode);
         });
         return box;
+    }
+
+    public Timestamp earliestDeparture(){
+        return reservations.get(0).departure;
     }
 
 }

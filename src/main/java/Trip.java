@@ -12,7 +12,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import jnr.ffi.annotations.In;
 
 import java.io.IOException;
 import java.sql.SQLException;

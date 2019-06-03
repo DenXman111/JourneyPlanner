@@ -67,6 +67,7 @@ public class City implements Displayable {
     @Override
     public Pane display() {
         VBox box = new VBox();
+        box.setPrefWidth(100);
         box.setAlignment(Pos.CENTER);
 
         // draws a circle above label containing city name
