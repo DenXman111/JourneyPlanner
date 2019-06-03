@@ -46,7 +46,7 @@ public class PastTrip implements Displayable {
         if (cancelable()) {
             Button cancelButton = new Button("Cancel reservation");
             cancelButton.getStyleClass().add("cancel-button");
-            VBox.setMargin(cancelButton, new Insets(10, 0, 0, 10));
+            VBox.setMargin(cancelButton, new Insets(10, 0, -3, 5));
             cancelButton.setOnMouseClicked(mouseEvent -> executeCancelTask());
             mainBox.getChildren().add(cancelButton);
         }

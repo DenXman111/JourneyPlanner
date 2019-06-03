@@ -51,14 +51,15 @@
 }
 
 .cancel-button{
-    -fx-background-color: rgba(41, 80, 203, 0.98);
+    -fx-background-color: rgba(188, 128, 62, 0.98);
     -fx-text-fill: white;
     -fx-background-radius: 20;
-    -fx-padding: 7px;
+    -fx-padding: 8px;
+    -fx-font-size: 11px;
 }
 
 .cancel-button:hover{
-    -fx-background-color: rgba(23, 38, 131, 0.98);
+    -fx-background-color: rgba(134, 85, 35, 0.98);
     -fx-text-fill: #cdcdcd;
 }
 
