@@ -766,8 +766,8 @@ create or replace function reserve(user_id varchar(30), seats integer, res varia
     $$ language plpgsql;
 
 
-/*create or replace function user_reservations(given_username varchar(50))
-returns table() as
+create or replace function user_reservations(given_username varchar(50))
+returns table(reservation_id integer, transit_id integer, departure timestamp, departure_stop varchar(127)) as
     $$
     begin
         return query
@@ -777,7 +777,7 @@ returns table() as
                 join reservations r on r.id = tr.reservation
             where r."user" = given_username;
     end;
-    $$ language plpgsql;*/
+    $$ language plpgsql;
 
 select *
 from get_buses('2019-06-04'::date, '2019-06-05'::date );
