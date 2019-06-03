@@ -22,11 +22,12 @@ import java.util.List;
 import java.util.ListIterator;
 
 import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.HOURS;
 
 public class Trip implements Displayable{
     private List<Edge> plan;
     private double rating;
-    private int daysInTrip;
+    private int hoursInTrip;
     private VBox mainPane;
     private Timestamp beginTime, endTime;
     private int people;
@@ -38,7 +39,7 @@ public class Trip implements Displayable{
     public Trip(int people) {
         plan = new ArrayList<>();
         rating = 0;
-        daysInTrip = 0;
+        hoursInTrip = 0;
         this.people = people;
     }
 
@@ -47,7 +48,7 @@ public class Trip implements Displayable{
     public Trip(Trip obj) {
         this.plan = new ArrayList<>(obj.plan);
         this.rating = obj.rating;
-        this.daysInTrip = obj.daysInTrip;
+        this.hoursInTrip = obj.hoursInTrip;
         this.beginTime = obj.beginTime;
         this.endTime = obj.endTime;
         this.mainPane = null;
@@ -63,14 +64,14 @@ public class Trip implements Displayable{
     @SuppressWarnings({"WeakerAccess", "Duplicates"})
     public void countRating(){
         this.rating = 0;
-        this.daysInTrip = 0;
+        this.hoursInTrip = 0;
         Edge prev = null;
         for (Edge now : plan){
             if (prev != null){
-                int days = (int)DAYS.between(prev.getEndTime().toLocalDateTime(), now.getStartTime().toLocalDateTime()) - 1;
-                this.rating = this.rating * this.daysInTrip + now.getStartCity().getRating() * days;
-                this.daysInTrip += days;
-                if (this.daysInTrip > 0) this.rating /= this.daysInTrip; else this.rating = 0;
+                int hours = (int)HOURS.between(prev.getEndTime().toLocalDateTime(), now.getStartTime().toLocalDateTime());
+                this.rating = this.rating * this.hoursInTrip + now.getStartCity().getRating() * hours;
+                this.hoursInTrip += hours;
+                if (this.hoursInTrip > 0) this.rating /= this.hoursInTrip; else this.rating = 0;
             }
             prev = now;
         }
@@ -80,10 +81,10 @@ public class Trip implements Displayable{
     public void pushEdge(Edge edge){
         if (!plan.isEmpty()){
             Edge last = plan.get(plan.size() - 1);
-            int days = (int)DAYS.between(last.getEndTime().toLocalDateTime(), edge.getStartTime().toLocalDateTime()) - 1;
-            this.rating = this.rating * this.daysInTrip + edge.getStartCity().getRating() * days;
-            this.daysInTrip += days;
-            if (this.daysInTrip > 0) this.rating /= this.daysInTrip; else this.rating = 0;
+            int hours = (int)HOURS.between(last.getEndTime().toLocalDateTime(), edge.getStartTime().toLocalDateTime());
+            this.rating = this.rating * this.hoursInTrip + edge.getStartCity().getRating() * hours;
+            this.hoursInTrip += hours;
+            if (this.hoursInTrip > 0) this.rating /= this.hoursInTrip; else this.rating = 0;
             //this.rating = Math.round(this.rating * 100) / 100;
         }
         plan.add(edge);
@@ -94,11 +95,11 @@ public class Trip implements Displayable{
         if (plan.size() > 1) {
             Edge last = plan.get(plan.size() - 1);
             Edge prev = plan.get(plan.size() - 2);
-            int days = (int)DAYS.between(prev.getEndTime().toLocalDateTime(), last.getStartTime().toLocalDateTime()) - 1;
-            this.rating *= this.daysInTrip;
-            this.daysInTrip -= days;
-            this.rating -= last.getStartCity().getRating() * days;
-            if (this.daysInTrip > 0) this.rating /= this.daysInTrip; else this.rating = 0;
+            int hours = (int)HOURS.between(prev.getEndTime().toLocalDateTime(), last.getStartTime().toLocalDateTime());
+            this.rating *= this.hoursInTrip;
+            this.hoursInTrip -= hours;
+            this.rating -= last.getStartCity().getRating() * hours;
+            if (this.hoursInTrip > 0) this.rating /= this.hoursInTrip; else this.rating = 0;
         }
         if (!plan.isEmpty()) plan.remove(plan.get(plan.size() - 1));
     }
@@ -248,7 +249,7 @@ public class Trip implements Displayable{
         numberLabel.getStyleClass().add("grey-text");
         HBox.setMargin(numberLabel, new Insets(0, 10, 0, 0));
 
-        Label travelTimeLabel = new Label( "Travel time: " + daysInTrip +  ( daysInTrip == 1 ? " days" : " day"));
+        Label travelTimeLabel = new Label( "Travel time: " + hoursInTrip / 24 +  ( hoursInTrip / 24 == 1 ? " day " : " days ") + hoursInTrip % 24 +  ( hoursInTrip % 24 == 1 ? " hour" : " hours"));
         travelTimeLabel.getStyleClass().add("rating-text");
         HBox.setMargin(travelTimeLabel, new Insets(0, 5, 0, 0));
 

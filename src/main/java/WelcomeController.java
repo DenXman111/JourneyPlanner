@@ -1,4 +1,3 @@
-import ch.qos.logback.classic.db.DBAppender;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
