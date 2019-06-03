@@ -1,11 +1,3 @@
-import com.google.api.gax.paging.Page;
-import com.google.auth.oauth2.ComputeEngineCredentials;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
-import com.google.common.collect.Lists;
-
 import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
@@ -294,32 +286,42 @@ public class DbAdapter {
         }
         return a;
     }
-    public static ArrayList <Trip> getHistory(String user) throws SQLException {
-        ArrayList <Trip> out=new ArrayList();
+    public static ArrayList <PastTrip> getHistory(String user) throws SQLException {
+        ArrayList <PastTrip> tripList = new ArrayList();
         Statement statement = null;
         try {
             statement = connection.createStatement();
-            String query="select distinct id from trips where traveler=\'"+user+"\'";
+            String query="select * from user_reservations('" + user + "')";
             ResultSet result=statement.executeQuery(query);
-            ArrayList<String> id_list=new ArrayList<>();
-            while (result.next()) {
-                id_list.add(result.getString("id"));
-            }
-            for(int i=0;i<id_list.size();i++) {
-                Trip tmp = new Trip(0);
-                String tr = id_list.get(i);
-                String query2 = "Select buses.* from buses join (select * from trips where id=\'" + tr + "\' and traveler=\'"+user+"\') as a on buses.id=a.bus_id order by a.id,departure;";
-                ResultSet result2 = statement.executeQuery(query2);
-                while (result2.next()) {
-                    System.out.println(tr);
-                    City r1 = getCityFromID(result2.getInt("start_city"));
-                    City r2 = getCityFromID(result2.getInt("end_city"));
-                    Edge b = new Edge(result2.getInt("id"), r1, r2, result2.getInt("price"),
-                            result2.getTimestamp("departure"),
-                            result2.getTimestamp("arrival"));
-                    tmp.pushEdge(b);
+
+            PastTrip pastTrip = null;
+            while (result.next()){
+                int reservationId = result.getInt("reservation_id");
+
+                if (pastTrip == null || pastTrip.getId() != reservationId){
+                    if (pastTrip != null) tripList.add(pastTrip);
+                    int people = ((Integer[])result.getArray("reserved_seats").getArray()).length;
+                    pastTrip = new PastTrip(reservationId, people);
                 }
-                out.add(tmp);
+
+                pastTrip.reservation.addTransitReservation(pastTrip.reservation.new TransitReservation(
+                        result.getInt("transit_id"),
+                        result.getTimestamp("departure"),
+                        result.getString("departure_stop"),
+                        result.getString("arrival_stop"),
+                        (Integer[])result.getArray("reserved_seats").getArray()
+                ));
+
+                City departureCity = getCityFromID(result.getInt("departure_city"));
+                City arrivalCity = getCityFromID(result.getInt("arrival_city"));
+                pastTrip.trip.pushEdge(new Edge(
+                        result.getInt("transit_id"),
+                        departureCity,
+                        arrivalCity,
+                        result.getInt("transit_price"),
+                        result.getTimestamp("departure"),
+                        result.getTimestamp("arrival")
+                ));
             }
         }
         catch (Exception e){
@@ -328,7 +330,7 @@ public class DbAdapter {
         finally {
             if (statement != null) statement.close();
         }
-        return out;
+        return tripList;
     }
 
 

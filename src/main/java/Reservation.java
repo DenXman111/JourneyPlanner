@@ -8,7 +8,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-import jnr.ffi.annotations.In;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -42,7 +41,7 @@ public class Reservation implements Displayable{
             VBox.setMargin(busLabel, new Insets(5, 0, 5, 0));
 
             Tooltip tooltip = new Tooltip(
-                    "departure: " + Formater.fullDateFormat(departure) + "\n" +
+                    "departure: " + Formatter.fullDateFormat(departure) + "\n" +
                     "from: '" + departureStop + "'\nto: '" + arrivalStop + "'"
             );
             tooltip.setShowDelay(Duration.ZERO);

@@ -91,8 +91,8 @@ public class Edge implements Displayable{
     public int getBusId() {return busID; }
 
     private Label timeInformation(){
-        Label dateLabel = new Label(Formater.dateFormat(startTime) + ":     " +
-                        Formater.timeFormat(startTime) + " - " + Formater.timeFormat(endTime));
+        Label dateLabel = new Label(Formatter.dateFormat(startTime) + ":     " +
+                        Formatter.timeFormat(startTime) + " - " + Formatter.timeFormat(endTime));
         dateLabel.getStyleClass().addAll("grey-description");
         return dateLabel;
     }

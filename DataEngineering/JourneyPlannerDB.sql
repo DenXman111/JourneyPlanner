@@ -291,6 +291,7 @@ CREATE OR REPLACE FUNCTION remove_breaks_after_update() RETURNS TRIGGER AS
     $remove_breaks_update$
     begin
         DELETE FROM breaks WHERE span_id = NEW.id AND date NOT BETWEEN NEW.begin_date AND NEW.end_date;
+        return new;
     end;
     $remove_breaks_update$ LANGUAGE plpgsql;
 CREATE TRIGGER remove_breaks_after_update AFTER UPDATE ON spans
@@ -585,7 +586,7 @@ returns TABLE(id_transit numeric, end_city numeric, price numeric(6, 2), departu
             JOIN spans sp ON tr.id_transit = sp.transit
             join cities c on bsa.city = c.id
             JOIN buses_in_span(sp.id, L, R) bii ON sp.id = bii.span
-        WHERE bsd.city = city_id and GREATEST(L, sp.begin_date) <= LEAST(R, sp.end_date) and c.country = 'Poland'
+        WHERE bsd.city = city_id and GREATEST(L, sp.begin_date) <= LEAST(R, sp.end_date)
         ORDER BY tr.price desc limit 10
     ;
     end;
@@ -767,25 +768,42 @@ create or replace function reserve(user_id varchar(30), seats integer, res varia
 
 
 create or replace function user_reservations(given_username varchar(50))
-returns table(reservation_id integer, transit_id integer, departure timestamp, departure_stop varchar(127)) as
+returns table(
+    reservation_id integer, reservation_date timestamp, seat_number integer, transit_id numeric, transit_price numeric(6,2),
+    departure timestamp, departure_stop varchar(127), departure_city numeric,
+    arrival timestamp, arrival_stop varchar(127), arrival_city numeric
+    ) as
     $$
     begin
         return query
-            select *
+            select r.id, r.date_reservation, sr.seat, t.id_transit, t.price,
+                   tres.departure_date, dbs.stop_name, dbs.city,
+                   tres.departure_date::timestamp + dt.time::interval, abs.stop_name, abs.city
             from seat_reservation sr
-                join transit_reservation tr on sr.transit_reservation_id = tr.id
-                join reservations r on r.id = tr.reservation
-            where r."user" = given_username;
+                join transit_reservation tres on sr.transit_reservation_id = tres.id
+                join reservations r on r.id = tres.reservation
+                join transits t on tres.transit = t.id_transit
+                join spans s on s.transit = t.id_transit
+                join departure_time dt on dt.span = s.id and extract(isodow from tres.departure_date) = dt.day_of_the_week::integer
+                join bus_stops dbs on t.departure_stop = dbs.id
+                join bus_stops abs on t.arrival_stop = abs.id
+            where r."user" = given_username
+                and tres.departure_date::time = dt.departure
+                and tres.departure_date::date not in (select b.date from breaks b where b.span_id = s.id)
+            order by r.date_reservation, tres.departure_date
+            ;
     end;
     $$ language plpgsql;
 
-select *
-from get_buses('2019-06-04'::date, '2019-06-05'::date );
-
-select * from reserve('admin1', 3, row ( 39, '2019-06-05 07:00'::timestamp ), row ( 30, '2019-06-05 07:00:00'::timestamp ));
-
-select *
-from seat_reservation st join transit_reservation tr on st.transit_reservation_id = tr.id join reservations r on tr.reservation = r.id;
+create or replace function reserved_seats(reservation_id integer) returns integer as
+    $$
+    declare
+        trans_res integer;
+    begin
+        trans_res = (select tr.id from transit_reservation tr where tr.reservation = reservation_id limit 1);
+        return (select count(*) from seat_reservation sr where sr.transit_reservation_id = trans_res);
+    end;
+    $$ language plpgsql;
 
 -- End of file
 
