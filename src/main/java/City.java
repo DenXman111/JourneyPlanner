@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class City implements Displayable {
 
     @SuppressWarnings("WeakerAccess")
-    public String getCountry() { return "Poland"; }
+    public String getCountry() { return county; }
 
     @SuppressWarnings("WeakerAccess")
     public static Map<Integer, City> downloadedCities = new ConcurrentHashMap<>();
@@ -27,17 +27,17 @@ public class City implements Displayable {
     private Integer cityID;
     private double rating;
     private int nightPrice;
-    //private long days = 0;
+    private String county;
 
     @SuppressWarnings("WeakerAccess")
-    public City(Integer id, String name, double rating, int price){
+    public City(Integer id, String name, double rating, int price, String country){
         if (name == null)
             throw new NullPointerException();
         this.name = name;
         this.cityID = id;
         this.rating = rating;
         this.nightPrice = price;
-        //this.days = 2;
+        this.county = country;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -46,7 +46,7 @@ public class City implements Displayable {
         cityID = city.cityID;
         rating = city.rating;
         nightPrice = city.nightPrice;
-        //days = 0;
+        county = city.county;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -60,7 +60,9 @@ public class City implements Displayable {
 
     public String getName() { return name; }
 
-    //public String getCountry() { return DbAdapter.getCountryFromID(cityID); }
+    // it's used actually in TableView
+    @SuppressWarnings("unused")
+    public Integer getCityID() { return cityID; }
 
     //public void setDays(int days) { this.days = days; }
 
@@ -114,6 +116,5 @@ public class City implements Displayable {
         box.getChildren().add(deleteIcon);
         return box;
     }
-
 
 }

@@ -21,17 +21,6 @@ public class DbAdapter {
 
 
     public static synchronized void connect() throws SQLException, IOException {
-
-        /*GoogleCredentials credentials = GoogleCredentials.fromStream(Main.class.getResourceAsStream("jpConnection.json"))
-                .createScoped(Lists.newArrayList("https://www.googleapis.com/auth/cloud-platform"));
-        Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
-
-        System.out.println("Buckets:");
-        Page<Bucket> buckets = storage.list();
-        for (Bucket bucket : buckets.iterateAll()) {
-            System.out.println(bucket.toString());
-        }*/
-
         connection = DriverManager.getConnection(jdbcUrl + "&socketFactory=" + socketFactory + "&user=" + user + "&password=" + password);
     }
 
@@ -73,7 +62,13 @@ public class DbAdapter {
             String query="Select * from cities where id=\'"+ID+"\'";
             ResultSet result=statement.executeQuery(query);
             while (result.next()){
-                City city = new City(ID,result.getString("name"),result.getDouble("rating"),result.getInt("average_price"));
+                City city = new City(
+                        ID,
+                        result.getString("name"),
+                        result.getDouble("rating"),
+                        result.getInt("average_price"),
+                        result.getString("country")
+                );
                 City.downloadedCities.putIfAbsent(ID, city);
                 return city;
             }
@@ -84,6 +79,56 @@ public class DbAdapter {
             if (statement != null) statement.close();
         }
         return null;
+    }
+
+    public static List<City> getCitiesList() throws SQLException {
+        List<City> cityList = new ArrayList<>();
+
+        String query = "select * from cities";
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            ResultSet result = statement.executeQuery(query);
+            while (result.next()){
+                City city = new City(
+                        result.getInt("id"),
+                        result.getString("name"),
+                        result.getDouble("rating"),
+                        result.getInt("average_price"),
+                        result.getString("country")
+                );
+                cityList.add(city);
+            }
+        }finally {
+            if (statement != null) statement.close();
+        }
+
+        return cityList;
+    }
+
+    public static List<BusStop> getBusStopsList() throws SQLException {
+        List<BusStop> stopsList = new ArrayList<>();
+
+        String query =
+                "select bs.id, bs.stop_name, c.name, bs.city from bus_stops bs join cities c on bs.city = c.id";
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            ResultSet result = statement.executeQuery(query);
+            while (result.next()){
+                BusStop stop = new BusStop(
+                        result.getInt("id"),
+                        result.getString("stop_name"),
+                        result.getString("name"),
+                        result.getInt("city")
+                );
+                stopsList.add(stop);
+            }
+        }finally {
+            if (statement != null) statement.close();
+        }
+
+        return stopsList;
     }
 
 
@@ -235,7 +280,7 @@ public class DbAdapter {
 
 
 
-    public static ArrayList<String> getCityList() throws SQLException {
+    public static ArrayList<String> getCityNamesList() throws SQLException {
         ArrayList<String> a =new ArrayList<>();
         Statement statement = null;
         try {

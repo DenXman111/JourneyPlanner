@@ -1,16 +1,11 @@
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -59,7 +54,7 @@ public class ModerController implements Initializable{
     public void initialize(URL url, ResourceBundle resourceBundle) {
         ObservableList<String> observableCitiesList = null;
         try {
-            observableCitiesList = FXCollections.observableArrayList(DbAdapter.getCityList());
+            observableCitiesList = FXCollections.observableArrayList(DbAdapter.getCityNamesList());
         } catch (SQLException e) {
             e.printStackTrace();
         }

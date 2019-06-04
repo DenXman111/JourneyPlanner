@@ -54,7 +54,7 @@ public class FormController implements Initializable {
 
         ObservableList<String> observableCitiesList = null;
         try {
-            observableCitiesList = FXCollections.observableArrayList(DbAdapter.getCityList());
+            observableCitiesList = FXCollections.observableArrayList(DbAdapter.getCityNamesList());
         } catch (SQLException e) {
             e.printStackTrace();
         }

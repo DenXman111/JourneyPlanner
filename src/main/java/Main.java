@@ -1,7 +1,4 @@
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.util.concurrent.ExecutorService;
@@ -10,7 +7,7 @@ import java.util.concurrent.Executors;
 
 public class Main extends Application {
 
-    @SuppressWarnings("WeakerAccess")
+    @SuppressWarnings({"WeakerAccess", "SpellCheckingInspection"})
     protected static String APIkey = "AIzaSyAE3KHmNCMilnkhmDhdMLvM2Nvpcbc1XaA";
 
     @SuppressWarnings("WeakerAccess")
