@@ -7,7 +7,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Line;
 import javafx.util.Duration;
 
 import java.sql.Timestamp;

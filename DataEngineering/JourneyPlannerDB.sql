@@ -49,8 +49,8 @@ CREATE SEQUENCE reservation_id
 -- Sequence: generates ids for cities
 CREATE SEQUENCE cities_id_seq
     INCREMENT BY 1
-    MINVALUE 100
-    START WITH 100
+    MINVALUE 1
+    START WITH 1
 ;
 
 -- Sequence: generates ids for bus_stops
@@ -804,6 +804,14 @@ create or replace function reserved_seats(reservation_id integer) returns intege
     begin
         trans_res = (select tr.id from transit_reservation tr where tr.reservation = reservation_id limit 1);
         return (select count(*) from seat_reservation sr where sr.transit_reservation_id = trans_res);
+    end;
+    $$ language plpgsql;
+
+
+create or replace function city_has_stops(city_id numeric) returns boolean as
+    $$
+    begin
+        return exists(select * from bus_stops where city = city_id);
     end;
     $$ language plpgsql;
 

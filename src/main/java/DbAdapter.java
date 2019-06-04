@@ -1,10 +1,8 @@
 import java.io.IOException;
 import java.sql.*;
+import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("all")
@@ -84,7 +82,7 @@ public class DbAdapter {
     public static List<City> getCitiesList() throws SQLException {
         List<City> cityList = new ArrayList<>();
 
-        String query = "select * from cities";
+        String query = "select *, city_has_stops(id) as has_stops from cities order by id";
         Statement statement = null;
         try {
             statement = connection.createStatement();
@@ -97,6 +95,7 @@ public class DbAdapter {
                         result.getInt("average_price"),
                         result.getString("country")
                 );
+                city.setHasStops(result.getBoolean("has_stops"));
                 cityList.add(city);
             }
         }finally {
@@ -110,7 +109,7 @@ public class DbAdapter {
         List<BusStop> stopsList = new ArrayList<>();
 
         String query =
-                "select bs.id, bs.stop_name, c.name, bs.city from bus_stops bs join cities c on bs.city = c.id";
+                "select bs.id, bs.stop_name, c.name, bs.city from bus_stops bs join cities c on bs.city = c.id order by bs.id";
         Statement statement = null;
         try {
             statement = connection.createStatement();
@@ -424,4 +423,32 @@ public class DbAdapter {
         PreparedStatement preparedStatement = connection.prepareStatement(deleteStatement);
         preparedStatement.executeUpdate();
     }
+
+
+    public static void uppdateCity(int id, String name, String country, double rating, int nightPrice) throws SQLException {
+        String updateStatement =
+                "update cities set name = '" + name
+                        + "', country = '" + country
+                        + "', rating = " + String.format(Locale.US,"%.2f", rating)
+                        + ", average_price = " + nightPrice
+                        + " where id = " + id;
+
+        PreparedStatement preparedStatement = connection.prepareStatement(updateStatement);
+        preparedStatement.executeUpdate();
+    }
+
+    public static void addNewCity() throws SQLException {
+        String insertStatement =
+                "insert into cities (name, rating, average_price, country) values ('New City', 0, 0, 'Country');";
+
+        PreparedStatement preparedStatement = connection.prepareStatement(insertStatement);
+        preparedStatement.executeUpdate();
+    }
+
+    public static void deleteCity(int cityId) throws SQLException {
+        String deleteStatement = "delete from cities where id = " + cityId;
+        PreparedStatement preparedStatement = connection.prepareStatement(deleteStatement);
+        preparedStatement.executeUpdate();
+    }
+
 }

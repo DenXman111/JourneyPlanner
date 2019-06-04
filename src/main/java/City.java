@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * City class stores all data about cites read from database.
  */
+@SuppressWarnings("WeakerAccess")
 public class City implements Displayable {
 
     @SuppressWarnings("WeakerAccess")
@@ -28,6 +29,7 @@ public class City implements Displayable {
     private double rating;
     private int nightPrice;
     private String county;
+    private boolean hasStops;
 
     @SuppressWarnings("WeakerAccess")
     public City(Integer id, String name, double rating, int price, String country){
@@ -47,6 +49,7 @@ public class City implements Displayable {
         rating = city.rating;
         nightPrice = city.nightPrice;
         county = city.county;
+        hasStops = city.hasStops;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -117,4 +120,11 @@ public class City implements Displayable {
         return box;
     }
 
+    public boolean hasStops() {
+        return hasStops;
+    }
+
+    public void setHasStops(boolean hasStops) {
+        this.hasStops = hasStops;
+    }
 }

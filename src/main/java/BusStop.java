@@ -21,6 +21,10 @@ public class BusStop {
         return name;
     }
 
+    public void setName(String name){
+        this.name = name;
+    }
+
     public String getCityName() {
         return cityName;
     }

@@ -65,6 +65,7 @@
 
 .ratting-button:hover{
     -fx-background-color: rgba(124, 46, 43, 0.98);
+    -fx-text-fill: #cdcdcd;
 }
 
 .map-button{

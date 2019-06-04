@@ -1,26 +1,25 @@
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.ResourceBundle;
 
 public class CitiesModerController implements Initializable {
-    public TableView<City> cityTable;
+    public TableView<CityRow> cityTable;
     public TableView<BusStop> stopsTable;
-    public TableColumn<City, Integer> cityIdColumn;
-    public TableColumn<City, String> cityNameColumn;
-    public TableColumn<City, String> cityCountryColumn;
-    public TableColumn<City, Double> cityRatingColumn;
-    public TableColumn<City, Integer> cityNightPriceColumn;
+    public TableColumn<CityRow, Integer> cityIdColumn;
+    public TableColumn<CityRow, TextField> cityNameColumn;
+    public TableColumn<CityRow, TextField> cityCountryColumn;
+    public TableColumn<CityRow, TextField> cityRatingColumn;
+    public TableColumn<CityRow, TextField> cityNightPriceColumn;
+    public TableColumn<CityRow, Button> citiesDeleteColumn;
 
     public TableColumn<BusStop, Integer> stopIdColumn;
     public TableColumn<BusStop, String> stopNameColumn;
@@ -29,20 +28,10 @@ public class CitiesModerController implements Initializable {
     public VBox vBox;
     public ProgressBar indicator;
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-
-        cityIdColumn.setCellValueFactory(new PropertyValueFactory<>("cityID"));
-        cityNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        cityCountryColumn.setCellValueFactory(new PropertyValueFactory<>("country"));
-        cityRatingColumn.setCellValueFactory(new PropertyValueFactory<>("rating"));
-        cityNightPriceColumn.setCellValueFactory(new PropertyValueFactory<>("nightPrice"));
-
-        stopIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        stopNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        stopCityColumn.setCellValueFactory(new PropertyValueFactory<>("cityName"));
-        stopCityIdColumn.setCellValueFactory(new PropertyValueFactory<>("cityId"));
-
+    private void downloadAndDisplay(){
+        indicator.setVisible(true);
+        cityTable.setVisible(false);
+        stopsTable.setVisible(false);
         Task<Integer> downloadTask = new Task<Integer>() {
             @Override
             protected Integer call() {
@@ -53,6 +42,8 @@ public class CitiesModerController implements Initializable {
                         displayCitiesTable(cityList);
                         displayStopsTable(stopList);
                         indicator.setVisible(false);
+                        cityTable.setVisible(true);
+                        stopsTable.setVisible(true);
                     });
                 } catch (Exception e){
                     e.printStackTrace();
@@ -71,15 +62,52 @@ public class CitiesModerController implements Initializable {
         Main.executors.submit(downloadTask);
     }
 
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+
+        cityIdColumn.setCellValueFactory(new PropertyValueFactory<>("cityID"));
+        cityNameColumn.setCellValueFactory(new PropertyValueFactory<>("nameField"));
+        cityCountryColumn.setCellValueFactory(new PropertyValueFactory<>("countyField"));
+        cityRatingColumn.setCellValueFactory(new PropertyValueFactory<>("ratingField"));
+        cityNightPriceColumn.setCellValueFactory(new PropertyValueFactory<>("nightPriceField"));
+
+        stopIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        stopNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        stopCityColumn.setCellValueFactory(new PropertyValueFactory<>("cityName"));
+        stopCityIdColumn.setCellValueFactory(new PropertyValueFactory<>("cityId"));
+        citiesDeleteColumn.setCellValueFactory(new PropertyValueFactory<>("deleteButton"));
+
+        downloadAndDisplay();
+    }
+
     private void displayCitiesTable(List<City> cityList){
-        cityList.forEach(city -> cityTable.getItems().add(city));
+        Runnable runDisplay = this::downloadAndDisplay;
+        cityTable.getItems().clear();
+        cityList.forEach(city -> cityTable.getItems().add(new CityRow(city, runDisplay)));
     }
 
     private void displayStopsTable(List<BusStop> stopsList){
+        stopsTable.getItems().clear();
         stopsList.forEach(stop -> stopsTable.getItems().add(stop));
     }
 
     public void returnButtonPressed() throws IOException {
         StageChanger.changeStage(StageChanger.ApplicationStage.MODER);
+    }
+
+    public void addCityClicked() {
+        Main.executors.submit(new Task<Integer>() {
+            @Override
+            protected Integer call() {
+                try {
+                    DbAdapter.addNewCity();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    Platform.runLater( () -> new ErrorWindow(e.getMessage()) );
+                }
+                Platform.runLater(CitiesModerController.this::downloadAndDisplay);
+                return null;
+            }
+        });
     }
 }

@@ -2,6 +2,7 @@
 <project version="4">
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/DataEngineering/JourneyPlannerDB.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/DataEngineering/data.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/DataEngineering/dropJourneyPlannerDB.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/src/main/Database/DB.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/GCloudConnectionTest.java" dialect="PostgreSQL" />
