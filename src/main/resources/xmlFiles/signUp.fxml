@@ -6,51 +6,58 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" stylesheets="@../styleSheet.css"
-            xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="SignUpController">
-   <AnchorPane prefHeight="561.0" prefWidth="588.0">
-      <VBox id="mainVBox" alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="-Infinity"
-            minHeight="-Infinity" minWidth="-Infinity" prefHeight="621.0" prefWidth="640.0" spacing="20.0"
-            stylesheets="@../styleSheet.css">
-         <TextField fx:id="UsernameField" maxWidth="-Infinity" prefHeight="53.0" prefWidth="306.0"
-                    promptText="Username"/>
-         <PasswordField fx:id="PasswordField" maxWidth="-Infinity" prefHeight="53.0" prefWidth="306.0"
-                        promptText="Password"/>
-         <TextField fx:id="EmailField" maxWidth="-Infinity" prefHeight="53.0" prefWidth="306.0" promptText="Email"/>
-         <TextField fx:id="NameField" maxWidth="-Infinity" prefHeight="53.0" prefWidth="306.0" promptText="Name"/>
-         <TextField fx:id="SurnameField" maxWidth="-Infinity" prefHeight="53.0" prefWidth="306.0"
-                    promptText="Surname"/>
-         <Button fx:id="SignUpButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false"
-                 onAction="#signUpButtonPressed" prefHeight="50.0" prefWidth="207.0"
-                 style="-fx-background-radius: 20; -fx-background-insets: 0, 1, 1;" styleClass="mainButton"
-                 text="Sign up" textFill="#14a085">
-            <font>
-               <Font size="24.0"/>
-            </font>
-            <VBox.margin>
-               <Insets top="55.0"/>
-            </VBox.margin>
-         </Button>
-         <opaqueInsets>
-            <Insets/>
-         </opaqueInsets>
-         <padding>
-            <Insets top="80.0"/>
-         </padding>
-      </VBox>
-   </AnchorPane>
-   <Button fx:id="ReturnButton" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="575.0" layoutY="10.0"
-           maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-           onAction="#returnButtonPressed" styleClass="image-button">
+
+<GridPane prefHeight="600.0" prefWidth="500.0" styleClass="background-prague" stylesheets="@../styleSheet.css"
+          xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="SignUpController">
+   <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints maxHeight="-Infinity" minHeight="10.0" vgrow="SOMETIMES"/>
+      <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" vgrow="SOMETIMES"/>
+   </rowConstraints>
+   <VBox alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity"
+         minWidth="-Infinity" spacing="20.0" GridPane.halignment="CENTER" GridPane.rowIndex="1"
+         GridPane.valignment="TOP">
+      <TextField fx:id="UsernameField" maxWidth="-Infinity" prefHeight="53.0" prefWidth="306.0" promptText="Username"/>
+      <PasswordField fx:id="PasswordField" maxWidth="-Infinity" prefHeight="53.0" prefWidth="306.0"
+                     promptText="Password"/>
+      <TextField fx:id="EmailField" maxWidth="-Infinity" prefHeight="53.0" prefWidth="306.0" promptText="Email"/>
+      <TextField fx:id="NameField" maxWidth="-Infinity" prefHeight="53.0" prefWidth="306.0" promptText="Name"/>
+      <TextField fx:id="SurnameField" maxWidth="-Infinity" prefHeight="53.0" prefWidth="306.0" promptText="Surname"/>
+      <Button fx:id="SignUpButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false"
+              onAction="#signUpButtonPressed" prefWidth="150.0" styleClass="mainButton" text="Sign up">
+         <VBox.margin>
+            <Insets top="15.0"/>
+         </VBox.margin>
+         <font>
+            <Font size="18.0"/>
+         </font>
+      </Button>
+      <opaqueInsets>
+         <Insets/>
+      </opaqueInsets>
+      <GridPane.margin>
+         <Insets bottom="10.0" left="10.0" right="10.0" top="20.0"/>
+      </GridPane.margin>
+   </VBox>
+   <Button fx:id="ReturnButton" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxHeight="-Infinity"
+           maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+           onAction="#returnButtonPressed" styleClass="image-button" GridPane.halignment="RIGHT"
+           GridPane.valignment="CENTER">
       <graphic>
          <ImageView fitHeight="20.0" fitWidth="20.0">
             <Image url="@../back.png"/>
          </ImageView>
       </graphic>
+      <GridPane.margin>
+         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+      </GridPane.margin>
    </Button>
-</AnchorPane>
+</GridPane>
