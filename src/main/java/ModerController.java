@@ -9,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
@@ -68,7 +69,7 @@ public class ModerController implements Initializable{
 
 
     @FXML
-    void addNewBusPressed(ActionEvent event) {
+    void addNewBusPressed() {
         try{
             if (CityAChoiceBox.getValue() == null) throw new FieldsDataException("Set departure city");
             if (CityBChoiceBox.getValue() == null) throw new FieldsDataException("Set arrival city");
@@ -94,7 +95,7 @@ public class ModerController implements Initializable{
     }
 
     @FXML
-    void deleteBusByIDPressed(ActionEvent event) {
+    void deleteBusByIDPressed() {
         try{
             if (BusNumberField.getText().length() == 0) throw new FieldsDataException("Bus number field is empty");
             if (!BusNumberField.getText().matches("\\d+")) throw new FieldsDataException("Write number to bus number field");
@@ -110,23 +111,11 @@ public class ModerController implements Initializable{
     }
 
     @FXML
-    @SuppressWarnings("Duplicates")
-    void returnButtonPressed(ActionEvent event) throws IOException {
-        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
-        Pane myPane = myLoader.load();
-
-        Stage stage = new Stage();
-        stage.setTitle("JourneyPlanner");
-
-        WelcomeController controller = myLoader.getController();
-        controller.setPrevStage(stage);
-        Scene myScene = new Scene(myPane);
-
-        stage.setScene(myScene);
-        stage.setResizable(false);
-        prevStage.close();
-        stage.show();
-
+    void returnButtonPressed() throws IOException {
+        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME);
     }
 
+    public void ManageCitiesClicked() throws IOException {
+        StageChanger.changeStage(StageChanger.ApplicationStage.CITIES_MODER);
+    }
 }

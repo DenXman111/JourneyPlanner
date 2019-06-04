@@ -33,11 +33,6 @@ public class HistoryController implements Initializable {
     @FXML
     private VBox answersVBox;
 
-    @SuppressWarnings("WeakerAccess")
-    protected void setPrevStage(Stage stage){
-        this.prevStage = stage;
-    }
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
@@ -79,19 +74,6 @@ public class HistoryController implements Initializable {
     @FXML
     @SuppressWarnings("Duplicates")
     void returnButtonPressed() throws IOException {
-        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
-        Pane myPane = myLoader.load();
-
-        Stage stage = new Stage();
-        stage.setTitle("JourneyPlanner");
-
-        WelcomeController controller = myLoader.getController();
-        controller.setPrevStage(stage);
-        Scene myScene = new Scene(myPane);
-
-        stage.setScene(myScene);
-        stage.setResizable(false);
-        prevStage.close();
-        stage.show();
+        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME);
     }
 }

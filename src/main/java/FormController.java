@@ -17,7 +17,6 @@ import java.time.LocalDate;
 import java.util.ResourceBundle;
 
 public class FormController implements Initializable {
-    private Stage prevStage;
 
     @FXML
     private Label loginLabel;
@@ -49,10 +48,6 @@ public class FormController implements Initializable {
 
     @FXML
     private VBox answersVBox;
-
-    void setPrevStage(Stage stage){
-        this.prevStage = stage;
-    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -125,23 +120,10 @@ public class FormController implements Initializable {
         }
     }
 
-    @SuppressWarnings({"Duplicates", "unused"})
     @FXML
-    void returnButtonPressed(ActionEvent event) throws IOException {
-        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
-        Pane myPane = myLoader.load();
-
-        Stage stage = new Stage();
-        stage.setTitle("JourneyPlanner");
-
-        WelcomeController controller = myLoader.getController();
-        controller.setPrevStage(stage);
-        Scene myScene = new Scene(myPane);
-
-        stage.setScene(myScene);
-        stage.setResizable(false);
-        prevStage.close();
-        stage.show();
+    void returnButtonPressed() throws IOException {
+        Main.restartDaemonExecutor();
+        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME);
     }
 
     @SuppressWarnings("WeakerAccess")

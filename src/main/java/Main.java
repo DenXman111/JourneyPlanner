@@ -1,9 +1,3 @@
-import com.google.api.gax.paging.Page;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
-import com.google.common.collect.Lists;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -20,12 +14,23 @@ public class Main extends Application {
     protected static String APIkey = "AIzaSyAE3KHmNCMilnkhmDhdMLvM2Nvpcbc1XaA";
 
     @SuppressWarnings("WeakerAccess")
-    public static final ExecutorService daemonExecutor = Executors.newFixedThreadPool(1,
+    public static ExecutorService daemonExecutor = Executors.newFixedThreadPool(1,
             r -> {
                 Thread t = Executors.defaultThreadFactory().newThread(r);
                 t.setDaemon(true);
                 return t;
             });
+
+    @SuppressWarnings("WeakerAccess")
+    public static void restartDaemonExecutor(){
+        daemonExecutor.shutdownNow();
+        daemonExecutor = Executors.newFixedThreadPool(1,
+                r -> {
+                    Thread t = Executors.defaultThreadFactory().newThread(r);
+                    t.setDaemon(true);
+                    return t;
+                });
+    }
 
     @SuppressWarnings("WeakerAccess")
     public static final ExecutorService executors = Executors.newFixedThreadPool(3,
@@ -37,17 +42,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        primaryStage.setTitle("JourneyPlanner");
-
-        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/welcome.fxml"));
-
-        Pane myPane = myLoader.load();
-        WelcomeController controller = myLoader.getController();
-        controller.setPrevStage(primaryStage);
-
-        Scene myScene = new Scene(myPane);
-        primaryStage.setScene(myScene);
-        primaryStage.show();
+        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME);
     }
 
 

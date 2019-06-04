@@ -23,12 +23,6 @@ public class WelcomeController implements Initializable {
     public Button WelcomeSceneStartButton;
     public VBox ButtonsBox;
     public ProgressIndicator progressIndicator;
-    private Stage prevStage;
-
-    @SuppressWarnings("WeakerAccess")
-    public void setPrevStage(Stage stage){
-        this.prevStage = stage;
-    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle){
@@ -72,57 +66,18 @@ public class WelcomeController implements Initializable {
 
     }
 
-    @SuppressWarnings({"Duplicates", "unused"})
     @FXML
-    public void startButtonPressed(ActionEvent event) throws IOException {
-        Stage stage = new Stage();
-        stage.setTitle("Main");
-        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/form.fxml"));
-
-        Pane myPane = myLoader.load();
-        FormController controller = myLoader.getController();
-        controller.setPrevStage(stage);
-
-        Scene scene = new Scene(myPane);
-        stage.setScene(scene);
-        prevStage.close();
-        stage.show();
-
-/*
-        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/map.fxml"));
-        Pane myPane = myLoader.load();
-
-        Scene scene = new Scene(myPane);
-        Stage stage = new Stage();
-        stage.setTitle("Map");
-        stage.setScene(scene);
-        stage.show();
-
- */
-    }
-    @SuppressWarnings("unused")
-    @FXML
-    public void loginPressed(ActionEvent event) throws IOException{
-        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/login.fxml"));
-
-        Pane myPane = myLoader.load();
-        LoginController controller = myLoader.getController();
-        controller.setPrevStage(prevStage);
-
-        Scene myScene = new Scene(myPane);
-        prevStage.setScene(myScene);
+    public void startButtonPressed() throws IOException {
+        StageChanger.changeStage(StageChanger.ApplicationStage.FORM);
     }
 
-    @SuppressWarnings("unused")
     @FXML
-    public void signUpPressed(ActionEvent event) throws IOException{
-        FXMLLoader myLoader = new FXMLLoader(getClass().getResource("/xmlFiles/signUp.fxml"));
+    public void loginPressed() throws IOException{
+        StageChanger.changeStage(StageChanger.ApplicationStage.LOGIN);
+    }
 
-        Pane myPane = myLoader.load();
-        SignUpController controller = myLoader.getController();
-        controller.setPrevStage(prevStage);
-
-        Scene myScene = new Scene(myPane);
-        prevStage.setScene(myScene);
+    @FXML
+    public void signUpPressed() throws IOException{
+        StageChanger.changeStage(StageChanger.ApplicationStage.SIGN_UP);
     }
 }
