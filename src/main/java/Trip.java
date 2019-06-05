@@ -103,7 +103,7 @@ public class Trip implements Displayable{
         if (!plan.isEmpty()) plan.remove(plan.get(plan.size() - 1));
     }
 
-    @SuppressWarnings("WeakerAccess")
+    @SuppressWarnings({"WeakerAccess", "BooleanMethodIsAlwaysInverted"})
     public boolean isEmpty(){
         return plan.isEmpty();
     }
@@ -118,7 +118,7 @@ public class Trip implements Displayable{
     }
 
     @SuppressWarnings("WeakerAccess")
-    public int getLivingPrice(Edge edge){
+    public double getLivingPrice(Edge edge){
         if (plan.isEmpty()) return 0;
         Edge last = plan.get(plan.size() - 1);
         int days = (int)DAYS.between(last.getEndTime().toLocalDateTime(), edge.getStartTime().toLocalDateTime());

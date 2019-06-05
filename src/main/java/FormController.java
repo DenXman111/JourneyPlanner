@@ -59,6 +59,7 @@ public class FormController implements Initializable {
             e.printStackTrace();
         }
         MainCityChoiceBox.setItems(observableCitiesList);
+        MainCityChoiceBox.getSelectionModel().selectFirst();
 
         progressBar.setVisible(false);
 
@@ -74,9 +75,10 @@ public class FormController implements Initializable {
         if (MainFieldStartDate.getValue() == null) throw new FieldsDataException("Fill start date");
         if (MainFieldEndingDate.getValue() == null) throw new FieldsDataException("Fill ending date");
 
-        int founds, seats;
+        int seats;
+        double founds;
         try{
-            founds = Integer.valueOf(MainFieldFunds.getText());
+            founds = Double.valueOf(MainFieldFunds.getText());
         } catch (RuntimeException e){
             throw new FieldsDataException("Should be number in Funds");
         }
@@ -105,7 +107,7 @@ public class FormController implements Initializable {
             MainButtonFind.setPrefWidth(170);
 
             Planner planing = new Planner(MainCityChoiceBox.getValue(),
-                    Integer.valueOf(MainFieldFunds.getText()),
+                    Double.valueOf(MainFieldFunds.getText()),
                     Integer.valueOf(seatsField.getText()),
                     MainFieldStartDate.getValue(),
                     MainFieldEndingDate.getValue());

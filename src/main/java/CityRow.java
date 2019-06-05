@@ -1,5 +1,3 @@
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 
@@ -23,7 +21,7 @@ public class CityRow {
         cityID = city.getCityID();
         ratingField = new TextField(Double.toString(city.getRating()));
         ratingField.setOnAction(actionEvent -> chaneCityInDataBase());
-        nightPriceField = new TextField(Integer.toString(city.getNightPrice()));
+        nightPriceField = new TextField(Double.toString(city.getNightPrice()));
         nightPriceField.setOnAction(actionEvent -> chaneCityInDataBase());
         countyField = new TextField(city.getCountry());
         countyField.setOnAction(actionEvent -> chaneCityInDataBase());
@@ -64,14 +62,14 @@ public class CityRow {
         return  city.getName().equals(nameField.getText()) &&
                 city.getCountry().equals(countyField.getText()) &&
                 Double.toString(city.getRating()).equals(ratingField.getText()) &&
-                Integer.toString(city.getNightPrice()).equals(nightPriceField.getText());
+                Double.toString(city.getNightPrice()).equals(nightPriceField.getText());
     }
 
     private boolean rightData(){
         return  TextChecker.containsSpecialSigns(nameField.getText()) ||
                 TextChecker.containsSpecialSigns(countyField.getText()) ||
                 !TextChecker.isDouble(ratingField.getText()) ||
-                !TextChecker.isInteger(nightPriceField.getText());
+                !TextChecker.isDouble(nightPriceField.getText());
     }
 
     private void chaneCityInDataBase(){
@@ -82,42 +80,29 @@ public class CityRow {
             nameField.setText(city.getName());
             return;
         }
-        Task<Integer> updateTask = new Task<Integer>() {
-            @Override
-            protected Integer call() {
-                try {
+
+        DbUpdate.execute(
+                () -> {
                     DbAdapter.uppdateCity(
                             cityID,
                             nameField.getText(),
                             countyField.getText(),
                             Double.parseDouble(ratingField.getText()),
-                            Integer.parseInt(nightPriceField.getText())
+                            Double.parseDouble(nightPriceField.getText())
                     );
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Platform.runLater( () -> new ErrorWindow(e.getMessage()) );
-                }
-                Platform.runLater( () -> CityRow.this.update.run());
-                return 100;
-            }
-        };
-
-        Main.executors.submit(updateTask);
+                    return null;
+                },
+                () -> CityRow.this.update.run()
+        );
     }
 
     private void deleteCityFromDataBase(){
-        Main.executors.submit(new Task<Integer>() {
-            @Override
-            protected Integer call(){
-                try{
+        DbUpdate.execute(
+                () -> {
                     DbAdapter.deleteCity(CityRow.this.cityID);
-                }catch (Exception e) {
-                    e.printStackTrace();
-                    Platform.runLater( () -> new ErrorWindow(e.getMessage()) );
-                }
-                Platform.runLater( () -> CityRow.this.update.run());
-                return 100;
-            }
-        });
+                    return null;
+                },
+                () -> CityRow.this.update.run()
+        );
     }
 }

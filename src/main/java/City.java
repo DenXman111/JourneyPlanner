@@ -27,12 +27,11 @@ public class City implements Displayable {
     private String name;
     private Integer cityID;
     private double rating;
-    private int nightPrice;
+    private double nightPrice;
     private String county;
     private boolean hasStops;
 
-    @SuppressWarnings("WeakerAccess")
-    public City(Integer id, String name, double rating, int price, String country){
+    public City(Integer id, String name, double rating, double price, String country){
         if (name == null)
             throw new NullPointerException();
         this.name = name;
@@ -42,7 +41,6 @@ public class City implements Displayable {
         this.county = country;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public City(City city){
         name = city.name;
         cityID = city.cityID;
@@ -59,7 +57,7 @@ public class City implements Displayable {
     public double getRating() { return rating; }
 
     @SuppressWarnings("WeakerAccess")
-    public int getNightPrice() { return nightPrice; }
+    public double getNightPrice() { return nightPrice; }
 
     public String getName() { return name; }
 
@@ -126,5 +124,18 @@ public class City implements Displayable {
 
     public void setHasStops(boolean hasStops) {
         this.hasStops = hasStops;
+    }
+
+    @Override
+    public String toString(){
+        return name + " (id: " + cityID + ")";
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null || obj.getClass() != City.class)
+            return false;
+        City city = (City)obj;
+        return city.cityID.equals(cityID);
     }
 }
