@@ -50,8 +50,6 @@ public class ModerController implements Initializable{
     @FXML
     private TextField DepartureStop;
 
-    @FXML
-    private TextField DepartureSpan;
 
     @FXML
     private TextField ArrivalStop;
@@ -69,16 +67,31 @@ public class ModerController implements Initializable{
     private TextField DepartureTime;
 
     @FXML
+    private TextField DDepartureTime;
+
+    @FXML
     private TextField Duration;
+
+    @FXML
+    private TextField DDuration;
+
+    @FXML
+    private TextField DepartureSpan;
+
+    @FXML
+    private TextField DDepartureSpan;
+
+    @FXML
+    private TextField Weekday;
+
+    @FXML
+    private TextField DWeekday;
 
     @FXML
     private TextField ExceptionSpan;
 
     @FXML
     private TextField DExceptionSpan;
-
-    @FXML
-    private TextField Weekday;
 
     @FXML
     private Button AddNewLineButton;
@@ -94,6 +107,9 @@ public class ModerController implements Initializable{
 
     @FXML
     private Button DeleteBreakButton;
+
+    @FXML
+    private Button DeleteDepartureTimeButton;
 
     void setPrevStage(Stage stage){
         this.prevStage = stage;
@@ -203,7 +219,26 @@ public class ModerController implements Initializable{
             new ErrorWindow(e.getMessage());
         }
         catch (SQLException e){
+            new ErrorWindow("Wrong input data!");
+        }
+    }
+
+    @FXML
+    void deleteDepartureTime(){
+        try{
+            if (DDepartureTime.getText().length() == 0) throw new FieldsDataException("No departure time");
+            if (DDuration.getText() == null) throw new FieldsDataException("No duration");
+            if (DDepartureSpan.getText() == null) throw new FieldsDataException("No transit chosen");
+            if (DWeekday.getText() == null) throw new FieldsDataException("No day chosen");
+            if (!DDepartureSpan.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
+            DbAdapter.deleteDepartureTime(DDepartureTime.getText(),DDuration.getText(),Integer.valueOf(DDepartureSpan.getText()),"\'"+DWeekday.getText()+"\'");
+            new ErrorWindow("Deleted!");
+        }
+        catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
+        }
+        catch (SQLException e){
+            new ErrorWindow("Wrong input data!");
         }
     }
 

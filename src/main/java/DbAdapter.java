@@ -211,6 +211,16 @@ public class DbAdapter {
         statement.close();
     }
 
+    public static void deleteDepartureTime(String departureTime, String duration,int exceptionSpan, String weekday) throws SQLException{
+        Statement statement = connection.createStatement();
+        String query = "delete from departure_time where departure=? and time=\'"+duration+"\' and span=? and day_of_the_week="+weekday;
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setTime(1, Time.valueOf(departureTime));
+        pst.setInt(2, exceptionSpan);
+        pst.executeUpdate();
+        statement.close();
+    }
+
     public static boolean haveBusWithID(int id) throws SQLException{
 
         Statement statement = connection.createStatement();
