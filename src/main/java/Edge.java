@@ -24,12 +24,12 @@ public class Edge implements Displayable{
     private City endCity;
     private Timestamp startTime;
     private Timestamp endTime;
-    private int price;
+    private double price;
 
     private List<EdgesInOut> additionalVisits;
     private Edge edgeOmittingEndCity;
 
-    Edge(Integer busID, City startCity, City endCity, int price, Timestamp startDate, Timestamp endingDate){
+    Edge(Integer busID, City startCity, City endCity, double price, Timestamp startDate, Timestamp endingDate){
         this.busID = busID;
         this.startCity = startCity;
         this.endCity = endCity;
@@ -75,7 +75,7 @@ public class Edge implements Displayable{
         return endCity;
     }
 
-    public int getPrice() { return price; }
+    public double getPrice() { return price; }
 
     @SuppressWarnings("WeakerAccess")
     public Timestamp getStartTime() {

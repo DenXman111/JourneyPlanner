@@ -16,7 +16,7 @@ import static java.time.temporal.ChronoUnit.HOURS;
 public class Planner extends Task<Integer> {
 
     private String startPoint;
-    private int funds;
+    private double funds;
     private int seats;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -26,7 +26,7 @@ public class Planner extends Task<Integer> {
 
     private Map<Integer, List<Edge>> map;
 
-    public Planner(String startPoint, int funds, int seats, LocalDate startDate, LocalDate endDate){
+    public Planner(String startPoint, double funds, int seats, LocalDate startDate, LocalDate endDate){
         this.startPoint = startPoint;
         this.funds = funds;
         this.seats = seats;
@@ -112,7 +112,7 @@ public class Planner extends Task<Integer> {
             return tripsList;
         }
 
-        private void dfs(City currentCity, int fund, Timestamp currentDate, Timestamp tripEndingDate) {
+        private void dfs(City currentCity, double fund, Timestamp currentDate, Timestamp tripEndingDate) {
 
             //if(tripsList.size() >= maxTripsNumber) return; //BAD - don't find best ways
 
@@ -149,7 +149,7 @@ public class Planner extends Task<Integer> {
                 if (!current.isEmpty() && (int)HOURS.between(currentDate.toLocalDateTime(), e.getStartTime().toLocalDateTime()) < 2) continue; //Time to change bus -- min 1 hour
                 if (e.getPrice() > fund) continue;
                 if (inCurrent.contains(e.getEndCity()) && !e.getEndCity().getID().equals(start)) continue;
-                int livingPrice = current.getLivingPrice(e);
+                double livingPrice = current.getLivingPrice(e);
                 if (fund < e.getPrice() + livingPrice) continue;
                 current.pushEdge(e);
                 dfs(e.getEndCity(), fund - e.getPrice() - livingPrice, e.getEndTime(), tripEndingDate);
@@ -159,7 +159,7 @@ public class Planner extends Task<Integer> {
             inCurrent.remove(currentCity);
         }
         @SuppressWarnings("WeakerAccess")
-        public void findBest(Integer startID, int fund, LocalDate startDate, LocalDate endingDate) throws SQLException, DatabaseException {
+        public void findBest(Integer startID, double fund, LocalDate startDate, LocalDate endingDate) throws SQLException, DatabaseException {
             start = startID;
             dfs(DbAdapter.getCityFromID(startID), fund, Timestamp.valueOf(startDate.atStartOfDay()), Timestamp.valueOf(endingDate.atStartOfDay()));
         }

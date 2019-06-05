@@ -815,5 +815,12 @@ create or replace function city_has_stops(city_id numeric) returns boolean as
     end;
     $$ language plpgsql;
 
+create or replace function exists_transits_with_stop(stop_id numeric) returns boolean as
+    $$
+    begin
+        return exists(select * from transits where departure_stop = stop_id or arrival_stop = stop_id);
+    end;
+    $$ language plpgsql;
+
 -- End of file
 

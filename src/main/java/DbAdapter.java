@@ -64,7 +64,7 @@ public class DbAdapter {
                         ID,
                         result.getString("name"),
                         result.getDouble("rating"),
-                        result.getInt("average_price"),
+                        result.getDouble("average_price"),
                         result.getString("country")
                 );
                 City.downloadedCities.putIfAbsent(ID, city);
@@ -92,7 +92,7 @@ public class DbAdapter {
                         result.getInt("id"),
                         result.getString("name"),
                         result.getDouble("rating"),
-                        result.getInt("average_price"),
+                        result.getDouble("average_price"),
                         result.getString("country")
                 );
                 city.setHasStops(result.getBoolean("has_stops"));
@@ -105,11 +105,11 @@ public class DbAdapter {
         return cityList;
     }
 
-    public static List<BusStop> getBusStopsList() throws SQLException {
+    public static List<BusStop> getBusStopsList() throws SQLException, DatabaseException {
         List<BusStop> stopsList = new ArrayList<>();
 
         String query =
-                "select bs.id, bs.stop_name, c.name, bs.city from bus_stops bs join cities c on bs.city = c.id order by bs.id";
+                "select id, stop_name, city, exists_transits_with_stop(id) as unmodifiable from bus_stops bs order by bs.id";
         Statement statement = null;
         try {
             statement = connection.createStatement();
@@ -118,9 +118,9 @@ public class DbAdapter {
                 BusStop stop = new BusStop(
                         result.getInt("id"),
                         result.getString("stop_name"),
-                        result.getString("name"),
-                        result.getInt("city")
+                        getCityFromID(result.getInt("city"))
                 );
+                stop.setModifiable(result.getBoolean("unmodifiable"));
                 stopsList.add(stop);
             }
         }finally {
@@ -143,6 +143,7 @@ public class DbAdapter {
         pst.executeUpdate();
         statement.close();
     }
+
     public static void addNewBus(String cityA, String cityB, int price, LocalDate departure, LocalDate arrival, int places) throws SQLException{
         Statement statement = connection.createStatement();
         String query = "INSERT INTO buses VALUES(nextval(\'buses_seq\'), ?, ?, ?, ?, ?, ?)";
@@ -261,7 +262,7 @@ public class DbAdapter {
                         result.getInt("id_transit"),
                         startCity,
                         endCity,
-                        result.getInt("price"),
+                        result.getDouble("price"),
                         result.getTimestamp("departure"),
                         result.getTimestamp("arrival") );
 
@@ -330,6 +331,8 @@ public class DbAdapter {
         }
         return a;
     }
+
+
     public static ArrayList <PastTrip> getHistory(String user) throws SQLException {
         ArrayList <PastTrip> tripList = new ArrayList();
         Statement statement = null;
@@ -425,12 +428,12 @@ public class DbAdapter {
     }
 
 
-    public static void uppdateCity(int id, String name, String country, double rating, int nightPrice) throws SQLException {
+    public static void uppdateCity(int id, String name, String country, double rating, double nightPrice) throws SQLException {
         String updateStatement =
                 "update cities set name = '" + name
                         + "', country = '" + country
                         + "', rating = " + String.format(Locale.US,"%.2f", rating)
-                        + ", average_price = " + nightPrice
+                        + ", average_price = " + String.format(Locale.US,"%.2f", nightPrice)
                         + " where id = " + id;
 
         PreparedStatement preparedStatement = connection.prepareStatement(updateStatement);
@@ -447,6 +450,28 @@ public class DbAdapter {
 
     public static void deleteCity(int cityId) throws SQLException {
         String deleteStatement = "delete from cities where id = " + cityId;
+        PreparedStatement preparedStatement = connection.prepareStatement(deleteStatement);
+        preparedStatement.executeUpdate();
+    }
+
+    public static void updateStop(int id, String name, int cityId) throws SQLException {
+        String updateStatement =
+                "update bus_stops set stop_name = '" + name
+                        + "', city = " + cityId
+                        + " where id = " + id;
+        PreparedStatement preparedStatement = connection.prepareStatement(updateStatement);
+        preparedStatement.executeUpdate();
+    }
+
+    public static void addNewStop() throws SQLException {
+        String insertStatement =
+                "insert into bus_stops(stop_name, city) VALUES ('New bus stop', (select id from cities limit 1));";
+        PreparedStatement preparedStatement = connection.prepareStatement(insertStatement);
+        preparedStatement.executeUpdate();
+    }
+
+    public static void deleteStop(int stop_id) throws SQLException {
+        String deleteStatement = "delete from bus_stops where id = " + stop_id;
         PreparedStatement preparedStatement = connection.prepareStatement(deleteStatement);
         preparedStatement.executeUpdate();
     }
