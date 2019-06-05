@@ -39,10 +39,16 @@ public class ModerController implements Initializable{
     private DatePicker EndDate;
 
     @FXML
+    private DatePicker ExceptionDate;
+
+    @FXML
     private TextField SeatPlacesField;
 
     @FXML
     private TextField DepartureStop;
+
+    @FXML
+    private TextField DepartureSpan;
 
     @FXML
     private TextField ArrivalStop;
@@ -57,10 +63,28 @@ public class ModerController implements Initializable{
     private TextField PriceField;
 
     @FXML
+    private TextField DepartureTime;
+
+    @FXML
+    private TextField Duration;
+
+    @FXML
+    private TextField ExceptionSpan;
+
+    @FXML
+    private TextField Weekday;
+
+    @FXML
     private Button AddNewLineButton;
 
     @FXML
     private Button AssignSpanToLineButton;
+
+    @FXML
+    private Button AssignDepartureTimeButton;
+
+    @FXML
+    private Button AddBreakButton;
 
     void setPrevStage(Stage stage){
         this.prevStage = stage;
@@ -111,14 +135,52 @@ public class ModerController implements Initializable{
             if (EndDate.getValue() == null) throw new FieldsDataException("End date is empty");
             if (!TransitField.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
             DbAdapter.assignSpanToLine(Integer.valueOf(TransitField.getText()),BeginDate.getValue(),EndDate.getValue());
+            new ErrorWindow("Added!");
         }
         catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
         }
         catch (SQLException e){
-            new ErrorWindow("Can't assign this span");
+            new ErrorWindow("Wrong input data!");
         }
     }
+
+    @FXML
+    void addDepartureTime(){
+        try{
+            if (DepartureTime.getText().length() == 0) throw new FieldsDataException("No departure time");
+            if (Duration.getText() == null) throw new FieldsDataException("No duration");
+            if (DepartureSpan.getText() == null) throw new FieldsDataException("No transit chosen");
+            if (Weekday.getText() == null) throw new FieldsDataException("No day chosen");
+            if (!DepartureSpan.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
+            DbAdapter.addDepartureTime(DepartureTime.getText(),Duration.getText(),Integer.valueOf(DepartureSpan.getText()),"\'"+Weekday.getText()+"\'");
+            new ErrorWindow("Added!");
+        }
+        catch (FieldsDataException e){
+            new ErrorWindow(e.getMessage());
+        }
+        catch (SQLException e){
+            new ErrorWindow("Wrong input data!");
+        }
+    }
+
+    @FXML
+    void addBreak(){
+        try{
+            if (ExceptionSpan.getText().length() == 0) throw new FieldsDataException("No line chosen");
+            if (!ExceptionSpan.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
+            if (ExceptionDate.getValue() == null) throw new FieldsDataException("End date is empty");
+            DbAdapter.addBreak(Integer.valueOf(ExceptionSpan.getText()),ExceptionDate.getValue());
+            new ErrorWindow("Added!");
+        }
+        catch(FieldsDataException e){
+            new ErrorWindow(e.getMessage());
+        }
+        catch (SQLException e){
+            new ErrorWindow(e.getMessage());
+        }
+    }
+
     @FXML
     void deleteBusByParametersPressed() {
         try{

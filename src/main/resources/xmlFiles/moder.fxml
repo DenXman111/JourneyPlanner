@@ -21,6 +21,7 @@
          </ImageView>
       </graphic>
    </Button>
+
    <TextField fx:id="ArrivalStop" layoutX="411.0" layoutY="51.0" maxWidth="-Infinity" prefHeight="38.0" prefWidth="273.0" promptText="Arrival stop" />
    <TextField fx:id="DepartureStop" layoutX="111.0" layoutY="51.0" maxWidth="-Infinity" prefHeight="38.0" prefWidth="273.0" promptText="Departure stop" />
    <TextField fx:id="PriceField" layoutX="410.0" layoutY="97.0" maxWidth="-Infinity" prefHeight="38.0" prefWidth="273.0" promptText="Price" />
@@ -30,10 +31,29 @@
          <Font size="18.0" />
       </font>
    </Button>
-   <TextField fx:id="TransitField" layoutX="229.0" layoutY="201.0" prefHeight="38.0" prefWidth="335.0" promptText="Line number" />
-   <DatePicker fx:id="BeginDate" layoutX="111.0" layoutY="240.0" maxWidth="-Infinity" prefHeight="29.0" prefWidth="273.0" promptText="Begin date" style="-fx-background-insets: 0, 1, 1;" />
-   <DatePicker fx:id="EndDate" layoutX="410.0" layoutY="240.0" maxWidth="-Infinity" prefHeight="29.0" prefWidth="273.0" promptText="End date" style="-fx-background-insets: 0, 1, 1;" />
-   <Button fx:id="AssignSpanToLineButton" layoutX="289.0" layoutY="275.0" mnemonicParsing="false" onAction="#assignSpanToLine" prefHeight="38.0" prefWidth="216.0" style="-fx-background-insets: 0, 0, 0;" text="Assign span to line" textFill="#14a085">
+
+   <TextField fx:id="TransitField" layoutX="229.0" layoutY="221.0" prefHeight="38.0" prefWidth="335.0" promptText="Line number" />
+   <DatePicker fx:id="BeginDate" layoutX="111.0" layoutY="260.0" maxWidth="-Infinity" prefHeight="29.0" prefWidth="273.0" promptText="Begin date" style="-fx-background-insets: 0, 1, 1;" />
+   <DatePicker fx:id="EndDate" layoutX="410.0" layoutY="260.0" maxWidth="-Infinity" prefHeight="29.0" prefWidth="273.0" promptText="End date" style="-fx-background-insets: 0, 1, 1;" />
+   <Button fx:id="AssignSpanToLineButton" layoutX="289.0" layoutY="295.0" mnemonicParsing="false" onAction="#assignSpanToLine" prefHeight="38.0" prefWidth="216.0" style="-fx-background-insets: 0, 0, 0;" text="Assign span to line" textFill="#14a085">
+      <font>
+         <Font size="17.0" />
+      </font>
+   </Button>
+
+   <TextField fx:id="DepartureTime" layoutX="111.0" layoutY="361.0" prefHeight="38.0" prefWidth="273.0" promptText="Departure Time (hh:mm:ss)" />
+   <TextField fx:id="Duration" layoutX="410.0" layoutY="361.0" prefHeight="38.0" prefWidth="273.0" promptText="Duration" />
+   <TextField fx:id="DepartureSpan" layoutX="111.0" layoutY="405.0" prefHeight="38.0" prefWidth="273.0" promptText="Span number" />
+   <TextField fx:id="Weekday" layoutX="410.0" layoutY="405.0" prefHeight="38.0" prefWidth="273.0" promptText="Day of the week" />
+   <Button fx:id="AssignDepartureTimeButton" layoutX="289.0" layoutY="449.0" mnemonicParsing="false" onAction="#addDepartureTime" prefHeight="38.0" prefWidth="216.0" style="-fx-background-insets: 0, 0, 0;" text="Add Departure Time" textFill="#14a085">
+      <font>
+         <Font size="17.0" />
+      </font>
+   </Button>
+
+   <TextField fx:id="ExceptionSpan" layoutX="111.0" layoutY="511.0" prefHeight="38.0" prefWidth="273.0" promptText="Line number" />
+   <DatePicker fx:id="ExceptionDate" layoutX="411.0" layoutY="511.0" maxWidth="-Infinity" prefHeight="38.0" prefWidth="273.0" promptText="Exception date" style="-fx-background-insets: 0, 1, 1;" />
+   <Button fx:id="AddBreakButton" layoutX="289.0" layoutY="560.0" mnemonicParsing="false" onAction="#addBreak" prefHeight="38.0" prefWidth="216.0" style="-fx-background-insets: 0, 0, 0;" text="Add Break" textFill="#14a085">
       <font>
          <Font size="17.0" />
       </font>

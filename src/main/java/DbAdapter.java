@@ -172,11 +172,33 @@ public class DbAdapter {
 
     public static void assignSpanToLine(int transit,LocalDate start, LocalDate end) throws SQLException{
         Statement statement = connection.createStatement();
-        String query = "INSERT INTO spans VALUES(nextval(\'span_id\'), ?, ?,?)";
+        String query = "INSERT INTO spans(begin_date,end_date,transit) VALUES(?, ?, ?)";
         PreparedStatement pst = connection.prepareStatement(query);
         pst.setDate(1, Date.valueOf(start));
         pst.setDate(2, Date.valueOf(end));
         pst.setInt(3, transit);
+        pst.executeUpdate();
+        statement.close();
+    }
+
+    public static void addDepartureTime(String departureTime, String duration,int exceptionSpan, String weekday) throws SQLException{
+        Statement statement = connection.createStatement();
+        String query = "INSERT INTO departure_time VALUES(?,\'"+duration+"\', ?,"+weekday+")";
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setTime(1, Time.valueOf(departureTime));
+        pst.setInt(2, exceptionSpan);
+        pst.executeUpdate();
+        statement.close();
+    }
+
+    public static void addBreak(int span, LocalDate data) throws SQLException{
+        Statement statement = connection.createStatement();
+        String query = "INSERT INTO breaks VALUES(?, ?)";
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setDate(1, Date.valueOf(data));
+        pst.setInt(2, span);
+        pst.executeUpdate();
+        statement.close();
     }
 
     public static boolean haveBusWithID(int id) throws SQLException{
