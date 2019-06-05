@@ -8,6 +8,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -32,10 +33,10 @@ public class ModerController implements Initializable{
     private ChoiceBox<String> CityDChoiceBox;
 
     @FXML
-    private DatePicker DepartureDate2;
+    private DatePicker BeginDate;
 
     @FXML
-    private DatePicker ArrivalDate2;
+    private DatePicker EndDate;
 
     @FXML
     private TextField SeatPlacesField;
@@ -50,25 +51,16 @@ public class ModerController implements Initializable{
     private TextField BusType;
 
     @FXML
+    private TextField TransitField;
+
+    @FXML
     private TextField PriceField;
-
-    @FXML
-    private DatePicker DepartureDate;
-
-    @FXML
-    private DatePicker ArrivalDate;
 
     @FXML
     private Button AddNewLineButton;
 
     @FXML
-    private TextField BusNumberField;
-
-    @FXML
-    private Button DeleteByIDButton;
-
-    @FXML
-    public Button DeleteByParametersButton;
+    private Button AssignSpanToLineButton;
 
     void setPrevStage(Stage stage){
         this.prevStage = stage;
@@ -101,77 +93,40 @@ public class ModerController implements Initializable{
             if (Integer.valueOf(ArrivalStop.getText())<=0) throw new FieldsDataException("Arrival stop id must be greater than 0");
             if (Integer.valueOf(DepartureStop.getText())<=0) throw new FieldsDataException("Departure stop id must be greater than 0");
             if (Integer.valueOf(BusType.getText())<=0) throw new FieldsDataException("Departure stop id must be greater than 0");
-            DbAdapter.addNewSpan(Integer.valueOf(ArrivalStop.getText()),Integer.valueOf(DepartureStop.getText()),Integer.valueOf(PriceField.getText()),Integer.valueOf(BusType.getText()));
+            DbAdapter.addNewLine(Integer.valueOf(ArrivalStop.getText()),Integer.valueOf(DepartureStop.getText()),Integer.valueOf(PriceField.getText()),Integer.valueOf(BusType.getText()));
             new ErrorWindow("Added!");
         }
         catch(FieldsDataException e){
             new ErrorWindow(e.getMessage());
         }
         catch (SQLException e){
-            new ErrorWindow(e.getMessage());
-        }
-    }
-    void addNewBusPressed() {
-        try{
-            if (CityAChoiceBox.getValue() == null) throw new FieldsDataException("Set departure city");
-            if (CityBChoiceBox.getValue() == null) throw new FieldsDataException("Set arrival city");
-            if (SeatPlacesField.getText().length() == 0) throw new FieldsDataException("Seat places field is empty");
-            if (PriceField.getText().length() == 0) throw new FieldsDataException("Price field is empty");
-            if (DepartureDate.getValue() == null) throw new FieldsDataException("Departure is empty");
-            if (ArrivalDate.getValue() == null) throw new FieldsDataException("Arrival date is empty");
-
-            if (CityAChoiceBox.getValue().equals(CityBChoiceBox.getValue())) throw new FieldsDataException("Set different departure and arrival cites");
-            if (!SeatPlacesField.getText().matches("\\d+")) throw new FieldsDataException("Write number to seat places field");
-            if (!PriceField.getText().matches("\\d+")) throw new FieldsDataException("Write number to price field");
-            if (DepartureDate.getValue().isBefore(LocalDate.now())) throw new FieldsDataException("Departure date shouldn't be in past");
-            if (ArrivalDate.getValue().isBefore(DepartureDate.getValue())) throw new FieldsDataException("Arrival date shouldn't be before departure date");
-
-            DbAdapter.addNewBus(CityAChoiceBox.getValue(), CityBChoiceBox.getValue(), Integer.valueOf(PriceField.getText()), DepartureDate.getValue(), ArrivalDate.getValue(), Integer.valueOf(SeatPlacesField.getText()));
-            new ErrorWindow("Added!");
-        } catch (FieldsDataException e){
-            new ErrorWindow(e.getMessage());
-        }
-        catch (SQLException e){
             new ErrorWindow("Can't add this bus");
         }
     }
-
     @FXML
-    void deleteBusByIDPressed() {
+    void assignSpanToLine(){
         try{
-            if (BusNumberField.getText().length() == 0) throw new FieldsDataException("Bus number field is empty");
-            if (!BusNumberField.getText().matches("\\d+")) throw new FieldsDataException("Write number to bus number field");
-
-            DbAdapter.removeBusByID(Integer.valueOf(BusNumberField.getText()));
-            new ErrorWindow("Deleted!");
-        } catch (FieldsDataException e){
+            if (TransitField.getText().length() == 0) throw new FieldsDataException("No transit chosen");
+            if (BeginDate.getValue() == null) throw new FieldsDataException("Begin date is empty");
+            if (EndDate.getValue() == null) throw new FieldsDataException("End date is empty");
+            if (!TransitField.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
+            DbAdapter.assignSpanToLine(Integer.valueOf(TransitField.getText()),BeginDate.getValue(),EndDate.getValue());
+        }
+        catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
         }
         catch (SQLException e){
-            new ErrorWindow("Wrong bus ID");
+            new ErrorWindow("Can't assign this span");
         }
     }
-
     @FXML
     void deleteBusByParametersPressed() {
         try{
             if (CityCChoiceBox.getValue() == null) throw new FieldsDataException("Set departure city");
             if (CityDChoiceBox.getValue() == null) throw new FieldsDataException("Set arrival city");
-            if (DepartureDate2.getValue() == null) throw new FieldsDataException("Departure is empty");
-            if (ArrivalDate2.getValue() == null) throw new FieldsDataException("Arrival date is empty");
-            DbAdapter.removeBusByParameters(DbAdapter.getCityID(CityCChoiceBox.getValue()), DbAdapter.getCityID(CityDChoiceBox.getValue()),DepartureDate2.getValue(), ArrivalDate2.getValue());
             new ErrorWindow("Deleted!");
         } catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
-        }
-        catch (SQLException e) {
-            try{
-                int idd=DbAdapter.getIDFromParameters(DbAdapter.getCityID(CityCChoiceBox.getValue()), DbAdapter.getCityID(CityDChoiceBox.getValue()),DepartureDate2.getValue(), ArrivalDate2.getValue());
-                DbAdapter.removeReservationsByID(idd);
-                DbAdapter.removeBusByID(idd);
-            } catch (Exception f){
-                new ErrorWindow("Bus in Reservation");
-            }
         }
         catch (Exception e)
         {

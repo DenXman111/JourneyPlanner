@@ -158,7 +158,7 @@ public class DbAdapter {
         statement.close();
     }
 
-    public static void addNewSpan(int depstop, int arrstop, int price, int bus_type ) throws SQLException {
+    public static void addNewLine(int depstop, int arrstop, int price, int bus_type ) throws SQLException {
         Statement statement = connection.createStatement();
         String query = "INSERT INTO transits VALUES(nextval(\'transit_id\'), ?, ?, ?, ?)";
         PreparedStatement pst = connection.prepareStatement(query);
@@ -169,6 +169,16 @@ public class DbAdapter {
         pst.executeUpdate();
         statement.close();
     }
+
+    public static void assignSpanToLine(int transit,LocalDate start, LocalDate end) throws SQLException{
+        Statement statement = connection.createStatement();
+        String query = "INSERT INTO spans VALUES(nextval(\'span_id\'), ?, ?,?)";
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setDate(1, Date.valueOf(start));
+        pst.setDate(2, Date.valueOf(end));
+        pst.setInt(3, transit);
+    }
+
     public static boolean haveBusWithID(int id) throws SQLException{
 
         Statement statement = connection.createStatement();
