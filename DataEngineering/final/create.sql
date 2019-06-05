@@ -459,7 +459,7 @@ CREATE TRIGGER have_free_seat_check BEFORE INSERT OR UPDATE ON seat_reservation
     FOR EACH ROW EXECUTE PROCEDURE have_free_seat_check();
 
 
-create or replace function add_bus(dep_stop int, arr_stop int, price int, bus_model int,bg_dt date, ed_dt date, dep time, leg interval, weekday int) returns numeric as
+create or replace function add_bus(dep_stop int, arr_stop int, price int, bus_model int, bg_dt date, ed_dt date, dep time, leg interval, weekday int) returns numeric as
 $$
 begin
 if ((select count(*)from bus_stops where dep_stop=id)=0 or (select count(*)from bus_stops where arr_stop=id)=0 or price<=0

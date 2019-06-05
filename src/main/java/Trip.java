@@ -293,7 +293,10 @@ public class Trip implements Displayable{
 
         showButton.setOnAction( (event) -> {
             try {
-                formController.showButtonPressed(this);
+                if (formController == null){
+                    FormController fc = new FormController();
+                    fc.showButtonPressed(this);
+                } else formController.showButtonPressed(this);
             } catch (IOException e){
                 e.printStackTrace();
             }
