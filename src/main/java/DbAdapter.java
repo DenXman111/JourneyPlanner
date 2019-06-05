@@ -157,6 +157,17 @@ public class DbAdapter {
         statement.close();
     }
 
+    public static void addNewSpan(int depstop, int arrstop, int price, int bus_type ) throws SQLException {
+        Statement statement = connection.createStatement();
+        String query = "INSERT INTO transits VALUES(nextval(\'transit_id\'), ?, ?, ?, ?)";
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setInt(1, depstop);
+        pst.setInt(2, arrstop);
+        pst.setInt(3, price);
+        pst.setInt(4, bus_type);
+        pst.executeUpdate();
+        statement.close();
+    }
     public static boolean haveBusWithID(int id) throws SQLException{
 
         Statement statement = connection.createStatement();
@@ -195,6 +206,48 @@ public class DbAdapter {
         finally {
             if (statement != null) statement.close();
         }
+    }
+
+    public static void removeReservationsByID(int id) throws Exception {
+        Statement statement = connection.createStatement();
+        String query = "select id from trips where bus_id=\'" + id + "\'";
+        ResultSet result = statement.executeQuery(query);
+        while (result.next()) {
+            int i=result.getInt("id");
+            String query2 ="delete from trips where id = ?";
+            PreparedStatement pst = connection.prepareStatement(query2);
+            pst.setInt(1, i);
+            pst.executeUpdate();
+        }
+    }
+
+    public static int getIDFromParameters(int id1, int id2, LocalDate departure, LocalDate arrival) throws Exception
+    {
+        Statement statement = connection.createStatement();
+        String query="Select id from buses WHERE start_city =\'"+id1+"\' and end_city=\'"+id2+"\' and departure=\'"+departure+"\' and arrival=\'"+arrival+"\'";
+        ResultSet result=statement.executeQuery(query);
+        if(result.next()){
+            return result.getInt("id");
+        }
+        return -1;
+    }
+
+    public static boolean haveBusWithParameters(int id1, int id2, LocalDate departure, LocalDate arrival) throws SQLException{
+
+        Statement statement = connection.createStatement();
+        String query="Select count(*) from buses WHERE start_city =\'"+id1+"\' and end_city=\'"+id2+"\' and departure=\'"+departure+"\' and arrival=\'"+arrival+"\'";
+        ResultSet result=statement.executeQuery(query);
+        if (result.next()){
+            if (result.getInt("count") == 0) return false; else
+                return true;
+        } else return false;
+    }
+
+    public static void removeBusByParameters(int id1,int id2, LocalDate departure, LocalDate arrival) throws Exception{
+        if (!haveBusWithParameters(id1,id2,departure,arrival)) throw new Exception();
+        Statement statement = connection.createStatement();
+        String query = "DELETE FROM buses WHERE start_city =\'"+id1+"\' and end_city=\'"+id2+"\' and departure=\'"+departure+"\' and arrival=\'"+arrival+"\'";
+        statement.executeUpdate(query);
     }
 
     public static boolean loginModerator(String username, String password) throws SQLException {

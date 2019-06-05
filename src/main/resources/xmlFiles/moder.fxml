@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.text.Text?>
 <AnchorPane prefHeight="775.0" prefWidth="784.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ModerController">
    <ImageView fitHeight="775.0" fitWidth="793.0">
       <Image url="@../backgroundPrague.jpg" />
@@ -20,13 +21,11 @@
          </ImageView>
       </graphic>
    </Button>
-   <ChoiceBox fx:id="CityAChoiceBox" accessibleText="Starting city" layoutX="111.0" layoutY="91.0" prefHeight="38.0" prefWidth="273.0" style="-fx-background-insets: 0, 1, 1;" />
-   <ChoiceBox fx:id="CityBChoiceBox" accessibleText="Starting city" layoutX="410.0" layoutY="91.0" prefHeight="38.0" prefWidth="273.0" style="-fx-background-insets: 0, 1, 1;" />
-   <TextField fx:id="SeatPlacesField" layoutX="111.0" layoutY="137.0" maxWidth="-Infinity" prefHeight="38.0" prefWidth="273.0" promptText="Seat places" />
-   <TextField fx:id="PriceField" layoutX="410.0" layoutY="137.0" maxWidth="-Infinity" prefHeight="38.0" prefWidth="273.0" promptText="Price" />
-   <DatePicker fx:id="DepartureDate" layoutX="111.0" layoutY="182.0" maxWidth="-Infinity" prefHeight="29.0" prefWidth="273.0" promptText="Departure date" style="-fx-background-insets: 0, 1, 1;" />
-   <DatePicker fx:id="ArrivalDate" layoutX="410.0" layoutY="182.0" maxWidth="-Infinity" prefHeight="29.0" prefWidth="273.0" promptText="Arrival date" style="-fx-background-insets: 0, 1, 1;" />
-   <Button fx:id="AddNewBusButton" layoutX="320.0" layoutY="236.0" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" onAction="#addNewBusPressed" prefHeight="33.0" prefWidth="154.0" style="-fx-background-radius: 20; -fx-background-insets: 0, 1, 1;" styleClass="mainButton" text="Add new bus" textFill="#14a085">
+   <TextField fx:id="ArrivalStop" layoutX="411.0" layoutY="51.0" maxWidth="-Infinity" prefHeight="38.0" prefWidth="273.0" promptText="Arrival stop" />
+   <TextField fx:id="DepartureStop" layoutX="111.0" layoutY="51.0" maxWidth="-Infinity" prefHeight="38.0" prefWidth="273.0" promptText="Departure stop" />
+   <TextField fx:id="PriceField" layoutX="410.0" layoutY="97.0" maxWidth="-Infinity" prefHeight="38.0" prefWidth="273.0" promptText="Price" />
+   <TextField fx:id="BusType" layoutX="110.0" layoutY="97.0" maxWidth="-Infinity" prefHeight="38.0" prefWidth="273.0" promptText="Bus Type" />
+   <Button fx:id="AddNewLineButton" layoutX="320.0" layoutY="141.0" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" onAction="#addNewLinePressed" prefHeight="33.0" prefWidth="154.0" style="-fx-background-radius: 20; -fx-background-insets: 0, 1, 1;" styleClass="mainButton" text="Add new line" textFill="#14a085">
       <font>
          <Font size="18.0" />
       </font>
@@ -37,5 +36,15 @@
          <Font size="17.0" />
       </font>
    </Button>
+   <ChoiceBox fx:id="CityCChoiceBox" accessibleText="Starting city" layoutX="111.0" layoutY="351.0" prefHeight="38.0" prefWidth="273.0" style="-fx-background-insets: 0, 1, 1;" />
+   <ChoiceBox fx:id="CityDChoiceBox" accessibleText="Starting city" layoutX="410.0" layoutY="351.0" prefHeight="38.0" prefWidth="273.0" style="-fx-background-insets: 0, 1, 1;" />
+   <DatePicker fx:id="DepartureDate2" layoutX="111.0" layoutY="402.0" maxWidth="-Infinity" prefHeight="29.0" prefWidth="273.0" promptText="Departure date" style="-fx-background-insets: 0, 1, 1;" />
+   <DatePicker fx:id="ArrivalDate2" layoutX="410.0" layoutY="402.0" maxWidth="-Infinity" prefHeight="29.0" prefWidth="273.0" promptText="Arrival date" style="-fx-background-insets: 0, 1, 1;" />
+   <Button fx:id="DeleteByParametersButton" layoutX="339.0" layoutY="440.0" mnemonicParsing="false" onAction="#deleteBusByParametersPressed" prefHeight="38.0" prefWidth="116.0" style="-fx-background-insets: 0, 0, 0;" text="Delete bus" textFill="#14a085">
+      <font>
+         <Font size="17.0" />
+      </font>
+   </Button>
+
    <Button layoutX="110.0" layoutY="16.0" mnemonicParsing="false" onMouseClicked="#ManageCitiesClicked" text="manage cities and bus stops" />
 </AnchorPane>
