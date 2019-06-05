@@ -59,5 +59,14 @@
       </font>
    </Button>
 
+   <TextField fx:id="DExceptionSpan" layoutX="111.0" layoutY="620.0" prefHeight="38.0" prefWidth="273.0" promptText="Line number" />
+   <DatePicker fx:id="DExceptionDate" layoutX="411.0" layoutY="620.0" maxWidth="-Infinity" prefHeight="38.0" prefWidth="273.0" promptText="Exception date" style="-fx-background-insets: 0, 1, 1;" />
+   <Button fx:id="DeleteBreakButton" layoutX="289.0" layoutY="665.0" mnemonicParsing="false" onAction="#deleteBreak" prefHeight="38.0" prefWidth="216.0" style="-fx-background-insets: 0, 0, 0;" text="Delete Break" textFill="#14a085">
+      <font>
+         <Font size="17.0" />
+      </font>
+   </Button>
+
+
    <Button layoutX="110.0" layoutY="16.0" mnemonicParsing="false" onMouseClicked="#ManageCitiesClicked" text="manage cities and bus stops" />
 </AnchorPane>

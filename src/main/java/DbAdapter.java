@@ -201,6 +201,16 @@ public class DbAdapter {
         statement.close();
     }
 
+    public static void deleteBreak(int span, LocalDate data) throws SQLException{
+        Statement statement = connection.createStatement();
+        String query = "delete from breaks where date=? and span_id=?";
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setDate(1, Date.valueOf(data));
+        pst.setInt(2, span);
+        pst.executeUpdate();
+        statement.close();
+    }
+
     public static boolean haveBusWithID(int id) throws SQLException{
 
         Statement statement = connection.createStatement();

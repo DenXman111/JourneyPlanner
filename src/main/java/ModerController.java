@@ -42,6 +42,9 @@ public class ModerController implements Initializable{
     private DatePicker ExceptionDate;
 
     @FXML
+    private DatePicker DExceptionDate;
+
+    @FXML
     private TextField SeatPlacesField;
 
     @FXML
@@ -72,6 +75,9 @@ public class ModerController implements Initializable{
     private TextField ExceptionSpan;
 
     @FXML
+    private TextField DExceptionSpan;
+
+    @FXML
     private TextField Weekday;
 
     @FXML
@@ -85,6 +91,9 @@ public class ModerController implements Initializable{
 
     @FXML
     private Button AddBreakButton;
+
+    @FXML
+    private Button DeleteBreakButton;
 
     void setPrevStage(Stage stage){
         this.prevStage = stage;
@@ -169,9 +178,26 @@ public class ModerController implements Initializable{
         try{
             if (ExceptionSpan.getText().length() == 0) throw new FieldsDataException("No line chosen");
             if (!ExceptionSpan.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
-            if (ExceptionDate.getValue() == null) throw new FieldsDataException("End date is empty");
+            if (ExceptionDate.getValue() == null) throw new FieldsDataException("Pick a date");
             DbAdapter.addBreak(Integer.valueOf(ExceptionSpan.getText()),ExceptionDate.getValue());
             new ErrorWindow("Added!");
+        }
+        catch(FieldsDataException e){
+            new ErrorWindow(e.getMessage());
+        }
+        catch (SQLException e){
+            new ErrorWindow("Wrong input data!");
+        }
+    }
+
+    @FXML
+    void deleteBreak(){
+        try{
+            if (DExceptionSpan.getText().length() == 0) throw new FieldsDataException("No line chosen");
+            if (!DExceptionSpan.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
+            if (DExceptionDate.getValue() == null) throw new FieldsDataException("Pick a date");
+            DbAdapter.deleteBreak(Integer.valueOf(DExceptionSpan.getText()),DExceptionDate.getValue());
+            new ErrorWindow("Deleted!");
         }
         catch(FieldsDataException e){
             new ErrorWindow(e.getMessage());
