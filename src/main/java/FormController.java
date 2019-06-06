@@ -120,6 +120,6 @@ public class FormController implements Initializable {
     @FXML
     void returnButtonPressed() throws IOException {
         Main.restartDaemonExecutor();
-        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME);
+        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME, true);
     }
 }

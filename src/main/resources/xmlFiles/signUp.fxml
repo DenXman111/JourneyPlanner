@@ -54,7 +54,7 @@
          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
       </GridPane.margin>
    </Button>
-   <Button fx:id="signUpButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" onAction="#signUpButtonPressed" prefWidth="150.0" styleClass="mainButton" text="Sign up" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="TOP">
+   <Button fx:id="signUpButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" onAction="#signUpButtonPressed" prefWidth="150.0" style="-fx-background-insets: 0, 0, 1, 1;" styleClass="mainButton" text="Sign up" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="TOP">
       <font>
          <Font size="18.0" />
       </font>

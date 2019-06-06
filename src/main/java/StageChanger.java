@@ -35,7 +35,7 @@ public class StageChanger {
         }
     }
 
-    public static void changeStage(Stage currentStage, String url, String title) throws IOException {
+    public static void changeStage(Stage currentStage, String url, String title, boolean resizable) throws IOException {
         FXMLLoader loader = new FXMLLoader(Main.class.getResource(url));
         Pane pane = loader.load();
 
@@ -45,6 +45,7 @@ public class StageChanger {
         Scene scene = new Scene(pane);
 
         newStage.setScene(scene);
+        newStage.setResizable(resizable);
         newStage.show();
         if (currentStage != null)
             currentStage.close();
@@ -52,8 +53,8 @@ public class StageChanger {
     }
 
 
-    public static void changeStage(ApplicationStage appStage) throws IOException {
-        changeStage(currentStage, appStage.url, appStage.title);
+    public static void changeStage(ApplicationStage appStage, boolean resizable) throws IOException {
+        changeStage(currentStage, appStage.url, appStage.title, resizable);
     }
 
     protected static Trip tripToDisplay;

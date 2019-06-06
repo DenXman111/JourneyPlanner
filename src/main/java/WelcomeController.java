@@ -68,16 +68,16 @@ public class WelcomeController implements Initializable {
 
     @FXML
     public void startButtonPressed() throws IOException {
-        StageChanger.changeStage(StageChanger.ApplicationStage.FORM);
+        StageChanger.changeStage(StageChanger.ApplicationStage.FORM, true);
     }
 
     @FXML
     public void loginPressed() throws IOException{
-        StageChanger.changeStage(StageChanger.ApplicationStage.LOGIN);
+        StageChanger.changeStage(StageChanger.ApplicationStage.LOGIN, true);
     }
 
     @FXML
     public void signUpPressed() throws IOException{
-        StageChanger.changeStage(StageChanger.ApplicationStage.SIGN_UP);
+        StageChanger.changeStage(StageChanger.ApplicationStage.SIGN_UP, true);
     }
 }

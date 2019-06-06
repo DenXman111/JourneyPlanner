@@ -330,11 +330,11 @@ public class ModerController implements Initializable{
 
     @FXML
     void returnButtonPressed() throws IOException {
-        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME);
+        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME, true);
     }
 
     public void ManageCitiesClicked() throws IOException {
-        StageChanger.changeStage(StageChanger.ApplicationStage.CITIES_MODER);
+        StageChanger.changeStage(StageChanger.ApplicationStage.CITIES_MODER, true);
     }
 
 

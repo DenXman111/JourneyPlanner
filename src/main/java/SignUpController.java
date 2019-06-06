@@ -69,7 +69,7 @@ public class SignUpController {
                     }
                     Platform.runLater( () -> {
                         try {
-                            StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME);
+                            StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME, true);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -89,6 +89,6 @@ public class SignUpController {
     @SuppressWarnings("unused")
     @FXML
     void returnButtonPressed(ActionEvent event) throws IOException{
-        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME);
+        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME, true);
     }
 }
