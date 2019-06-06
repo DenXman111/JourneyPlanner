@@ -8,14 +8,12 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-import javax.sound.sampled.Line;
-import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ResourceBundle;
 
+@SuppressWarnings("unused")
 public class ModerController implements Initializable{
     private Stage prevStage;
     @FXML
@@ -136,6 +134,7 @@ public class ModerController implements Initializable{
         this.prevStage = stage;
     }
 
+    @SuppressWarnings("UnusedAssignment")
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         ObservableList<String> observableCitiesList = null;
@@ -202,10 +201,7 @@ public class ModerController implements Initializable{
             DbAdapter.addDepartureTime(DepartureTime.getText(),Duration.getText(),Integer.valueOf(DepartureSpan.getText()),"\'"+Weekday.getText()+"\'");
             new ErrorWindow("Added!");
         }
-        catch (FieldsDataException e){
-            new ErrorWindow(e.getMessage());
-        }
-        catch (SQLException e){
+        catch (FieldsDataException | SQLException e){
             new ErrorWindow(e.getMessage());
         }
     }
@@ -238,10 +234,7 @@ public class ModerController implements Initializable{
             else throw new FieldsDataException("No such break!");
 
         }
-        catch(FieldsDataException e){
-            new ErrorWindow(e.getMessage());
-        }
-        catch (SQLException e){
+        catch(FieldsDataException | SQLException e){
             new ErrorWindow(e.getMessage());
         }
     }
@@ -258,10 +251,7 @@ public class ModerController implements Initializable{
             new ErrorWindow("Deleted!");
             else throw new FieldsDataException("No such departure time!");
         }
-        catch (FieldsDataException e){
-            new ErrorWindow(e.getMessage());
-        }
-        catch (SQLException e){
+        catch (FieldsDataException | SQLException e){
             new ErrorWindow(e.getMessage());
         }
     }
@@ -277,10 +267,7 @@ public class ModerController implements Initializable{
             new ErrorWindow("Deleted!");
             else throw new FieldsDataException("No such span!");
         }
-        catch (FieldsDataException e){
-            new ErrorWindow(e.getMessage());
-        }
-        catch (SQLException e){
+        catch (FieldsDataException | SQLException e){
             new ErrorWindow(e.getMessage());
         }
     }
@@ -293,10 +280,7 @@ public class ModerController implements Initializable{
             DbAdapter.removeTransitByID(Integer.valueOf(DDTransitField.getText()));
             new ErrorWindow("Deleted!");
         }
-        catch (FieldsDataException e) {
-            new ErrorWindow(e.getMessage());
-        }
-        catch (SQLException e){
+        catch (FieldsDataException | SQLException e) {
             new ErrorWindow(e.getMessage());
         }
     }
@@ -320,21 +304,18 @@ public class ModerController implements Initializable{
             String spans=DbAdapter.getSpans(Integer.valueOf(DTransitField.getText()));
             new LinesWindow(spans);
         }
-        catch (FieldsDataException e){
-            new ErrorWindow(e.getMessage());
-        }
-        catch(SQLException e){
+        catch (FieldsDataException | SQLException e){
             new ErrorWindow(e.getMessage());
         }
     }
 
     @FXML
     void returnButtonPressed() throws IOException {
-        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME, true);
+        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME);
     }
 
     public void ManageCitiesClicked() throws IOException {
-        StageChanger.changeStage(StageChanger.ApplicationStage.CITIES_MODER, true);
+        StageChanger.changeStage(StageChanger.ApplicationStage.CITIES_MODER);
     }
 
 

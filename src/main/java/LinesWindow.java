@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import static java.lang.Double.max;
 
 
+@SuppressWarnings("WeakerAccess")
 public class LinesWindow {
     static private Stage stage;
     LinesWindow(String message){

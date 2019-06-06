@@ -1,4 +1,4 @@
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "BooleanMethodIsAlwaysInverted"})
 public class TextChecker {
     public static boolean containsSpecialSigns(String text){
         return text.matches(".*[;\"',.].*");
@@ -8,11 +8,7 @@ public class TextChecker {
         return text.matches("[0-9]+(\\.[0-9]+)?");
     }
 
-    public static boolean isInteger(String text){
-        return text.matches("[0-9]+");
+    public static boolean noWhiteCharactersOrQuotes(String text){
+        return text.matches("[^ \n'\"]*");
     }
-
-    /*public static void main(String [] args){
-        System.out.println(containsSpecialSigns("Krakow"));
-    }*/
 }

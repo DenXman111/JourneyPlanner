@@ -109,7 +109,7 @@ public class CitiesModerController implements Initializable {
     }
 
     public void returnButtonPressed() throws IOException {
-        StageChanger.changeStage(StageChanger.ApplicationStage.MODER, false);
+        StageChanger.changeStage(StageChanger.ApplicationStage.MODER);
     }
 
     public void addCityClicked() {

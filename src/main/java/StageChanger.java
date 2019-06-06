@@ -12,26 +12,28 @@ public class StageChanger {
 
     public enum ApplicationStage {
 
-        CITIES_MODER("xmlFiles/citiesModer.fxml", "cities and bus stops management"),
+        CITIES_MODER("xmlFiles/citiesModer.fxml", "cities and bus stops management", true),
 
-        FORM("xmlFiles/form.fxml", "form"),
+        FORM("xmlFiles/form.fxml", "form", true),
 
-        HISTORY("xmlFiles/history.fxml", "your reservations"),
+        HISTORY("xmlFiles/history.fxml", "your reservations", true),
 
-        LOGIN("xmlFiles/login.fxml", "login"),
+        LOGIN("xmlFiles/login.fxml", "login", true),
 
-        MODER("xmlFiles/moder.fxml", "transits management"),
+        MODER("xmlFiles/moder.fxml", "transits management", false),
 
-        SIGN_UP("xmlFiles/signUp.fxml", "sign up"),
+        SIGN_UP("xmlFiles/signUp.fxml", "sign up", true),
 
-        WELCOME("xmlFiles/welcome.fxml", "JourneyPlanner"),
+        WELCOME("xmlFiles/welcome.fxml", "JourneyPlanner", true),
         ;
 
         String url, title;
+        boolean resizable;
 
-        ApplicationStage(String url, String title){
+        ApplicationStage(String url, String title, boolean resizable){
             this.url = url;
             this.title = title;
+            this.resizable = resizable;
         }
     }
 
@@ -53,8 +55,8 @@ public class StageChanger {
     }
 
 
-    public static void changeStage(ApplicationStage appStage, boolean resizable) throws IOException {
-        changeStage(currentStage, appStage.url, appStage.title, resizable);
+    public static void changeStage(ApplicationStage appStage) throws IOException {
+        changeStage(currentStage, appStage.url, appStage.title, appStage.resizable);
     }
 
     protected static Trip tripToDisplay;

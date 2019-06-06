@@ -1,7 +1,7 @@
 import java.sql.*;
 import java.util.ArrayList;
 
-@SuppressWarnings({"SqlNoDataSourceInspection", "SqlResolve", "FieldCanBeLocal"})
+@SuppressWarnings({"SqlResolve", "FieldCanBeLocal"})
 public class GCloudConnectionTest {
 
     private static String user = "application_user";

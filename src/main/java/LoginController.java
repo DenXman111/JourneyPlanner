@@ -33,7 +33,7 @@ public class LoginController {
 
     @FXML
     void returnButtonPressed() throws IOException {
-        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME, true);
+        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME);
     }
 
     @FXML
@@ -52,9 +52,9 @@ public class LoginController {
                         username = UsernameField.getText();
 
                         if (actionEvent.getSource().equals(loginButton))
-                            StageChanger.changeStage(StageChanger.ApplicationStage.FORM, true);
+                            StageChanger.changeStage(StageChanger.ApplicationStage.FORM);
                         else
-                            StageChanger.changeStage(StageChanger.ApplicationStage.HISTORY, true);
+                            StageChanger.changeStage(StageChanger.ApplicationStage.HISTORY);
 
                     } catch (FieldsDataException e){
                         new ErrorWindow(e.getMessage());
@@ -85,7 +85,7 @@ public class LoginController {
                         stage.setTitle("Main");
                         username = UsernameField.getText();
 
-                        StageChanger.changeStage(StageChanger.ApplicationStage.MODER, false);
+                        StageChanger.changeStage(StageChanger.ApplicationStage.MODER);
 
                     } catch (FieldsDataException e){
                         new ErrorWindow(e.getMessage());

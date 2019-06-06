@@ -2,10 +2,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
@@ -44,6 +41,12 @@ public class SignUpController {
             if (nameField.getText().length() == 0) throw new FieldsDataException("Name field is empty");
             if (surnameField.getText().length() == 0) throw new FieldsDataException("Surname field is empty");
 
+            TextField [] fields = {usernameField, passwordField, emailField, nameField, surnameField};
+            for (TextField field : fields){
+                if (!TextChecker.noWhiteCharactersOrQuotes(field.getText()))
+                    throw new FieldsDataException("Do not use white characters or quotes\n" + field.getText());
+            }
+
             signUpButton.setDisable(true);
             signUpBox.setVisible(false);
 
@@ -69,7 +72,7 @@ public class SignUpController {
                     }
                     Platform.runLater( () -> {
                         try {
-                            StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME, true);
+                            StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -89,6 +92,6 @@ public class SignUpController {
     @SuppressWarnings("unused")
     @FXML
     void returnButtonPressed(ActionEvent event) throws IOException{
-        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME, true);
+        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME);
     }
 }

@@ -277,6 +277,9 @@ INSERT INTO new_users(username, email_address, password, name, surname) VALUES
 ('Andrew_Randall198', 'andrew.randall@example.com', 'amanda', 'Andrew', 'Randall'),
 ('Stephen_Mills199', 'stephen.mills@example.com', 'thomas', 'Stephen', 'Mills');
 
+-- moderators
+INSERT INTO moderators(username) values ('admin1');
+
 -- bus models
 INSERT INTO buses_models(id, seats) VALUES
 (0, 30),

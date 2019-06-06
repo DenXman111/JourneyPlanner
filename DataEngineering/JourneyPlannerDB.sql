@@ -181,11 +181,15 @@ CREATE TABLE transit_reservation (
 );
 
 -- Table: seat_reservation
--- Table: seat_reservation
 CREATE TABLE seat_reservation (
     seat int  NOT NULL CHECK (1 <= seat AND seat <= 300),
     transit_reservation_id int  NOT NULL,
     CONSTRAINT seat_reservation_pk PRIMARY KEY (seat,transit_reservation_id)
+);
+
+-- Table: moderators (added after first presentation)
+create table moderators(
+    username varchar(50) references users(username)
 );
 
 --Views
@@ -193,12 +197,24 @@ CREATE TABLE seat_reservation (
 CREATE VIEW countries AS
 select country as name from cities group by country;
 
+-- view displaying names of departure and arrival bus stops for every transits
+-- (modified after first presentation)
+-- @author Krzysztof Mrzigod
 -- View: lines
-CREATE VIEW lines AS
-select departure_stop, arrival_stop from transits group by departure_stop, arrival_stop;
+CREATE OR REPLACE VIEW lines AS
+select
+       a.id_transit as itr,
+       a.stop_name as stop1,
+       b.stop_name as stop2
+from
+     (select id_transit, stop_name from transits join bus_stops on transits.departure_stop = bus_stops.id) a
+         join (select id_transit,stop_name from transits join bus_stops on transits.arrival_stop=bus_stops.id) b on a.id_transit = b.id_transit
+order by itr;
 
 -- View: new_users
 -- empty view used for adding new users with not hashed password
+-- we know its unnecessary but we forgot to change it and know there's little time left
+-- (should be removed after first presentation)
 -- author Łukasz Selwa
 CREATE VIEW new_users AS
 SELECT
@@ -211,6 +227,7 @@ SELECT
 -- Rule: new_users
 -- adds user to users table and hashes his password
 -- author Łukasz Selwa
+-- (should be used on table users)
 CREATE RULE create_new_user AS ON INSERT TO new_users
     DO INSTEAD
     INSERT INTO users(username, email_address, password, name, surname)
@@ -274,7 +291,6 @@ ALTER TABLE seat_reservation ADD CONSTRAINT seat_transit_reservation
 ;
 
 
-
 -- Trigger: spans
 -- after modifying or deleting spans remove all breaks that will not be contained
 -- @author Łukasz Selwa
@@ -329,7 +345,7 @@ CREATE OR REPLACE FUNCTION count_breaks(begin_date date, end_date date, weekday 
     end;
     $$ LANGUAGE plpgsql;
 
--- before insert or update check if there is no other bus leaving on the same time
+-- before insert or update check if there is no other bus (with same transit_id) leaving on the same time
 CREATE OR REPLACE FUNCTION departure_time_check() RETURNS TRIGGER AS
     $departure_time_check$
     declare
@@ -383,7 +399,6 @@ CREATE TRIGGER break_check BEFORE INSERT OR UPDATE ON breaks
 -- triggers
 
 -- trigger on seat_reservation checks if seat has not been taken already
--- Old version didn't work (I think Denis was the author), I wrote it from scratch
 -- @author Łukasz Selwa
 CREATE OR REPLACE FUNCTION seat_reservation_departure_date_check() RETURNS trigger AS $seat_reservation_departure_date_check$
 DECLARE
@@ -410,6 +425,7 @@ CREATE TRIGGER seat_reservation_departure_date_check BEFORE INSERT OR UPDATE ON 
     FOR EACH ROW EXECUTE PROCEDURE seat_reservation_departure_date_check();
 
 
+-- delete all transit_reservations pointing at reservation that is being deleted
 CREATE OR REPLACE FUNCTION reservations_delete() RETURNS TRIGGER AS
     $reservations_delete$
     begin
@@ -420,7 +436,7 @@ CREATE OR REPLACE FUNCTION reservations_delete() RETURNS TRIGGER AS
 CREATE TRIGGER reservations_delete BEFORE DELETE ON reservations
     FOR EACH ROW EXECUTE PROCEDURE reservations_delete();
 
-
+-- similarly as trigger above remove all seat_reservation pointing at removed transit_reservation
 CREATE OR REPLACE function transit_reservation_delete() RETURNS TRIGGER AS
     $transit_reservation_delete$
     begin
@@ -464,6 +480,7 @@ CREATE TRIGGER transit_reservation_check BEFORE INSERT OR UPDATE ON transit_rese
 
 --
 
+-- It doesn't work and I don't know what it suppose to do
 /*CREATE OR REPLACE FUNCTION date_reservation_check() RETURNS trigger AS $date_reservation_check$
 BEGIN
     IF (SELECT min(departure_date) FROM transit_reservation WHERE reservation = NEW.id) < NEW.date_reservation THEN
@@ -495,6 +512,8 @@ CREATE TRIGGER have_free_seat_check BEFORE INSERT OR UPDATE ON seat_reservation
     FOR EACH ROW EXECUTE PROCEDURE have_free_seat_check();
 
 
+-- function for adding new transits
+-- @author Krzysztof Mrzigod
 create or replace function add_bus(dep_stop int, arr_stop int, price int, bus_model int,bg_dt date, ed_dt date, dep time, leg interval, weekday day) returns numeric as
 $$
 begin
@@ -511,6 +530,7 @@ return 1;
 end;
 $$
 language plpgsql;
+
 
 -- function buses_in_span returns all buses in span span_id and dates in interval
 -- @author Denis Pivovarov
@@ -555,6 +575,9 @@ end;
 $$
 language plpgsql;
 
+
+
+
 -- function get_buses returns all buses in dates in interval L..R
 -- @author Denis Pivovarov
 
@@ -576,6 +599,8 @@ $$
 language plpgsql;
 
 
+-- returns all transits leaving from given city between dates L and R
+-- it ended up not being used in final version of application
 create or replace function buses_from_city( city_id numeric, L date, R date)
 returns TABLE(id_transit numeric, end_city numeric, price numeric(6, 2), departure timestamp, arrival timestamp) as
     $$
@@ -595,6 +620,12 @@ returns TABLE(id_transit numeric, end_city numeric, price numeric(6, 2), departu
     $$
 language plpgsql;
 
+
+
+-- between given given cities and in given time interval look for cities you can visit and return appropriate buses
+-- (tr for transits)
+-- This one is on me @Łukasz Selwa
+-- It doesn't look good and it wan't tested properly properly
 create or replace function optional_visits(start_city numeric, start_time timestamp, end_city numeric, end_time timestamp)
 returns TABLE(id_tr1 numeric, tr1_str_city numeric, tr1_end_city numeric, tr1_price numeric(6, 2), tr1_departure timestamp, tr1_arrival timestamp,
               id_tr2 numeric, tr2_str_city numeric, tr2_end_city numeric, tr2_price numeric(6, 2), tr2_departure timestamp, tr2_arrival timestamp)
@@ -626,13 +657,9 @@ as
     $$
 language plpgsql;
 
-create table moderators(
-    username varchar(50) references users(username)
-);
 
-INSERT INTO moderators(username) values ('admin1');
-
-
+-- returns true if and only if given username and password are correct
+-- @ŁS (new)
 create or replace function loginUser(given_username varchar(50), user_password varchar(50)) returns boolean as
     $$
     begin
@@ -640,6 +667,8 @@ create or replace function loginUser(given_username varchar(50), user_password v
     end;
     $$language plpgsql;
 
+-- returns true if and only if given username and password are correct and username is in table moderators
+-- @ŁS (new)
 create or replace function loginModerator(given_username varchar(50), user_password varchar(50)) returns boolean as
     $$
     begin
@@ -647,7 +676,8 @@ create or replace function loginModerator(given_username varchar(50), user_passw
     end;
     $$ language plpgsql;
 
-
+-- returns true if and only if there are free 'seats' number in given bus
+-- @ŁS (new)
 create or replace function enough_seats(transit_id integer, departure timestamp, seats integer) returns boolean as
     $$
     begin
@@ -672,7 +702,8 @@ create or replace function enough_seats(transit_id integer, departure timestamp,
     $$ language plpgsql;
 
 
--- function returns first unreserved seats in given bus or throws exception if there are not enough seats left
+-- function returns first unreserved seats in given bus or throws exception if there isn't not enough seats left
+-- @ŁS (new)
 create or replace function first_free_seats(transit_id integer, departure timestamp, seats integer)
 returns table(seat_number integer) as
     $$
@@ -706,6 +737,8 @@ returns table(seat_number integer) as
     $$ language plpgsql;
 
 
+
+-- returns all buses in given interval L...R with enough seats
 create or replace function get_buses_with_seats_left(L date, R date, seats integer)
  returns TABLE(id_transit numeric, start_city numeric, end_city numeric, price numeric(6, 2), departure timestamp, arrival timestamp) as
 $$
@@ -724,11 +757,11 @@ end;
 $$
 language plpgsql;
 
-select *
-from get_buses('2019-06-01'::date, '2019-06-07'::date);
 
-
-
+-- reserves first |seats| seats for user for every bus in reservation_type array
+-- returns table with transit, departure time, departure stop, arrival stop and array with reserved seats numbers
+-- reservation_type = {transit integer, departure timestamp}
+-- @ŁS (new)
 create or replace function reserve(user_id varchar(30), seats integer, res variadic reservation_type array) returns
     table (transit_id integer, departure_time timestamp, departure_stop varchar(127), arrival_stop varchar(127), reserved_seats integer array )as
     $$

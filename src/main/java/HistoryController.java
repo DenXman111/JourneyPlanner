@@ -74,6 +74,6 @@ public class HistoryController implements Initializable {
     @FXML
     @SuppressWarnings("Duplicates")
     void returnButtonPressed() throws IOException {
-        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME, true);
+        StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME);
     }
 }
