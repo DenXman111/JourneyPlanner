@@ -39,6 +39,12 @@ public class ModerController implements Initializable{
     private DatePicker EndDate;
 
     @FXML
+    private DatePicker DBeginDate;
+
+    @FXML
+    private DatePicker DEndDate;
+
+    @FXML
     private DatePicker ExceptionDate;
 
     @FXML
@@ -50,7 +56,6 @@ public class ModerController implements Initializable{
     @FXML
     private TextField DepartureStop;
 
-
     @FXML
     private TextField ArrivalStop;
 
@@ -59,6 +64,12 @@ public class ModerController implements Initializable{
 
     @FXML
     private TextField TransitField;
+
+    @FXML
+    private TextField DTransitField;
+
+    @FXML
+    private TextField DDTransitField;
 
     @FXML
     private TextField PriceField;
@@ -111,6 +122,13 @@ public class ModerController implements Initializable{
     @FXML
     private Button DeleteDepartureTimeButton;
 
+    @FXML
+    private Button DeleteSpanFromLineButton;
+
+    @FXML
+
+    private Button DeleteLineButton;
+
     void setPrevStage(Stage stage){
         this.prevStage = stage;
     }
@@ -142,7 +160,7 @@ public class ModerController implements Initializable{
             if (Integer.valueOf(ArrivalStop.getText())<=0) throw new FieldsDataException("Arrival stop id must be greater than 0");
             if (Integer.valueOf(DepartureStop.getText())<=0) throw new FieldsDataException("Departure stop id must be greater than 0");
             if (Integer.valueOf(BusType.getText())<=0) throw new FieldsDataException("Departure stop id must be greater than 0");
-            DbAdapter.addNewLine(Integer.valueOf(ArrivalStop.getText()),Integer.valueOf(DepartureStop.getText()),Integer.valueOf(PriceField.getText()),Integer.valueOf(BusType.getText()));
+            DbAdapter.addNewLine(Integer.valueOf(DepartureStop.getText()),Integer.valueOf(ArrivalStop.getText()),Integer.valueOf(PriceField.getText()),Integer.valueOf(BusType.getText()));
             new ErrorWindow("Added!");
         }
         catch(FieldsDataException e){
@@ -185,7 +203,7 @@ public class ModerController implements Initializable{
             new ErrorWindow(e.getMessage());
         }
         catch (SQLException e){
-            new ErrorWindow("Wrong input data!");
+            new ErrorWindow(e.getMessage());
         }
     }
 
@@ -212,14 +230,16 @@ public class ModerController implements Initializable{
             if (DExceptionSpan.getText().length() == 0) throw new FieldsDataException("No line chosen");
             if (!DExceptionSpan.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
             if (DExceptionDate.getValue() == null) throw new FieldsDataException("Pick a date");
-            DbAdapter.deleteBreak(Integer.valueOf(DExceptionSpan.getText()),DExceptionDate.getValue());
+            if(DbAdapter.deleteBreak(Integer.valueOf(DExceptionSpan.getText()),DExceptionDate.getValue()))
             new ErrorWindow("Deleted!");
+            else throw new FieldsDataException("No such break!");
+
         }
         catch(FieldsDataException e){
             new ErrorWindow(e.getMessage());
         }
         catch (SQLException e){
-            new ErrorWindow("Wrong input data!");
+            new ErrorWindow(e.getMessage());
         }
     }
 
@@ -231,14 +251,60 @@ public class ModerController implements Initializable{
             if (DDepartureSpan.getText() == null) throw new FieldsDataException("No transit chosen");
             if (DWeekday.getText() == null) throw new FieldsDataException("No day chosen");
             if (!DDepartureSpan.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
-            DbAdapter.deleteDepartureTime(DDepartureTime.getText(),DDuration.getText(),Integer.valueOf(DDepartureSpan.getText()),"\'"+DWeekday.getText()+"\'");
+            if(DbAdapter.deleteDepartureTime(DDepartureTime.getText(),DDuration.getText(),Integer.valueOf(DDepartureSpan.getText()),"\'"+DWeekday.getText()+"\'"))
             new ErrorWindow("Deleted!");
+            else throw new FieldsDataException("No such departure time!");
         }
         catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
         }
         catch (SQLException e){
             new ErrorWindow("Wrong input data!");
+        }
+    }
+
+    @FXML
+    void deleteSpanFromLine(){
+        try{
+            if (DTransitField.getText().length() == 0) throw new FieldsDataException("No line chosen");
+            if (DBeginDate.getValue() == null) throw new FieldsDataException("Begin date is empty");
+            if (DEndDate.getValue() == null) throw new FieldsDataException("End date is empty");
+            if (!DTransitField.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
+            if(DbAdapter.deleteSpanFromLine(Integer.valueOf(DTransitField.getText()),DBeginDate.getValue(),DEndDate.getValue()))
+            new ErrorWindow("Deleted!");
+            else throw new FieldsDataException("No such span!");
+        }
+        catch (FieldsDataException e){
+            new ErrorWindow(e.getMessage());
+        }
+        catch (SQLException e){
+            new ErrorWindow(e.getMessage());
+        }
+    }
+
+    @FXML
+    void deleteLine(){
+        try {
+            if (DDTransitField.getText().length() == 0) throw new FieldsDataException("No line chosen");
+            if (!DDTransitField.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
+            DbAdapter.removeTransitByID(Integer.valueOf(DDTransitField.getText()));
+            new ErrorWindow("Deleted!");
+        }
+        catch (FieldsDataException e) {
+            new ErrorWindow(e.getMessage());
+        }
+        catch (SQLException e){
+            new ErrorWindow(e.getMessage());
+        }
+    }
+
+    @FXML
+    void ShowLines(){
+        try{
+            DbAdapter.getLines();
+        }
+        catch(Exception e) {
+            new ErrorWindow(e.getMessage());
         }
     }
 

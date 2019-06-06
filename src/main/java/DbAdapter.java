@@ -1,3 +1,5 @@
+import jnr.ffi.annotations.In;
+
 import java.io.IOException;
 import java.sql.*;
 import java.sql.Date;
@@ -201,46 +203,136 @@ public class DbAdapter {
         statement.close();
     }
 
-    public static void deleteBreak(int span, LocalDate data) throws SQLException{
+    public static boolean haveBreak(int span, LocalDate data) throws SQLException{
         Statement statement = connection.createStatement();
-        String query = "delete from breaks where date=? and span_id=?";
-        PreparedStatement pst = connection.prepareStatement(query);
-        pst.setDate(1, Date.valueOf(data));
-        pst.setInt(2, span);
-        pst.executeUpdate();
-        statement.close();
-    }
-
-    public static void deleteDepartureTime(String departureTime, String duration,int exceptionSpan, String weekday) throws SQLException{
-        Statement statement = connection.createStatement();
-        String query = "delete from departure_time where departure=? and time=\'"+duration+"\' and span=? and day_of_the_week="+weekday;
-        PreparedStatement pst = connection.prepareStatement(query);
-        pst.setTime(1, Time.valueOf(departureTime));
-        pst.setInt(2, exceptionSpan);
-        pst.executeUpdate();
-        statement.close();
-    }
-
-    public static boolean haveBusWithID(int id) throws SQLException{
-
-        Statement statement = connection.createStatement();
-        String query = "Select count(*) from transits where id = \'"+id+"\'";
+        String query = "Select count(*) from breaks where date=\'"+data+"\' and span_id=\'"+span+"\'";
         ResultSet result=statement.executeQuery(query);
-        statement.close();
         if (result.next()){
             if (result.getInt("count") == 0) return false; else
                 return true;
         } else return false;
     }
 
-    public static void removeBusByID(int id) throws SQLException{
-        if (!haveBusWithID(id)) throw new SQLException();
+    public static boolean deleteBreak(int span, LocalDate data) throws SQLException{
+        if(haveBreak(span,data)) {
+            Statement statement = connection.createStatement();
+            String query = "delete from breaks where date=? and span_id=?";
+            PreparedStatement pst = connection.prepareStatement(query);
+            pst.setDate(1, Date.valueOf(data));
+            pst.setInt(2, span);
+            pst.executeUpdate();
+            statement.close();
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean haveDepartureTime(String departureTime, String duration,int exceptionSpan, String weekday) throws SQLException{
         Statement statement = connection.createStatement();
-        String query = "DELETE FROM transits WHERE id = ?";
+        String query = "Select count(*) from departure_time where departure=\'"+departureTime+"\' and time=\'"+duration+"\' and span=\'"+exceptionSpan+"\' and day_of_the_week="+weekday;
+        ResultSet result=statement.executeQuery(query);
+        if (result.next()){
+            if (result.getInt("count") == 0) return false; else
+                return true;
+        } else return false;
+    }
+
+    public static boolean deleteDepartureTime(String departureTime, String duration,int exceptionSpan, String weekday) throws SQLException{
+        if(haveDepartureTime(departureTime,duration,exceptionSpan,weekday)) {
+            Statement statement = connection.createStatement();
+            String query = "delete from departure_time where departure=\'"+departureTime+"\' and time=\'" + duration + "\' and span=\'"+exceptionSpan+"\' and day_of_the_week=" + weekday;
+            PreparedStatement pst = connection.prepareStatement(query);
+            pst.setTime(1, Time.valueOf(departureTime));
+            pst.setInt(2, exceptionSpan);
+            pst.executeUpdate();
+            statement.close();
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean haveSpanInLine(int transit,LocalDate start, LocalDate end) throws SQLException{
+        Statement statement = connection.createStatement();
+        String query = "Select count(*) from spans where begin_date=\'"+start+"\' and end_date=\'"+end+"\' and transit=\'"+transit+"\'";
+        ResultSet result=statement.executeQuery(query);
+        if (result.next()){
+            if (result.getInt("count") == 0) return false; else
+                return true;
+        } else return false;
+    }
+
+    public static void removeSpanByID(int id) throws SQLException{
+        Statement statement = connection.createStatement();
+        String query = "DELETE FROM departure_time WHERE span= ?";
         PreparedStatement pst = connection.prepareStatement(query);
         pst.setInt(1, id);
         pst.executeUpdate();
         statement.close();
+        Statement statement2 = connection.createStatement();
+        String query2 = "DELETE FROM spans WHERE id = ?";
+        PreparedStatement pst2 = connection.prepareStatement(query2);
+        pst2.setInt(1, id);
+        pst2.executeUpdate();
+        pst2.close();
+    }
+
+    public static boolean deleteSpanFromLine(int transit,LocalDate start, LocalDate end) throws SQLException{
+        if(haveSpanInLine(transit,start,end)) {
+            Statement statement = connection.createStatement();
+            String query = "select id from spans where begin_date=\'"+start+"\' and end_date=\'"+end+"\' and transit=\'"+transit+"\'";
+            ResultSet result=statement.executeQuery(query);
+            ArrayList<Integer> spany=new ArrayList<>();
+            while(result.next()){
+                spany.add(result.getInt("id"));
+            }
+            statement.close();
+            for(int i=0;i<spany.size();i++){
+                removeSpanByID(spany.get(i));
+            }
+            return true;
+        }
+        return false;
+    }
+
+
+    public static boolean haveTransitWithID(int id) throws SQLException{
+        Statement statement = connection.createStatement();
+        String query = "Select count(*) from transits where id_transit = \'"+id+"\'";
+        ResultSet result=statement.executeQuery(query);
+        if (result.next()){
+            if (result.getInt("count") == 0) return false; else
+                return true;
+        } else return false;
+    }
+
+    public static void removeTransitByID(int id) throws SQLException{
+        if (!haveTransitWithID(id)) throw new SQLException("No such line");
+        Statement statement2=connection.createStatement();
+        String query2= "select id from spans where transit=\'"+id+"\'";
+        ResultSet result=statement2.executeQuery(query2);
+        ArrayList<Integer> spany=new ArrayList<>();
+        while(result.next()){
+            spany.add(result.getInt("id"));
+        }
+        statement2.close();
+        for(int i=0;i<spany.size();i++){
+            removeSpanByID(spany.get(i));
+        }
+        Statement statement = connection.createStatement();
+        String query = "DELETE FROM transits WHERE id_transit = ?";
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setInt(1, id);
+        pst.executeUpdate();
+        statement.close();
+    }
+
+    public static void getLines() throws SQLException {
+        Statement statement = connection.createStatement();
+        String query = "Select id_transit, departure_stop, arrival_stop from transits";
+        ResultSet result = statement.executeQuery(query);
+        while (result.next()) {
+            System.out.println(result.getInt("id_transit")+" "+result.getString("departure_stop")+" "+result.getString("arrival_stop"));
+        }
     }
 
     public static boolean userExists(String username, String password) throws SQLException {
