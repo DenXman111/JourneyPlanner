@@ -12,6 +12,8 @@ dla zarejestrowanych użytkowników.
 
 Bardziej szczegółowe elementy projektu i wraz z autorem:
 
+---- Etap 1 ----
+
 Łukasz Selwa:
 
 1. Widok ‚new_users’ nic nie przechowuje ale po wstawieniu wszystkich danych nowego użytkownika
@@ -79,3 +81,21 @@ Krzysztof Mrzigod
     3.3 Usuwanie rezerwacji zwiazanych z usuwanymi elementami
     3.4 Wyswietlanie wszystkich linii autobusowych obecnie w bazie
     3.5 Wyswietlanie wszystkich przedzialow czasowych przypisanych do danej linii
+
+
+Łukasz Selwa
+
+Mechanizm rezerwowania znalezionych podróży
+	1.1 Znajdowanie i rezerwowanie pierwszych k wolnych miejsc
+dla każdego wypranego przejazdu lub rzucanie wyjątkiem jeśli się nie da.
+	1.2 Mechanizm anulowania rezerwacji
+2. System logowania (w tym logowania jako moderator)
+3. Strona zarządzania miastami i przystankami
+	3.1 Zmienianie nazw miast, kraju, oceny miast i średniej ceny za noc w hotelu
+	3.2 Usuwanie miast, które jest dozwolone tylko jeśli nie ma przystanku autobusowego w bazie wskazującego na to miast
+	3.3 Zmienianie nazw przystanku
+	3.4 Zmienianie miasta, do którego dany przystanek należy i usuwanie przystanku.
+		Podobnie dozwolone tylko jeśli nie ma przejazdu (transits) wskazującego na ten przystanek
+	3.5 dodawanie przystanków i miast (uwaga pojawiają się na końcu tablicy)
+4. Komunikacja z bazą danych na google cloud
+5. Wygląd stron welcome, form, login, signUp i citeisModerator
