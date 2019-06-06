@@ -10,6 +10,46 @@ z których każde posiada indywidualną ocenę (rating) co pozwoli naszej aplika
 podróży z najlepszą oceną. Dodatkowo baza umożliwia rezerwowanie miejsc w autobusach
 dla zarejestrowanych użytkowników.
 
+
+
+
+Uruchamianie aplikacji przez plik jar (linux i macOs)
+
+1.  Proszę pobrać i zainstalować, jeżeli nie ma na komputerze, java JDK 11 i JavaFX SDK
+
+	https://jdk.java.net/11/
+
+	https://gluonhq.com/products/javafx/
+
+
+2.  Proszę rozpakować src.tar i przejść do folderu jarApp
+3.  Proszę utworzyć zmienną globalną  w powłoce, w której będzie uruchomiona aplikacja wskazującą na plik jpConnection.json,
+    który znajduje się w tym folderze (bez tego aplikacja nie połączy się z bazą na google cloud)
+
+	    export GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
+
+    Gdzie za [PATH] należy podstawić bezwzględną ścieżkę do pliku jpConnection.json
+
+4.  Uruchomić plik  komendą
+
+    java -jar JourneyPlanner.jar --module-path [PATH_TO_FX] --add-modules=javafx.controls,javafx.web,javafx.fxml
+
+    Gdzie za [PATH_TO_FX] trzeba podstawić ścieżkę do javafx (folder lib z pobranego pliku javafx-sdk)
+
+
+
+
+    Pod linikiem
+
+    https://github.com/DenXman111/JourneyPlanner
+
+Znajduję się repozytorium projektu na githubie i opis jak go uruchomić w programie IntelliJ (w tedy działa także na systemie Windows)
+Uwaga potrzebny jest tam również plik jpConnection.json, którego w repozytorium nie ma
+
+
+
+
+
 Bardziej szczegółowe elementy projektu i wraz z autorem:
 
 ---- Etap 1 ----

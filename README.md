@@ -22,6 +22,7 @@ https://jdbc.postgresql.org/download.html
     Then click on **Run -> Edit Configurations...** and add these VM options:
     
     --module-path ${PATH_TO_FX} --add-modules=javafx.controls,javafx.web,javafx.fxml
-    
+   
+4. Create environmental variable **GOOGLE_APPLICATION_CREDENTIALS** pointing to credentials json file (message us to get it)
 
-4. If you work on IntelliJ install cloud code plugin by google
+5. (optional) If you work on IntelliJ install cloud code plugin by google
