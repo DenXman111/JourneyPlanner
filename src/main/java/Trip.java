@@ -31,10 +31,8 @@ public class Trip implements Displayable{
     private Timestamp beginTime, endTime;
     private int people;
 
-    static private FormController formController;
     static boolean displayBookButton = true;
 
-    @SuppressWarnings("WeakerAccess")
     public Trip(int people) {
         plan = new ArrayList<>();
         rating = 0;
@@ -43,7 +41,6 @@ public class Trip implements Displayable{
     }
 
 
-    @SuppressWarnings("WeakerAccess")
     public Trip(Trip obj) {
         this.plan = new ArrayList<>(obj.plan);
         this.rating = obj.rating;
@@ -52,11 +49,6 @@ public class Trip implements Displayable{
         this.endTime = obj.endTime;
         this.mainPane = null;
         this.people = obj.people;
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    static public void setFormController(FormController controller){
-        formController = controller;
     }
 
 
@@ -293,10 +285,7 @@ public class Trip implements Displayable{
 
         showButton.setOnAction( (event) -> {
             try {
-                if (formController == null){
-                    FormController fc = new FormController();
-                    fc.showButtonPressed(this);
-                } else formController.showButtonPressed(this);
+                StageChanger.displayMapWindow(Trip.this);
             } catch (IOException e){
                 e.printStackTrace();
             }

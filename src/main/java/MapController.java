@@ -72,21 +72,19 @@ public class MapController implements Initializable, MapComponentInitializedList
     private Map<String, Timestamp> endingDates = new HashMap<>();
 
     private void showCurrentTrip(){
-        City startCity = FormController.tripToShowing.getStartCity();
+        City startCity = StageChanger.tripToDisplay.getStartCity();
 
         int number = 1;
-        //List<DirectionsWaypoint> points = new ArrayList<>();
         addMarker(startCity, "Start");
 
-        for (Edge edge : FormController.tripToShowing.getPlan()){
+        for (Edge edge : StageChanger.tripToDisplay.getPlan()){
             startDates.put(edge.getEndCity().getName(), edge.getEndTime());
             endingDates.put(edge.getStartCity().getName(), edge.getStartTime());
 
             if (!startCity.getName().equals(edge.getEndCity().getName())) {
-                addMarker(edge.getEndCity(), NumberConventer.convertNumber(number));
+                addMarker(edge.getEndCity(), NumberConverter.convertNumber(number));
                 number++;
             }
-//            points.add(new DirectionsWaypoint(edge.getEndCity().getName() + ", " + edge.getEndCity().getCountry()));
 //            System.out.println(edge.getEndCity().getName() + ", " + edge.getEndCity().getCountry() + "  :::  " + points.get(points.size() - 1).getVariableName());
 
             City A = edge.getStartCity();
@@ -100,22 +98,6 @@ public class MapController implements Initializable, MapComponentInitializedList
             directionsService.getRoute(request, this, directionsRenderer);
 
         }
-        //Collections.reverse(points);
-
-        //Direction adding
-
-        //BUILD ROAD IN BAD ORDER
-/*
-        Platform.runLater(()->{
-            DirectionsRequest request =
-                    new DirectionsRequest(startCity.getName() + ", " + startCity.getCountry(),
-                            startCity.getName() + ", " + startCity.getCountry(), TravelModes.DRIVING, points.toArray(new DirectionsWaypoint[points.size()]));
-            directionsRenderer = new DirectionsRenderer(true, mapView.getMap(), directionsPane);
-            directionsService.getRoute(request, this, directionsRenderer);
-            addMarker(startCity, "Start");
-        });
- */
-
     }
     @Override
     public void mapInitialized() {
