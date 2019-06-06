@@ -307,7 +307,7 @@ public class DbAdapter {
 
     public static void removeReservationbyTransit(int tr) throws SQLException{
         Statement statement = connection.createStatement();
-        String query = "Select id,reservation from from transit_reservation where transit = \'"+tr+"\'";
+        String query = "Select id,reservation from transit_reservation where transit = \'"+tr+"\'";
         ResultSet result=statement.executeQuery(query);
         ArrayList<Integer> seats=new ArrayList<>();
         ArrayList<Integer> reser=new ArrayList<>();
@@ -359,23 +359,14 @@ public class DbAdapter {
         Statement statement = connection.createStatement();
         String query = "select id, reservation from transit_reservation where transit=\'"+tran+"\' and departure_date::time=\'"+dep+"\' and extract(isodow from departure_date)=\'"+span+"\'";
         ResultSet result=statement.executeQuery(query);
-        ArrayList<Integer> seats=new ArrayList<>();
         ArrayList<Integer> reser=new ArrayList<>();
         while(result.next()){
-            seats.add(result.getInt("id"));
             reser.add(result.getInt("reservation"));
         }
         statement.close();
-        for(int i=0;i<seats.size();i++){
-            removeSeatByID(seats.get(i));
-        }
         for(int i=0;i<reser.size();i++){
-            cancelReservation(reser.get(i));
+            removeReservationsByID(reser.get(i));
         }
-        Statement statement1 = connection.createStatement();
-        String query1 = "delete from transit_reservation where transit=\'"+tran+"\' and departure_date::time=\'"+dep+"\' and extract(isodow from departure_date)=\'"+span+"\'";
-        statement1.executeUpdate(query1);
-        statement1.close();
     }
 
     private static void removeSeatByID(Integer integer) throws SQLException {
@@ -400,11 +391,16 @@ public class DbAdapter {
         }
         removeReservationbyTransit(id);
         Statement statement = connection.createStatement();
-        String query = "DELETE FROM transits WHERE id_transit = ?";
-        PreparedStatement pst = connection.prepareStatement(query);
-        pst.setInt(1, id);
-        pst.executeUpdate();
+        String query = "select reservation FROM transit_reservation WHERE transit = \'"+id+"\'";
+        ResultSet result2=statement.executeQuery(query);
+        ArrayList<Integer> reser=new ArrayList<>();
+        while(result2.next()){
+            reser.add(result.getInt("reservation"));
+        }
         statement.close();
+        for(int i=0;i<reser.size();i++){
+            removeReservationsByID(reser.get(i));
+        }
     }
 
     public static void getLines() throws SQLException {
@@ -434,17 +430,23 @@ public class DbAdapter {
         }
     }
 
-    public static void removeReservationsByID(int id) throws Exception {
+    public static void removeReservationsByID(int id) throws SQLException {
         Statement statement = connection.createStatement();
-        String query = "select id from trips where bus_id=\'" + id + "\'";
-        ResultSet result = statement.executeQuery(query);
-        while (result.next()) {
-            int i=result.getInt("id");
-            String query2 ="delete from trips where id = ?";
-            PreparedStatement pst = connection.prepareStatement(query2);
-            pst.setInt(1, i);
-            pst.executeUpdate();
+        String query = "select id, transit, reservation from transit_reservation where reservation=\'"+id+"\'";
+        ResultSet result=statement.executeQuery(query);
+        ArrayList<Integer> seats=new ArrayList<>();
+        while(result.next()){
+            seats.add(result.getInt("id"));
         }
+        statement.close();
+        for(int i=0;i<seats.size();i++){
+            removeSeatByID(seats.get(i));
+        }
+        cancelReservation(id);
+        Statement statement1 = connection.createStatement();
+        String query1 = "delete from transit_reservation where reservation=\'"+id+"\'";
+        statement1.executeUpdate(query1);
+        statement1.close();
     }
 
     public static int getIDFromParameters(int id1, int id2, LocalDate departure, LocalDate arrival) throws Exception
@@ -459,7 +461,6 @@ public class DbAdapter {
     }
 
     public static boolean haveBusWithParameters(int id1, int id2, LocalDate departure, LocalDate arrival) throws SQLException{
-
         Statement statement = connection.createStatement();
         String query="Select count(*) from buses WHERE start_city =\'"+id1+"\' and end_city=\'"+id2+"\' and departure=\'"+departure+"\' and arrival=\'"+arrival+"\'";
         ResultSet result=statement.executeQuery(query);
