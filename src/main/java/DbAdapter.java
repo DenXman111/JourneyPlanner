@@ -424,7 +424,7 @@ public class DbAdapter {
 
     public static String getSpans(int id) throws SQLException {
         Statement statement = connection.createStatement();
-        String query = "Select begin_date, end_date from spans where transit=\'"+id+"\' join bus stops ";
+        String query = "Select begin_date, end_date from spans where transit=\'"+id+"\'";
         ResultSet result = statement.executeQuery(query);
         String res="Start Date            End Date\n";
         while (result.next()) {
