@@ -405,7 +405,7 @@ public class DbAdapter {
 
     public static String getLines() throws SQLException {
         Statement statement = connection.createStatement();
-        String query = "select a.id_transit as itr,a.stop_name as stop1, b.stop_name as stop2 from (select id_transit,stop_name from transits join bus_stops on transits.departure_stop=bus_stops.id) a join (select id_transit,stop_name from transits join bus_stops on transits.arrival_stop=bus_stops.id) b on a.id_transit=b.id_transit order by itr";
+        String query = "select * from lines";
         ResultSet result = statement.executeQuery(query);
         String res="Line:                 Departure Stop                                                                  ArrivalStop\n";
         while (result.next()) {
