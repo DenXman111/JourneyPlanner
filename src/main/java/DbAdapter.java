@@ -405,18 +405,18 @@ public class DbAdapter {
 
     public static String getLines() throws SQLException {
         Statement statement = connection.createStatement();
-        String query = "Select id_transit, departure_stop, arrival_stop from transits";
+        String query = "select a.id_transit as itr,a.stop_name as stop1, b.stop_name as stop2 from (select id_transit,stop_name from transits join bus_stops on transits.departure_stop=bus_stops.id) a join (select id_transit,stop_name from transits join bus_stops on transits.arrival_stop=bus_stops.id) b on a.id_transit=b.id_transit order by itr";
         ResultSet result = statement.executeQuery(query);
-        String res="Line: D. Stop  A.Stop\n";
+        String res="Line:                 Departure Stop                                                                  ArrivalStop\n";
         while (result.next()) {
-            System.out.println(result.getInt("id_transit")+"    "+result.getString("departure_stop")+"      "+result.getString("arrival_stop"));
-            String t1=""+result.getInt("id_transit");
+            System.out.println(result.getInt("itr")+"    "+result.getString("stop1")+"      "+result.getString("stop2"));
+            String t1=""+result.getInt("itr");
             while(t1.length()<7)
                 t1=t1+" ";
-            t1+=result.getString("departure_stop");
-            while(t1.length()<21)
+            t1+=result.getString("stop1");
+            while(t1.length()<60)
                 t1=t1+" ";
-            res=res+t1+result.getString("arrival_stop")+"\n";
+            res=res+t1+result.getString("stop2")+"\n";
 
         }
         return res;
@@ -424,7 +424,7 @@ public class DbAdapter {
 
     public static String getSpans(int id) throws SQLException {
         Statement statement = connection.createStatement();
-        String query = "Select begin_date, end_date from spans where transit=\'"+id+"\'";
+        String query = "Select begin_date, end_date from spans where transit=\'"+id+"\' join bus stops ";
         ResultSet result = statement.executeQuery(query);
         String res="Start Date            End Date\n";
         while (result.next()) {
