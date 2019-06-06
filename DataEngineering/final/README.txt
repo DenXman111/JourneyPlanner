@@ -57,3 +57,25 @@ Krzysztof Mrzigod
 
 3. Sekwencje transit_id i bus_id wykorzystywane przez powyzsza funkcje
 
+
+
+---- Etap 2 ----
+
+
+
+
+
+
+
+Krzysztof Mrzigod
+
+1. Wiekszosc funkcji do komunikacji ze stara baza danych (nie ta z 1szego etapu, tylko mniejsza ktora byla dla niej pierwowzorem)
+
+2. Ekran Historii (dla starej bazy danych)
+
+3. Ekran Moderacji
+    3.1 Dodawanie linii autobusowych, przedialow czasowych, czasow odjazdu dla busuw w danym przedziale oraz dni specjalnych
+    3.2 Usuwanie powyzszych
+    3.3 Usuwanie rezerwacji zwiazanych z usuwanymi elementami
+    3.4 Wyswietlanie wszystkich linii autobusowych obecnie w bazie
+    3.5 Wyswietlanie wszystkich przedzialow czasowych przypisanych do danej linii
