@@ -9,6 +9,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
@@ -158,6 +159,10 @@ public class ModerController implements Initializable{
             if (!DepartureStop.getText().matches("\\d+")) throw new FieldsDataException("Write number to departure stop field");
             if (!PriceField.getText().matches("\\d+")) throw new FieldsDataException("Write number to price field");
             if (!BusType.getText().matches("\\d+")) throw new FieldsDataException("Write number to bus type field");
+            if (BusType.getText().matches(".*'.*")||BusType.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
+            if (ArrivalStop.getText().matches(".*'.*")||ArrivalStop.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
+            if (PriceField.getText().matches(".*'.*")||PriceField.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
+            if (DepartureStop.getText().matches(".*'.*")||DepartureStop.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
             if (Integer.valueOf(PriceField.getText())<=0) throw new FieldsDataException("Price must be greater than 0");
             if (Integer.valueOf(ArrivalStop.getText())<=0) throw new FieldsDataException("Arrival stop id must be greater than 0");
             if (Integer.valueOf(DepartureStop.getText())<=0) throw new FieldsDataException("Departure stop id must be greater than 0");
@@ -179,10 +184,11 @@ public class ModerController implements Initializable{
             if (BeginDate.getValue() == null) throw new FieldsDataException("Begin date is empty");
             if (EndDate.getValue() == null) throw new FieldsDataException("End date is empty");
             if (!TransitField.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
+            if (TransitField.getText().matches(".*'.*")||TransitField.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
             DbAdapter.assignSpanToLine(Integer.valueOf(TransitField.getText()),BeginDate.getValue(),EndDate.getValue());
             new ErrorWindow("Added!");
         }
-        catch (FieldsDataException e){
+            catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
         }
         catch (SQLException e){
@@ -197,6 +203,10 @@ public class ModerController implements Initializable{
             if (Duration.getText() == null) throw new FieldsDataException("No duration");
             if (DepartureSpan.getText() == null) throw new FieldsDataException("No transit chosen");
             if (Weekday.getText() == null) throw new FieldsDataException("No day chosen");
+            if (DepartureTime.getText().matches(".*'.*")||DepartureTime.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
+            if (Duration.getText().matches(".*'.*")||Duration.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
+            if (DepartureSpan.getText().matches(".*'.*")||DepartureSpan.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
+            if (Weekday.getText().matches(".*'.*")||Weekday.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
             if (!DepartureSpan.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
             DbAdapter.addDepartureTime(DepartureTime.getText(),Duration.getText(),Integer.valueOf(DepartureSpan.getText()),"\'"+Weekday.getText()+"\'");
             new ErrorWindow("Added!");
@@ -211,6 +221,7 @@ public class ModerController implements Initializable{
         try{
             if (ExceptionSpan.getText().length() == 0) throw new FieldsDataException("No line chosen");
             if (!ExceptionSpan.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
+            if (ExceptionSpan.getText().matches(".*'.*")||ExceptionSpan.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
             if (ExceptionDate.getValue() == null) throw new FieldsDataException("Pick a date");
             DbAdapter.addBreak(Integer.valueOf(ExceptionSpan.getText()),ExceptionDate.getValue());
             new ErrorWindow("Added!");
@@ -228,6 +239,7 @@ public class ModerController implements Initializable{
         try{
             if (DExceptionSpan.getText().length() == 0) throw new FieldsDataException("No line chosen");
             if (!DExceptionSpan.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
+            if (DExceptionSpan.getText().matches(".*'.*")||DExceptionSpan.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
             if (DExceptionDate.getValue() == null) throw new FieldsDataException("Pick a date");
             if(DbAdapter.deleteBreak(Integer.valueOf(DExceptionSpan.getText()),DExceptionDate.getValue()))
             new ErrorWindow("Deleted!");
@@ -246,6 +258,10 @@ public class ModerController implements Initializable{
             if (DDuration.getText() == null) throw new FieldsDataException("No duration");
             if (DDepartureSpan.getText() == null) throw new FieldsDataException("No transit chosen");
             if (DWeekday.getText() == null) throw new FieldsDataException("No day chosen");
+            if (DDepartureTime.getText().matches(".*'.*")||DDepartureTime.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
+            if (DDuration.getText().matches(".*'.*")||DDuration.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
+            if (DDepartureSpan.getText().matches(".*'.*")||DDepartureSpan.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
+            if (DWeekday.getText().matches(".*'.*")||DWeekday.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
             if (!DDepartureSpan.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
             if(DbAdapter.deleteDepartureTime(DDepartureTime.getText(),DDuration.getText(),Integer.valueOf(DDepartureSpan.getText()),"\'"+DWeekday.getText()+"\'"))
             new ErrorWindow("Deleted!");
@@ -262,6 +278,7 @@ public class ModerController implements Initializable{
             if (DTransitField.getText().length() == 0) throw new FieldsDataException("No line chosen");
             if (DBeginDate.getValue() == null) throw new FieldsDataException("Begin date is empty");
             if (DEndDate.getValue() == null) throw new FieldsDataException("End date is empty");
+            if (DTransitField.getText().matches(".*'.*")||DTransitField.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
             if (!DTransitField.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
             if(DbAdapter.deleteSpanFromLine(Integer.valueOf(DTransitField.getText()),DBeginDate.getValue(),DEndDate.getValue()))
             new ErrorWindow("Deleted!");
@@ -276,6 +293,7 @@ public class ModerController implements Initializable{
     void deleteLine(){
         try {
             if (DDTransitField.getText().length() == 0) throw new FieldsDataException("No line chosen");
+            if (DDTransitField.getText().matches(".*'.*")||DDTransitField.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
             if (!DDTransitField.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
             DbAdapter.removeTransitByID(Integer.valueOf(DDTransitField.getText()));
             new ErrorWindow("Deleted!");
@@ -300,6 +318,7 @@ public class ModerController implements Initializable{
     void ShowSpansFromLine(){
         try {
             if (DTransitField.getText().length() == 0) throw new FieldsDataException("No line chosen");
+            if (DTransitField.getText().matches(".*'.*")|| DTransitField.getText().matches(".*;.*") ) throw new FieldsDataException("Don't use special characters");
             if (!DTransitField.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
             String spans=DbAdapter.getSpans(Integer.valueOf(DTransitField.getText()));
             new LinesWindow(spans);
