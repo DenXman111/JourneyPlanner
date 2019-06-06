@@ -18,26 +18,26 @@ public class FormController implements Initializable {
     private Label loginLabel;
 
     @FXML
-    private ChoiceBox<String> MainCityChoiceBox;
+    private ChoiceBox<String> mainCityChoiceBox;
 
     @FXML
-    private TextField MainFieldFunds;
+    private TextField mainFieldFunds;
 
     @FXML
     private TextField seatsField;
 
     @FXML
-    private DatePicker MainFieldStartDate;
+    private DatePicker mainFieldStartDate;
 
     @FXML
-    private DatePicker MainFieldEndingDate;
+    private DatePicker mainFieldEndingDate;
 
     @FXML
-    private Button MainButtonFind;
+    private Button mainButtonFind;
 
     @SuppressWarnings("unused")
     @FXML
-    private Button ReturnButton;
+    private Button returnButton;
 
     @FXML
     private ProgressBar progressBar;
@@ -54,8 +54,8 @@ public class FormController implements Initializable {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        MainCityChoiceBox.setItems(observableCitiesList);
-        MainCityChoiceBox.getSelectionModel().selectFirst();
+        mainCityChoiceBox.setItems(observableCitiesList);
+        mainCityChoiceBox.getSelectionModel().selectFirst();
 
         progressBar.setVisible(false);
 
@@ -65,16 +65,16 @@ public class FormController implements Initializable {
     }
 
     private void check() throws FieldsDataException{
-        if (MainCityChoiceBox.getSelectionModel().isEmpty()) throw new FieldsDataException("Choose any city");
-        if (MainFieldFunds.getText().isEmpty()) throw new FieldsDataException("Write your funds");
+        if (mainCityChoiceBox.getSelectionModel().isEmpty()) throw new FieldsDataException("Choose any city");
+        if (mainFieldFunds.getText().isEmpty()) throw new FieldsDataException("Write your funds");
         if (seatsField.getText().isEmpty()) throw new FieldsDataException("Specify number of seats");
-        if (MainFieldStartDate.getValue() == null) throw new FieldsDataException("Fill start date");
-        if (MainFieldEndingDate.getValue() == null) throw new FieldsDataException("Fill ending date");
+        if (mainFieldStartDate.getValue() == null) throw new FieldsDataException("Fill start date");
+        if (mainFieldEndingDate.getValue() == null) throw new FieldsDataException("Fill ending date");
 
         int seats;
         double founds;
         try{
-            founds = Double.valueOf(MainFieldFunds.getText());
+            founds = Double.valueOf(mainFieldFunds.getText());
         } catch (RuntimeException e){
             throw new FieldsDataException("Should be number in Funds");
         }
@@ -86,9 +86,9 @@ public class FormController implements Initializable {
         if (founds <= 0) throw new FieldsDataException("Founds should be a positive number");
         if (seats <= 0) throw new FieldsDataException("Number of seats should be positive");
 
-        if (LocalDate.now().isAfter(MainFieldStartDate.getValue()))
+        if (LocalDate.now().isAfter(mainFieldStartDate.getValue()))
             throw new FieldsDataException("Start date should be in future");
-        if (MainFieldStartDate.getValue().isAfter(MainFieldEndingDate.getValue()))
+        if (mainFieldStartDate.getValue().isAfter(mainFieldEndingDate.getValue()))
             throw new FieldsDataException("Ending date before start date");
     }
     @SuppressWarnings("unused")
@@ -99,13 +99,13 @@ public class FormController implements Initializable {
             Trip.displayBookButton = true;
             progressBar.setVisible(true);
             answersVBox.getChildren().clear();
-            MainButtonFind.setPrefWidth(170);
+            mainButtonFind.setPrefWidth(170);
 
-            Planner planing = new Planner(MainCityChoiceBox.getValue(),
-                    Double.valueOf(MainFieldFunds.getText()),
+            Planner planing = new Planner(mainCityChoiceBox.getValue(),
+                    Double.valueOf(mainFieldFunds.getText()),
                     Integer.valueOf(seatsField.getText()),
-                    MainFieldStartDate.getValue(),
-                    MainFieldEndingDate.getValue());
+                    mainFieldStartDate.getValue(),
+                    mainFieldEndingDate.getValue());
 
             planing.setDisplayData(answersVBox, progressBar);
 

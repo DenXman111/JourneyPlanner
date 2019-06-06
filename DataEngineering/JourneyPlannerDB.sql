@@ -802,20 +802,24 @@ create or replace function reserve(user_id varchar(30), seats integer, res varia
     $$ language plpgsql;
 
 
-create or replace function user_reservations(given_username varchar(50))
-returns table(
-    reservation_id integer, reservation_date timestamp, seat_number integer, transit_id numeric, transit_price numeric(6,2),
-    departure timestamp, departure_stop varchar(127), departure_city numeric,
-    arrival timestamp, arrival_stop varchar(127), arrival_city numeric
-    ) as
-    $$
-    begin
+-- returns all data about user past reservations
+-- @ŁS (new)
+create function user_reservations(given_username character varying)
+returns TABLE
+    (reservation_id integer, reservation_date timestamp without time zone, reserved_seats integer[],
+     transit_id numeric, transit_price numeric,
+     departure timestamp without time zone, departure_stop character varying, departure_city numeric,
+     arrival timestamp without time zone, arrival_stop character varying, arrival_city numeric)
+as
+$$
+begin
         return query
-            select r.id, r.date_reservation, sr.seat, t.id_transit, t.price,
+            select r.id, r.date_reservation,
+                   array(select sr.seat from seat_reservation sr where sr.transit_reservation_id = tres.id),
+                   t.id_transit, t.price,
                    tres.departure_date, dbs.stop_name, dbs.city,
                    tres.departure_date::timestamp + dt.time::interval, abs.stop_name, abs.city
-            from seat_reservation sr
-                join transit_reservation tres on sr.transit_reservation_id = tres.id
+            from transit_reservation tres
                 join reservations r on r.id = tres.reservation
                 join transits t on tres.transit = t.id_transit
                 join spans s on s.transit = t.id_transit
@@ -825,22 +829,26 @@ returns table(
             where r."user" = given_username
                 and tres.departure_date::time = dt.departure
                 and tres.departure_date::date not in (select b.date from breaks b where b.span_id = s.id)
-            order by r.date_reservation, tres.departure_date
-            ;
+            order by r.date_reservation, tres.departure_date;
     end;
-    $$ language plpgsql;
+$$ language plpgsql;
 
-create or replace function reserved_seats(reservation_id integer) returns integer as
-    $$
-    declare
+
+-- for given reservation return number of traveling people
+create function reserved_seats(reservation_id integer) returns integer
+as
+$$
+declare
         trans_res integer;
     begin
         trans_res = (select tr.id from transit_reservation tr where tr.reservation = reservation_id limit 1);
         return (select count(*) from seat_reservation sr where sr.transit_reservation_id = trans_res);
     end;
-    $$ language plpgsql;
+$$ language plpgsql;
 
 
+-- return true if and ony if there exists bus stop in database in this city
+-- *our application doesn't allow to delete city if there are bus stops in it
 create or replace function city_has_stops(city_id numeric) returns boolean as
     $$
     begin
@@ -848,6 +856,7 @@ create or replace function city_has_stops(city_id numeric) returns boolean as
     end;
     $$ language plpgsql;
 
+-- similarly we check if there are transits pointing at a bus stop before we allow to remove this bus stop or modify it's city
 create or replace function exists_transits_with_stop(stop_id numeric) returns boolean as
     $$
     begin
@@ -856,4 +865,3 @@ create or replace function exists_transits_with_stop(stop_id numeric) returns bo
     $$ language plpgsql;
 
 -- End of file
-

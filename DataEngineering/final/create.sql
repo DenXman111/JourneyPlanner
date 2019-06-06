@@ -1,52 +1,4 @@
--- clear before insert
--- noinspection SqlResolveForFile
-
--- script used for removing all data created after running file JourneyPlannerDB.sql
-DROP TABLE IF EXISTS breaks CASCADE;
-DROP TABLE IF EXISTS bus_stops CASCADE;
-DROP TABLE IF EXISTS buses_models CASCADE;
-DROP TABLE IF EXISTS cities CASCADE;
-DROP TABLE IF EXISTS departure_time CASCADE;
-DROP TABLE IF EXISTS spans CASCADE;
-DROP TABLE IF EXISTS reservations CASCADE;
-DROP TABLE IF EXISTS seat_reservation CASCADE;
-DROP TABLE IF EXISTS transit_reservation CASCADE;
-DROP TABLE IF EXISTS transits CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
-
-DROP VIEW IF EXISTS countries;
-DROP VIEW IF EXISTS lines;
-DROP VIEW IF EXISTS new_users;
-
-DROP SEQUENCE IF EXISTS reservation_id;
-DROP SEQUENCE IF EXISTS cities_id_seq;
-drop sequence if exists transit_id;
-drop sequence if exists span_id;
-DROP SEQUENCE IF EXISTS reservation_id_seq;
-DROP SEQUENCE IF EXISTS stops_id_seq;
-DROP SEQUENCE IF EXISTS transit_reservation_id_seq;
-
-DROP FUNCTION IF EXISTS break_check();
-DROP FUNCTION IF EXISTS date_reservation_check();
-DROP FUNCTION IF EXISTS have_free_seat_check();
-DROP FUNCTION IF EXISTS remove_breaks_after_delete();
-DROP FUNCTION IF EXISTS remove_breaks_after_update();
-DROP FUNCTION IF EXISTS seat_reservation_departure_date_check();
-DROP FUNCTION IF EXISTS seat_reservation_departure_date_check();
-DROP FUNCTION IF EXISTS check_span_overlap();
-drop function if exists add_bus(int,int,int,int,date,date,time,interval,day);
-DROP FUNCTION IF EXISTS get_buses(date, date);
-DROP FUNCTION IF EXISTS buses_in_span(numeric, date, date);
-DROP FUNCTION IF EXISTS add_bus(integer, integer, integer, integer, date, date, time, interval, integer);
-DROP FUNCTION IF EXISTS transit_reservation_check();
-
-DROP DOMAIN IF EXISTS email;
-DROP EXTENSION IF EXISTS citext;
-DROP EXTENSION IF EXISTS pgcrypto;
--- and clear
-
-
--- database structure
+-- noinspection SqlNoDataSourceInspectionForFile
 
 -- noinspection SqlResolveForFile
 
@@ -55,6 +7,33 @@ DROP EXTENSION IF EXISTS pgcrypto;
 CREATE EXTENSION citext;
 CREATE DOMAIN email AS citext
   CHECK ( value ~ '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$' );
+
+-- day enum for departure_time
+CREATE TYPE day as ENUM ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
+
+-- reservation_type for reservation function
+
+CREATE TYPE reservation_type AS (
+    transit numeric,
+    departure timestamp
+);
+
+-- casting day to int
+CREATE OR REPLACE FUNCTION day_to_int(day) returns int as
+$$
+begin
+    case
+        when $1 = 'Monday'::day then return 1;
+        when $1 = 'Tuesday'::day then return 2;
+        when $1 = 'Wednesday'::day then return 3;
+        when $1 = 'Thursday'::day then return 4;
+        when $1 = 'Friday'::day then return 5;
+        when $1 = 'Saturday'::day then return 6;
+        else return 7; -- Sunday
+    end case;
+end;
+$$ LANGUAGE plpgsql;
+CREATE CAST ( day as integer ) with function day_to_int(day);
 
 -- password
 CREATE EXTENSION pgcrypto;
@@ -70,8 +49,8 @@ CREATE SEQUENCE reservation_id
 -- Sequence: generates ids for cities
 CREATE SEQUENCE cities_id_seq
     INCREMENT BY 1
-    MINVALUE 100
-    START WITH 100
+    MINVALUE 1
+    START WITH 1
 ;
 
 -- Sequence: generates ids for bus_stops
@@ -107,7 +86,7 @@ Create sequence transit_reservation_id_seq
 CREATE TABLE cities (
     id NUMERIC  NOT NULL DEFAULT NEXTVAL('cities_id_seq'),
     name varchar(63)  NOT NULL,
-    rating int  NOT NULL,
+    rating numeric(3, 2)  NOT NULL,
     average_price int  NOT NULL,
     country varchar(63)  NOT NULL,
     CONSTRAINT cities_pk PRIMARY KEY (id),
@@ -162,7 +141,7 @@ CREATE TABLE departure_time (
     departure time  NOT NULL,
     time interval  NOT NULL,
     span int  NOT NULL,
-    day_of_the_week int NOT NULL CHECK ( day_of_the_week BETWEEN 1 and 7),
+    day_of_the_week day NOT NULL,
     CONSTRAINT departure_time_pk PRIMARY KEY (departure, span, day_of_the_week)
 );
 
@@ -202,11 +181,15 @@ CREATE TABLE transit_reservation (
 );
 
 -- Table: seat_reservation
--- Table: seat_reservation
 CREATE TABLE seat_reservation (
     seat int  NOT NULL CHECK (1 <= seat AND seat <= 300),
     transit_reservation_id int  NOT NULL,
     CONSTRAINT seat_reservation_pk PRIMARY KEY (seat,transit_reservation_id)
+);
+
+-- Table: moderators (added after first presentation)
+create table moderators(
+    username varchar(50) references users(username)
 );
 
 --Views
@@ -214,12 +197,24 @@ CREATE TABLE seat_reservation (
 CREATE VIEW countries AS
 select country as name from cities group by country;
 
+-- view displaying names of departure and arrival bus stops for every transits
+-- (modified after first presentation)
+-- @author Krzysztof Mrzigod
 -- View: lines
-CREATE VIEW lines AS
-select departure_stop, arrival_stop from transits group by departure_stop, arrival_stop;
+CREATE OR REPLACE VIEW lines AS
+select
+       a.id_transit as itr,
+       a.stop_name as stop1,
+       b.stop_name as stop2
+from
+     (select id_transit, stop_name from transits join bus_stops on transits.departure_stop = bus_stops.id) a
+         join (select id_transit,stop_name from transits join bus_stops on transits.arrival_stop=bus_stops.id) b on a.id_transit = b.id_transit
+order by itr;
 
 -- View: new_users
 -- empty view used for adding new users with not hashed password
+-- we know its unnecessary but we forgot to change it and know there's little time left
+-- (should be removed after first presentation)
 -- author Łukasz Selwa
 CREATE VIEW new_users AS
 SELECT
@@ -232,6 +227,7 @@ SELECT
 -- Rule: new_users
 -- adds user to users table and hashes his password
 -- author Łukasz Selwa
+-- (should be used on table users)
 CREATE RULE create_new_user AS ON INSERT TO new_users
     DO INSTEAD
     INSERT INTO users(username, email_address, password, name, surname)
@@ -295,7 +291,6 @@ ALTER TABLE seat_reservation ADD CONSTRAINT seat_transit_reservation
 ;
 
 
-
 -- Trigger: spans
 -- after modifying or deleting spans remove all breaks that will not be contained
 -- @author Łukasz Selwa
@@ -312,33 +307,75 @@ CREATE OR REPLACE FUNCTION remove_breaks_after_update() RETURNS TRIGGER AS
     $remove_breaks_update$
     begin
         DELETE FROM breaks WHERE span_id = NEW.id AND date NOT BETWEEN NEW.begin_date AND NEW.end_date;
+        return new;
     end;
     $remove_breaks_update$ LANGUAGE plpgsql;
 CREATE TRIGGER remove_breaks_after_update AFTER UPDATE ON spans
     FOR EACH ROW EXECUTE PROCEDURE remove_breaks_after_update();
 
--- before inserting span check if it does not overlap other span with the same transit_id
--- @author Łukasz Selwa
--- it's a temporary trigger,
-CREATE OR REPLACE FUNCTION check_span_overlap() RETURNS TRIGGER AS
-    $check_span_overlap$
+-- Trigger: departure_time
+
+-- function returns number of given day of the week in the interval
+CREATE OR REPLACE FUNCTION days_in_span(begin_date date, end_date date, weekday day) RETURNS integer as
+    $$
+    begin
+        if begin_date > end_date then
+            return 0;
+        end if;
+        return (
+            select count(*)
+            from (
+                select begin_date + times * '1 day'::interval as d
+                from generate_series(0, end_date - begin_date) times
+                ) foo
+            where extract(isodow from foo.d) = weekday::integer);
+    end;
+    $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION count_breaks(begin_date date, end_date date, weekday day, span_id numeric) RETURNS INTEGER AS
+    $$
+    begin
+        return (
+            select count(*)
+            from breaks br
+            where br.span_id = span_id
+              and extract(isodow from br.date) = weekday::integer
+              and br.date between begin_date and end_date
+            );
+    end;
+    $$ LANGUAGE plpgsql;
+
+-- before insert or update check if there is no other bus (with same transit_id) leaving on the same time
+CREATE OR REPLACE FUNCTION departure_time_check() RETURNS TRIGGER AS
+    $departure_time_check$
     declare
+        tr integer;
+        span_begin date;
+        span_end date;
         rec record;
     begin
-        for rec in select id ,begin_date, end_date from spans where transit = new.transit loop
-            if GREATEST(rec.begin_date, new.begin_date) <= LEAST(rec.end_date, new.end_date) then
-                raise notice 'Value: %, %,    %, %', new.begin_date, new.end_date, rec.begin_date, rec.end_date;
-                raise exception 'new span overlaps with other span';
+        tr = (select sp.transit from spans sp where sp.id = new.span);
+        span_begin = (select sp.begin_date from spans sp where sp.id = new.span);
+        span_end = (select sp.end_date from spans sp where sp.id = new.span);
+
+        for rec in select *
+        from departure_time dt join spans sp on dt.span = sp.id
+        where sp.transit = tr and dt.day_of_the_week = new.day_of_the_week and dt.departure = new.departure and
+              GREATEST(sp.begin_date, span_begin) <= LEAST(sp.end_date, span_end) loop
+            if days_in_span(GREATEST(rec.begin_date, span_begin), LEAST(rec.end_date, span_end), new.day_of_the_week)
+                   - count_breaks(GREATEST(rec.begin_date, span_begin), LEAST(rec.end_date, span_end), new.day_of_the_week, rec.span)
+                   > 0 then
+                raise exception 'bus % already leaves at % (span %)', tr, new.departure, rec.span;
             end if;
         end loop;
         return new;
     end;
-    $check_span_overlap$ LANGUAGE plpgsql;
-CREATE TRIGGER check_span_overlap BEFORE INSERT ON spans
-    FOR EACH ROW EXECUTE PROCEDURE check_span_overlap();
+    $departure_time_check$ LANGUAGE plpgsql;
+CREATE TRIGGER departure_time_check BEFORE INSERT OR UPDATE ON departure_time
+    FOR EACH ROW EXECUTE PROCEDURE departure_time_check();
 
 -- Trigger: breaks
--- returns null if break is not contained in indicated span
+-- returns null if given break is not contained in the indicated span
 -- @author Łukasz Selwa
 CREATE OR REPLACE FUNCTION break_check() RETURNS TRIGGER AS
     $break_check$
@@ -362,7 +399,6 @@ CREATE TRIGGER break_check BEFORE INSERT OR UPDATE ON breaks
 -- triggers
 
 -- trigger on seat_reservation checks if seat has not been taken already
--- Old version didn't work (I think Denis was the author), I wrote it from scratch
 -- @author Łukasz Selwa
 CREATE OR REPLACE FUNCTION seat_reservation_departure_date_check() RETURNS trigger AS $seat_reservation_departure_date_check$
 DECLARE
@@ -389,6 +425,28 @@ CREATE TRIGGER seat_reservation_departure_date_check BEFORE INSERT OR UPDATE ON 
     FOR EACH ROW EXECUTE PROCEDURE seat_reservation_departure_date_check();
 
 
+-- delete all transit_reservations pointing at reservation that is being deleted
+CREATE OR REPLACE FUNCTION reservations_delete() RETURNS TRIGGER AS
+    $reservations_delete$
+    begin
+        delete from transit_reservation where reservation = old.id;
+        return old;
+    end;
+    $reservations_delete$ LANGUAGE plpgsql;
+CREATE TRIGGER reservations_delete BEFORE DELETE ON reservations
+    FOR EACH ROW EXECUTE PROCEDURE reservations_delete();
+
+-- similarly as trigger above remove all seat_reservation pointing at removed transit_reservation
+CREATE OR REPLACE function transit_reservation_delete() RETURNS TRIGGER AS
+    $transit_reservation_delete$
+    begin
+        delete from seat_reservation st where st.transit_reservation_id = old.id;
+        return old;
+    end;
+    $transit_reservation_delete$ LANGUAGE plpgsql;
+CREATE TRIGGER transit_reservation_delete BEFORE DELETE ON transit_reservation
+    FOR EACH ROW EXECUTE PROCEDURE transit_reservation_delete();
+
 -- trigger on transit_reservation checks if given transit exists (there is a bus in database which leaves on given time)
 -- @author Łukasz Selwa + Denis Pivovarov
 CREATE OR REPLACE FUNCTION transit_reservation_check() RETURNS TRIGGER AS
@@ -398,24 +456,15 @@ CREATE OR REPLACE FUNCTION transit_reservation_check() RETURNS TRIGGER AS
             raise exception 'null values in transit_reservation';
         end if;
 
-        -- look for breaks:
-        if (
-            select count(*)
-            from breaks br join spans sp on br.span_id = sp.id
-            where sp.transit = new.transit
-            and br.date = new.departure_date::date
-               ) <> 0 then
-            return new;
-        end if;
-
         if (
             select count(*)
             from departure_time dt join spans s on dt.span = s.id
             where
                 s.transit = new.transit
                 and new.departure_date::date between s.begin_date and s.end_date
-                and dt.day_of_the_week = extract(isodow from new.departure_date)
+                and dt.day_of_the_week::integer = extract(isodow from new.departure_date)
                 and dt.departure = cast(new.departure_date as time)
+                and (select count(*) from breaks br where br.span_id = s.id and br.date = new.departure_date::date) = 0
             ) = 0 then
             raise exception 'There is no transit % departing on %', new.transit, new.departure_date;
         end if;
@@ -428,9 +477,13 @@ CREATE TRIGGER transit_reservation_check BEFORE INSERT OR UPDATE ON transit_rese
 
 --trigger on reservations checks [date_reservation before all buses]
 -- @author Denis Pivovarov
-CREATE OR REPLACE FUNCTION date_reservation_check() RETURNS trigger AS $date_reservation_check$
+
+--
+
+-- It doesn't work and I don't know what it suppose to do
+/*CREATE OR REPLACE FUNCTION date_reservation_check() RETURNS trigger AS $date_reservation_check$
 BEGIN
-    IF (SELECT min(departure_date) FROM transit_reservation WHERE transit = NEW.id) < NEW.date_reservation THEN
+    IF (SELECT min(departure_date) FROM transit_reservation WHERE reservation = NEW.id) < NEW.date_reservation THEN
         RAISE EXCEPTION 'some departure_date in reservation is before date_reservation';
     END IF;
     return NEW;
@@ -439,7 +492,7 @@ $date_reservation_check$ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER date_reservation_check BEFORE INSERT OR UPDATE ON reservations
-    FOR EACH ROW EXECUTE PROCEDURE date_reservation_check();
+    FOR EACH ROW EXECUTE PROCEDURE date_reservation_check();*/
 
 
 --trigger on seat_reservation that checks if seat number < all seats when somebody tries to make a bus reservation
@@ -459,7 +512,9 @@ CREATE TRIGGER have_free_seat_check BEFORE INSERT OR UPDATE ON seat_reservation
     FOR EACH ROW EXECUTE PROCEDURE have_free_seat_check();
 
 
-create or replace function add_bus(dep_stop int, arr_stop int, price int, bus_model int, bg_dt date, ed_dt date, dep time, leg interval, weekday int) returns numeric as
+-- function for adding new transits
+-- @author Krzysztof Mrzigod
+create or replace function add_bus(dep_stop int, arr_stop int, price int, bus_model int,bg_dt date, ed_dt date, dep time, leg interval, weekday day) returns numeric as
 $$
 begin
 if ((select count(*)from bus_stops where dep_stop=id)=0 or (select count(*)from bus_stops where arr_stop=id)=0 or price<=0
@@ -475,6 +530,7 @@ return 1;
 end;
 $$
 language plpgsql;
+
 
 -- function buses_in_span returns all buses in span span_id and dates in interval
 -- @author Denis Pivovarov
@@ -498,7 +554,7 @@ begin
         LOOP
             now = L_date;
             LOOP
-                EXIT  WHEN  r.day_of_the_week = FLOOR(extract(isodow from now));
+                EXIT  WHEN  r.day_of_the_week::integer = FLOOR(extract(isodow from now));
                 now = now + '1 day' :: interval;
             END LOOP;
             LOOP
@@ -519,6 +575,9 @@ end;
 $$
 language plpgsql;
 
+
+
+
 -- function get_buses returns all buses in dates in interval L..R
 -- @author Denis Pivovarov
 
@@ -533,16 +592,286 @@ begin
             JOIN bus_stops bsa ON tr.arrival_stop = bsa.id
             JOIN spans sp ON tr.id_transit = sp.transit
             JOIN buses_in_span(sp.id, L, R) bii ON sp.id = bii.span
+        WHERE  GREATEST(L, sp.begin_date) <= LEAST(R, sp.end_date)
     ;
 end;
 $$
 language plpgsql;
 
 
+-- returns all transits leaving from given city between dates L and R
+-- it ended up not being used in final version of application
+create or replace function buses_from_city( city_id numeric, L date, R date)
+returns TABLE(id_transit numeric, end_city numeric, price numeric(6, 2), departure timestamp, arrival timestamp) as
+    $$
+    begin
+        return QUERY
+        SELECT tr.id_transit, bsa.city, tr.price, bii.departure, bii.arrival
+        FROM transits tr
+            JOIN bus_stops bsd ON tr.departure_stop = bsd.id
+            JOIN bus_stops bsa ON tr.arrival_stop = bsa.id
+            JOIN spans sp ON tr.id_transit = sp.transit
+            join cities c on bsa.city = c.id
+            JOIN buses_in_span(sp.id, L, R) bii ON sp.id = bii.span
+        WHERE bsd.city = city_id and GREATEST(L, sp.begin_date) <= LEAST(R, sp.end_date)
+        ORDER BY tr.price desc limit 10
+    ;
+    end;
+    $$
+language plpgsql;
 
--- End of database.
 
--- exemplary data:
+
+-- between given given cities and in given time interval look for cities you can visit and return appropriate buses
+-- (tr for transits)
+-- This one is on me @Łukasz Selwa
+-- It doesn't look good and it wan't tested properly properly
+create or replace function optional_visits(start_city numeric, start_time timestamp, end_city numeric, end_time timestamp)
+returns TABLE(id_tr1 numeric, tr1_str_city numeric, tr1_end_city numeric, tr1_price numeric(6, 2), tr1_departure timestamp, tr1_arrival timestamp,
+              id_tr2 numeric, tr2_str_city numeric, tr2_end_city numeric, tr2_price numeric(6, 2), tr2_departure timestamp, tr2_arrival timestamp)
+as
+    $$
+    begin
+        return query
+        select tr1.id_transit, tr1_bsd.city, tr1_bsa.city, tr1.price, bii1.departure, bii1.arrival,
+               tr2.id_transit, tr2_bsd.city, tr2_bsa.city, tr2.price, bii2.departure, bii2.arrival
+        from transits tr1
+            join bus_stops tr1_bsd on tr1.departure_stop = tr1_bsd.id
+            join bus_stops tr1_bsa on tr1.arrival_stop = tr1_bsd.id
+            join bus_stops tr2_bsd on tr2_bsd.city = tr1_bsa.city
+            join transits tr2 on tr2.departure_stop = tr2_bsd.id
+            join bus_stops tr2_bsa on tr2_bsa.id = tr2.arrival_stop
+            join spans sp1 on sp1.transit = tr1.id_transit
+            join spans sp2 on sp2.transit = tr2.id_transit
+            join buses_in_span(sp1.id, start_time::date, end_time::date) bii1 ON bii1.span = sp1.id
+            join buses_in_span(sp2.id, start_time::date, end_time::date) bii2 ON bii2.span = sp2.id
+        where tr1_bsd.city = start_city
+            and tr2_bsa.city = end_city
+            and GREATEST(start_time::date, sp1.begin_date) <= LEAST(end_time::date, sp1.end_date)
+            and GREATEST(start_time::date, sp2.begin_date) <= LEAST(end_time::date, sp2.end_date)
+            and bii1.arrival <= bii2.departure
+            and start_time <= bii1.departure
+            and bii2.arrival <= end_time
+        ;
+    end;
+    $$
+language plpgsql;
+
+
+-- returns true if and only if given username and password are correct
+-- @ŁS (new)
+create or replace function loginUser(given_username varchar(50), user_password varchar(50)) returns boolean as
+    $$
+    begin
+        return (select count(*) from users u where u.username = given_username and u.password = ENCODE(DIGEST(user_password, 'sha1'), 'hex')) <> 0;
+    end;
+    $$language plpgsql;
+
+-- returns true if and only if given username and password are correct and username is in table moderators
+-- @ŁS (new)
+create or replace function loginModerator(given_username varchar(50), user_password varchar(50)) returns boolean as
+    $$
+    begin
+        return loginUser(given_username, user_password) and (select count(*) from moderators where username = given_username) <> 0;
+    end;
+    $$ language plpgsql;
+
+-- returns true if and only if there are free 'seats' number in given bus
+-- @ŁS (new)
+create or replace function enough_seats(transit_id integer, departure timestamp, seats integer) returns boolean as
+    $$
+    begin
+        return
+            -- capacity
+            (
+                select bm.seats
+                from transits t join buses_models bm on t.bus_model = bm.id
+                where t.id_transit = transit_id limit 1
+            )
+            >=
+            -- reserved seats
+            (
+                select count(*)
+                from seat_reservation st join transit_reservation tr on st.transit_reservation_id = tr.id
+                where tr.transit = transit_id and tr.departure_date = departure
+            )
+            + seats
+            ;
+
+    end;
+    $$ language plpgsql;
+
+
+-- function returns first unreserved seats in given bus or throws exception if there isn't not enough seats left
+-- @ŁS (new)
+create or replace function first_free_seats(transit_id integer, departure timestamp, seats integer)
+returns table(seat_number integer) as
+    $$
+    declare
+        capacity integer;
+        reserved_seats integer;
+    begin
+        capacity =
+            (
+                select bm.seats
+                from transits t join buses_models bm on t.bus_model = bm.id
+                where t.id_transit = transit_id
+            );
+        reserved_seats =
+            (
+                select count(*)
+                from seat_reservation st join transit_reservation tr on st.transit_reservation_id = tr.id
+                where tr.transit = transit_id and tr.departure_date = departure
+            );
+        if capacity < seats + reserved_seats then
+            raise exception 'no enough seats left';
+        end if;
+        return query
+            with reserved as (
+                select st.seat
+                from seat_reservation st join transit_reservation tr on st.transit_reservation_id = tr.id
+                where tr.transit = transit_id and tr.departure_date = departure
+                )
+            select * from generate_series(1, capacity, 1) num where num not in (select * from reserved) limit seats;
+    end;
+    $$ language plpgsql;
+
+
+
+-- returns all buses in given interval L...R with enough seats
+create or replace function get_buses_with_seats_left(L date, R date, seats integer)
+ returns TABLE(id_transit numeric, start_city numeric, end_city numeric, price numeric(6, 2), departure timestamp, arrival timestamp) as
+$$
+begin
+    return QUERY
+        SELECT tr.id_transit, bsd.city, bsa.city, tr.price, bii.departure, bii.arrival
+        FROM transits tr
+            JOIN bus_stops bsd ON tr.departure_stop = bsd.id
+            JOIN bus_stops bsa ON tr.arrival_stop = bsa.id
+            JOIN spans sp ON tr.id_transit = sp.transit
+            JOIN buses_in_span(sp.id, L, R) bii ON sp.id = bii.span
+        WHERE  GREATEST(L, sp.begin_date) <= LEAST(R, sp.end_date)
+            and enough_seats(tr.id_transit::integer, bii.departure, seats)
+    ;
+end;
+$$
+language plpgsql;
+
+
+-- reserves first |seats| seats for user for every bus in reservation_type array
+-- returns table with transit, departure time, departure stop, arrival stop and array with reserved seats numbers
+-- reservation_type = {transit integer, departure timestamp}
+-- @ŁS (new)
+create or replace function reserve(user_id varchar(30), seats integer, res variadic reservation_type array) returns
+    table (transit_id integer, departure_time timestamp, departure_stop varchar(127), arrival_stop varchar(127), reserved_seats integer array )as
+    $$
+    declare
+        my_reservation numeric = null;
+        my_transit_id numeric = null;
+        my_seat integer;
+        trans record;
+    begin
+        my_reservation = NEXTVAL('reservation_id_seq');
+        insert into reservations(id, "user", date_reservation) VALUES (my_reservation, user_id, current_timestamp);
+        for trans in select * from unnest(res) loop
+            my_transit_id =  NEXTVAL('transit_reservation_id_seq');
+            insert into transit_reservation(id, transit, departure_date, reservation)
+            VALUES(my_transit_id, trans.transit, trans.departure, my_reservation);
+            transit_id = trans.transit;
+            departure_time = trans.departure;
+            departure_stop = (select bs.stop_name from transits t join bus_stops bs on t.departure_stop = bs.id where t.id_transit = trans.transit);
+            arrival_stop = (select bs.stop_name from transits t join bus_stops bs on t.arrival_stop = bs.id where t.id_transit = trans.transit);
+            reserved_seats = array(select seat_number from first_free_seats(trans.transit::integer, trans.departure, seats));
+
+            for my_seat in select * from unnest(reserved_seats) rs loop
+
+                insert into seat_reservation(seat, transit_reservation_id) VALUES (my_seat, my_transit_id);
+
+            end loop;
+
+            return next;
+
+        end loop;
+    exception
+        when others then
+            if my_reservation is not null then
+                delete from reservations where id = my_reservation;
+            end if;
+            raise exception 'reservation fail';
+    end;
+    $$ language plpgsql;
+
+
+-- returns all data about user past reservations
+-- @ŁS (new)
+create function user_reservations(given_username character varying)
+returns TABLE
+    (reservation_id integer, reservation_date timestamp without time zone, reserved_seats integer[],
+     transit_id numeric, transit_price numeric,
+     departure timestamp without time zone, departure_stop character varying, departure_city numeric,
+     arrival timestamp without time zone, arrival_stop character varying, arrival_city numeric)
+as
+$$
+begin
+        return query
+            select r.id, r.date_reservation,
+                   array(select sr.seat from seat_reservation sr where sr.transit_reservation_id = tres.id),
+                   t.id_transit, t.price,
+                   tres.departure_date, dbs.stop_name, dbs.city,
+                   tres.departure_date::timestamp + dt.time::interval, abs.stop_name, abs.city
+            from transit_reservation tres
+                join reservations r on r.id = tres.reservation
+                join transits t on tres.transit = t.id_transit
+                join spans s on s.transit = t.id_transit
+                join departure_time dt on dt.span = s.id and extract(isodow from tres.departure_date) = dt.day_of_the_week::integer
+                join bus_stops dbs on t.departure_stop = dbs.id
+                join bus_stops abs on t.arrival_stop = abs.id
+            where r."user" = given_username
+                and tres.departure_date::time = dt.departure
+                and tres.departure_date::date not in (select b.date from breaks b where b.span_id = s.id)
+            order by r.date_reservation, tres.departure_date;
+    end;
+$$ language plpgsql;
+
+
+-- for given reservation return number of traveling people
+create function reserved_seats(reservation_id integer) returns integer
+as
+$$
+declare
+        trans_res integer;
+    begin
+        trans_res = (select tr.id from transit_reservation tr where tr.reservation = reservation_id limit 1);
+        return (select count(*) from seat_reservation sr where sr.transit_reservation_id = trans_res);
+    end;
+$$ language plpgsql;
+
+
+-- return true if and ony if there exists bus stop in database in this city
+-- *our application doesn't allow to delete city if there are bus stops in it
+create or replace function city_has_stops(city_id numeric) returns boolean as
+    $$
+    begin
+        return exists(select * from bus_stops where city = city_id);
+    end;
+    $$ language plpgsql;
+
+-- similarly we check if there are transits pointing at a bus stop before we allow to remove this bus stop or modify it's city
+create or replace function exists_transits_with_stop(stop_id numeric) returns boolean as
+    $$
+    begin
+        return exists(select * from transits where departure_stop = stop_id or arrival_stop = stop_id);
+    end;
+    $$ language plpgsql;
+
+
+
+-- exemplary data
+
+
+-- noinspection SqlResolveForFile
+
+-- noinspection SqlResolveForFile
 
 -- exemplary data
 INSERT INTO cities (id, name, rating, average_price, country) VALUES
@@ -819,6 +1148,9 @@ INSERT INTO new_users(username, email_address, password, name, surname) VALUES
 ('Andrew_Randall198', 'andrew.randall@example.com', 'amanda', 'Andrew', 'Randall'),
 ('Stephen_Mills199', 'stephen.mills@example.com', 'thomas', 'Stephen', 'Mills');
 
+-- moderators
+INSERT INTO moderators(username) values ('admin1');
+
 -- bus models
 INSERT INTO buses_models(id, seats) VALUES
 (0, 30),
@@ -1034,542 +1366,542 @@ INSERT INTO spans(id, begin_date, end_date, transit) VALUES
 (134, '2019-10-01'::date, '2020-3-01'::date, 67);
 
 INSERT INTO departure_time(departure, time, span, day_of_the_week) VALUES
-('9:00'::time, '2 hours'::interval, 1, 3),
-('9:00'::time, '2 hours'::interval, 1, 4),
-('10:00'::time, '2 hours'::interval, 1, 5),
-('9:00'::time, '2 hours'::interval, 1, 6),
-('8:00'::time, '2 hours'::interval, 2, 1),
-('7:00'::time, '2 hours'::interval, 2, 3),
-('9:00'::time, '2 hours'::interval, 2, 4),
-('7:00'::time, '2 hours'::interval, 2, 5),
-('7:00'::time, '2 hours'::interval, 2, 7),
-('6:00'::time, '3 hours'::interval, 3, 1),
-('10:00'::time, '3 hours'::interval, 3, 2),
-('6:00'::time, '3 hours'::interval, 4, 1),
-('11:00'::time, '3 hours'::interval, 4, 2),
-('10:00'::time, '3 hours'::interval, 4, 7),
-('10:00'::time, '1 hours'::interval, 5, 2),
-('23:00'::time, '0.5 hours'::interval, 5, 2),
-('9:00'::time, '0.5 hours'::interval, 5, 4),
-('21:00'::time, '0.5 hours'::interval, 5, 4),
-('8:00'::time, '0.5 hours'::interval, 5, 6),
-('19:00'::time, '1 hours'::interval, 5, 6),
-('8:00'::time, '1 hours'::interval, 6, 1),
-('18:00'::time, '1 hours'::interval, 6, 1),
-('8:00'::time, '1 hours'::interval, 6, 2),
-('20:00'::time, '0.5 hours'::interval, 6, 2),
-('10:00'::time, '0.5 hours'::interval, 6, 4),
-('20:00'::time, '0.5 hours'::interval, 6, 4),
-('10:00'::time, '0.5 hours'::interval, 6, 5),
-('18:00'::time, '1 hours'::interval, 6, 5),
-('11:00'::time, '2 hours'::interval, 7, 2),
-('10:00'::time, '2 hours'::interval, 7, 6),
-('7:00'::time, '1 hours'::interval, 7, 7),
-('11:00'::time, '2 hours'::interval, 8, 2),
-('6:00'::time, '1 hours'::interval, 8, 3),
-('7:00'::time, '1 hours'::interval, 8, 5),
-('6:00'::time, '3 hours'::interval, 9, 1),
-('7:00'::time, '3 hours'::interval, 9, 4),
-('7:00'::time, '2 hours'::interval, 9, 5),
-('6:00'::time, '3 hours'::interval, 10, 1),
-('10:00'::time, '2 hours'::interval, 10, 2),
-('8:00'::time, '2 hours'::interval, 10, 5),
-('9:00'::time, '2 hours'::interval, 11, 2),
-('11:00'::time, '3 hours'::interval, 11, 3),
-('11:00'::time, '2 hours'::interval, 11, 4),
-('7:00'::time, '3 hours'::interval, 11, 6),
-('8:00'::time, '2 hours'::interval, 12, 1),
-('8:00'::time, '3 hours'::interval, 12, 3),
-('6:00'::time, '2 hours'::interval, 12, 4),
-('8:00'::time, '2 hours'::interval, 12, 5),
-('7:00'::time, '3 hours'::interval, 13, 1),
-('9:00'::time, '3 hours'::interval, 13, 2),
-('8:00'::time, '3 hours'::interval, 13, 4),
-('6:00'::time, '2 hours'::interval, 14, 2),
-('9:00'::time, '2 hours'::interval, 14, 3),
-('8:00'::time, '3 hours'::interval, 14, 4),
-('9:00'::time, '3 hours'::interval, 14, 5),
-('8:00'::time, '2 hours'::interval, 14, 7),
-('7:00'::time, '2 hours'::interval, 15, 2),
-('9:00'::time, '1 hours'::interval, 15, 3),
-('9:00'::time, '2 hours'::interval, 15, 4),
-('9:00'::time, '1 hours'::interval, 15, 6),
-('10:00'::time, '2 hours'::interval, 16, 2),
-('6:00'::time, '2 hours'::interval, 16, 3),
-('8:00'::time, '1 hours'::interval, 16, 4),
-('10:00'::time, '2 hours'::interval, 16, 7),
-('9:00'::time, '2 hours'::interval, 17, 1),
-('11:00'::time, '2 hours'::interval, 17, 2),
-('9:00'::time, '2 hours'::interval, 17, 3),
-('9:00'::time, '2 hours'::interval, 17, 6),
-('7:00'::time, '2 hours'::interval, 17, 7),
-('7:00'::time, '2 hours'::interval, 18, 3),
-('10:00'::time, '2 hours'::interval, 18, 5),
-('9:00'::time, '2 hours'::interval, 18, 6),
-('8:00'::time, '2 hours'::interval, 19, 1),
-('9:00'::time, '2 hours'::interval, 19, 2),
-('8:00'::time, '1 hours'::interval, 19, 5),
-('9:00'::time, '2 hours'::interval, 20, 1),
-('9:00'::time, '1 hours'::interval, 20, 2),
-('11:00'::time, '2 hours'::interval, 20, 3),
-('9:00'::time, '1 hours'::interval, 20, 7),
-('6:00'::time, '2 hours'::interval, 21, 2),
-('11:00'::time, '2 hours'::interval, 21, 4),
-('7:00'::time, '2 hours'::interval, 21, 5),
-('9:00'::time, '2 hours'::interval, 21, 6),
-('9:00'::time, '2 hours'::interval, 22, 1),
-('10:00'::time, '2 hours'::interval, 22, 2),
-('9:00'::time, '2 hours'::interval, 22, 3),
-('10:00'::time, '2 hours'::interval, 22, 6),
-('7:00'::time, '3 hours'::interval, 23, 1),
-('6:00'::time, '3 hours'::interval, 23, 4),
-('9:00'::time, '3 hours'::interval, 23, 7),
-('6:00'::time, '3 hours'::interval, 24, 2),
-('7:00'::time, '3 hours'::interval, 24, 3),
-('9:00'::time, '3 hours'::interval, 24, 6),
-('8:00'::time, '2 hours'::interval, 25, 1),
-('9:00'::time, '2 hours'::interval, 25, 5),
-('8:00'::time, '2 hours'::interval, 25, 6),
-('8:00'::time, '2 hours'::interval, 25, 7),
-('10:00'::time, '2 hours'::interval, 26, 3),
-('6:00'::time, '2 hours'::interval, 26, 4),
-('11:00'::time, '2 hours'::interval, 26, 5),
-('11:00'::time, '2 hours'::interval, 26, 6),
-('10:00'::time, '3 hours'::interval, 27, 3),
-('9:00'::time, '3 hours'::interval, 27, 5),
-('6:00'::time, '3 hours'::interval, 27, 6),
-('9:00'::time, '3 hours'::interval, 28, 2),
-('7:00'::time, '3 hours'::interval, 28, 3),
-('10:00'::time, '3 hours'::interval, 28, 7),
-('10:00'::time, '3 hours'::interval, 29, 1),
-('9:00'::time, '2 hours'::interval, 29, 3),
-('11:00'::time, '3 hours'::interval, 29, 4),
-('9:00'::time, '2 hours'::interval, 29, 7),
-('6:00'::time, '3 hours'::interval, 30, 1),
-('7:00'::time, '2 hours'::interval, 30, 2),
-('7:00'::time, '3 hours'::interval, 30, 3),
-('8:00'::time, '2 hours'::interval, 30, 5),
-('7:00'::time, '2 hours'::interval, 31, 1),
-('6:00'::time, '2 hours'::interval, 31, 2),
-('9:00'::time, '2 hours'::interval, 31, 4),
-('10:00'::time, '2 hours'::interval, 31, 6),
-('8:00'::time, '2 hours'::interval, 32, 2),
-('7:00'::time, '2 hours'::interval, 32, 3),
-('8:00'::time, '2 hours'::interval, 32, 4),
-('11:00'::time, '2 hours'::interval, 32, 5),
-('9:00'::time, '2 hours'::interval, 32, 7),
-('10:00'::time, '2 hours'::interval, 33, 2),
-('10:00'::time, '3 hours'::interval, 33, 4),
-('9:00'::time, '3 hours'::interval, 33, 5),
-('9:00'::time, '2 hours'::interval, 33, 6),
-('11:00'::time, '2 hours'::interval, 33, 7),
-('8:00'::time, '3 hours'::interval, 34, 1),
-('9:00'::time, '3 hours'::interval, 34, 2),
-('8:00'::time, '2 hours'::interval, 34, 4),
-('7:00'::time, '2 hours'::interval, 34, 7),
-('8:00'::time, '3 hours'::interval, 35, 3),
-('9:00'::time, '3 hours'::interval, 35, 6),
-('11:00'::time, '3 hours'::interval, 36, 1),
-('6:00'::time, '3 hours'::interval, 36, 4),
-('10:00'::time, '3 hours'::interval, 36, 5),
-('9:00'::time, '3 hours'::interval, 36, 6),
-('10:00'::time, '2 hours'::interval, 37, 1),
-('6:00'::time, '2 hours'::interval, 37, 2),
-('9:00'::time, '2 hours'::interval, 37, 4),
-('11:00'::time, '2 hours'::interval, 38, 1),
-('9:00'::time, '2 hours'::interval, 38, 5),
-('9:00'::time, '2 hours'::interval, 38, 7),
-('9:00'::time, '2 hours'::interval, 39, 1),
-('10:00'::time, '1 hours'::interval, 39, 2),
-('7:00'::time, '2 hours'::interval, 39, 4),
-('11:00'::time, '1 hours'::interval, 40, 1),
-('10:00'::time, '1 hours'::interval, 40, 2),
-('7:00'::time, '2 hours'::interval, 40, 4),
-('6:00'::time, '2 hours'::interval, 40, 6),
-('8:00'::time, '2 hours'::interval, 40, 7),
-('10:00'::time, '2 hours'::interval, 41, 1),
-('6:00'::time, '1 hours'::interval, 41, 3),
-('6:00'::time, '1 hours'::interval, 41, 4),
-('8:00'::time, '1 hours'::interval, 41, 7),
-('11:00'::time, '1 hours'::interval, 42, 1),
-('10:00'::time, '2 hours'::interval, 42, 5),
-('8:00'::time, '1 hours'::interval, 42, 6),
-('9:00'::time, '2 hours'::interval, 42, 7),
-('7:00'::time, '2 hours'::interval, 43, 1),
-('8:00'::time, '2 hours'::interval, 43, 2),
-('10:00'::time, '2 hours'::interval, 43, 7),
-('6:00'::time, '2 hours'::interval, 44, 2),
-('8:00'::time, '2 hours'::interval, 44, 4),
-('6:00'::time, '2 hours'::interval, 44, 6),
-('6:00'::time, '2 hours'::interval, 44, 7),
-('8:00'::time, '2 hours'::interval, 45, 2),
-('9:00'::time, '2 hours'::interval, 45, 5),
-('6:00'::time, '2 hours'::interval, 45, 6),
-('6:00'::time, '2 hours'::interval, 46, 2),
-('10:00'::time, '2 hours'::interval, 46, 3),
-('9:00'::time, '2 hours'::interval, 46, 4),
-('11:00'::time, '2 hours'::interval, 47, 1),
-('6:00'::time, '2 hours'::interval, 47, 4),
-('10:00'::time, '2 hours'::interval, 47, 5),
-('6:00'::time, '2 hours'::interval, 48, 2),
-('7:00'::time, '2 hours'::interval, 48, 3),
-('10:00'::time, '2 hours'::interval, 48, 4),
-('8:00'::time, '2 hours'::interval, 48, 6),
-('10:00'::time, '2 hours'::interval, 49, 3),
-('8:00'::time, '1 hours'::interval, 49, 5),
-('10:00'::time, '2 hours'::interval, 49, 6),
-('10:00'::time, '1 hours'::interval, 49, 7),
-('8:00'::time, '1 hours'::interval, 50, 1),
-('8:00'::time, '1 hours'::interval, 50, 2),
-('9:00'::time, '1 hours'::interval, 50, 4),
-('10:00'::time, '2 hours'::interval, 50, 6),
-('10:00'::time, '3 hours'::interval, 51, 1),
-('10:00'::time, '3 hours'::interval, 51, 2),
-('10:00'::time, '3 hours'::interval, 51, 6),
-('7:00'::time, '3 hours'::interval, 51, 7),
-('9:00'::time, '3 hours'::interval, 52, 1),
-('8:00'::time, '3 hours'::interval, 52, 6),
-('7:00'::time, '3 hours'::interval, 52, 7),
-('8:00'::time, '2 hours'::interval, 53, 1),
-('8:00'::time, '2 hours'::interval, 53, 2),
-('11:00'::time, '2 hours'::interval, 53, 6),
-('9:00'::time, '2 hours'::interval, 53, 7),
-('8:00'::time, '2 hours'::interval, 54, 2),
-('7:00'::time, '2 hours'::interval, 54, 3),
-('7:00'::time, '2 hours'::interval, 54, 6),
-('8:00'::time, '2 hours'::interval, 54, 7),
-('6:00'::time, '3 hours'::interval, 55, 2),
-('6:00'::time, '3 hours'::interval, 55, 3),
-('9:00'::time, '3 hours'::interval, 55, 6),
-('7:00'::time, '3 hours'::interval, 55, 7),
-('8:00'::time, '3 hours'::interval, 56, 1),
-('9:00'::time, '3 hours'::interval, 56, 3),
-('10:00'::time, '3 hours'::interval, 56, 4),
-('9:00'::time, '3 hours'::interval, 56, 6),
-('10:00'::time, '3 hours'::interval, 57, 1),
-('10:00'::time, '3 hours'::interval, 57, 2),
-('11:00'::time, '3 hours'::interval, 57, 3),
-('9:00'::time, '3 hours'::interval, 57, 4),
-('8:00'::time, '3 hours'::interval, 58, 1),
-('10:00'::time, '3 hours'::interval, 58, 2),
-('11:00'::time, '3 hours'::interval, 58, 5),
-('9:00'::time, '3 hours'::interval, 58, 7),
-('11:00'::time, '2 hours'::interval, 59, 1),
-('7:00'::time, '3 hours'::interval, 59, 3),
-('10:00'::time, '2 hours'::interval, 59, 4),
-('6:00'::time, '2 hours'::interval, 59, 5),
-('10:00'::time, '3 hours'::interval, 59, 6),
-('10:00'::time, '3 hours'::interval, 60, 2),
-('8:00'::time, '3 hours'::interval, 60, 4),
-('11:00'::time, '2 hours'::interval, 60, 6),
-('7:00'::time, '0.5 hours'::interval, 61, 1),
-('20:00'::time, '0.5 hours'::interval, 61, 1),
-('8:00'::time, '0.5 hours'::interval, 61, 3),
-('22:00'::time, '0.5 hours'::interval, 61, 3),
-('7:00'::time, '0.5 hours'::interval, 61, 4),
-('21:00'::time, '0.5 hours'::interval, 61, 4),
-('8:00'::time, '0.5 hours'::interval, 62, 2),
-('20:00'::time, '0.5 hours'::interval, 62, 2),
-('8:00'::time, '0.5 hours'::interval, 62, 3),
-('23:00'::time, '0.5 hours'::interval, 62, 3),
-('7:00'::time, '0.5 hours'::interval, 62, 5),
-('19:00'::time, '0.5 hours'::interval, 62, 5),
-('11:00'::time, '0.5 hours'::interval, 62, 7),
-('19:00'::time, '0.5 hours'::interval, 62, 7),
-('6:00'::time, '3 hours'::interval, 63, 1),
-('8:00'::time, '3 hours'::interval, 63, 4),
-('10:00'::time, '3 hours'::interval, 63, 6),
-('8:00'::time, '3 hours'::interval, 64, 1),
-('7:00'::time, '3 hours'::interval, 64, 2),
-('11:00'::time, '3 hours'::interval, 64, 4),
-('11:00'::time, '3 hours'::interval, 64, 6),
-('9:00'::time, '3 hours'::interval, 65, 2),
-('6:00'::time, '3 hours'::interval, 65, 5),
-('6:00'::time, '3 hours'::interval, 65, 6),
-('11:00'::time, '3 hours'::interval, 65, 7),
-('11:00'::time, '3 hours'::interval, 66, 1),
-('8:00'::time, '3 hours'::interval, 66, 2),
-('10:00'::time, '3 hours'::interval, 66, 3),
-('6:00'::time, '3 hours'::interval, 66, 7),
-('9:00'::time, '3 hours'::interval, 67, 4),
-('10:00'::time, '2 hours'::interval, 67, 5),
-('9:00'::time, '3 hours'::interval, 67, 6),
-('8:00'::time, '3 hours'::interval, 68, 1),
-('10:00'::time, '3 hours'::interval, 68, 2),
-('11:00'::time, '2 hours'::interval, 68, 4),
-('10:00'::time, '2 hours'::interval, 68, 5),
-('6:00'::time, '3 hours'::interval, 68, 6),
-('6:00'::time, '2 hours'::interval, 69, 1),
-('7:00'::time, '2 hours'::interval, 69, 2),
-('7:00'::time, '2 hours'::interval, 69, 7),
-('11:00'::time, '2 hours'::interval, 70, 1),
-('10:00'::time, '2 hours'::interval, 70, 2),
-('7:00'::time, '2 hours'::interval, 70, 3),
-('11:00'::time, '2 hours'::interval, 70, 4),
-('8:00'::time, '2 hours'::interval, 70, 6),
-('9:00'::time, '2 hours'::interval, 71, 5),
-('6:00'::time, '2 hours'::interval, 71, 6),
-('11:00'::time, '2 hours'::interval, 71, 7),
-('9:00'::time, '2 hours'::interval, 72, 1),
-('6:00'::time, '2 hours'::interval, 72, 2),
-('6:00'::time, '2 hours'::interval, 72, 4),
-('11:00'::time, '2 hours'::interval, 72, 6),
-('7:00'::time, '2 hours'::interval, 72, 7),
-('11:00'::time, '2 hours'::interval, 73, 1),
-('9:00'::time, '3 hours'::interval, 73, 2),
-('11:00'::time, '3 hours'::interval, 73, 3),
-('9:00'::time, '3 hours'::interval, 73, 7),
-('9:00'::time, '2 hours'::interval, 74, 1),
-('8:00'::time, '3 hours'::interval, 74, 4),
-('8:00'::time, '2 hours'::interval, 74, 6),
-('9:00'::time, '3 hours'::interval, 74, 7),
-('11:00'::time, '3 hours'::interval, 75, 2),
-('9:00'::time, '3 hours'::interval, 75, 3),
-('9:00'::time, '3 hours'::interval, 75, 7),
-('6:00'::time, '3 hours'::interval, 76, 4),
-('10:00'::time, '3 hours'::interval, 76, 6),
-('6:00'::time, '3 hours'::interval, 76, 7),
-('8:00'::time, '3 hours'::interval, 77, 1),
-('7:00'::time, '3 hours'::interval, 77, 3),
-('7:00'::time, '3 hours'::interval, 77, 4),
-('11:00'::time, '3 hours'::interval, 77, 7),
-('10:00'::time, '3 hours'::interval, 78, 1),
-('11:00'::time, '3 hours'::interval, 78, 4),
-('7:00'::time, '3 hours'::interval, 78, 5),
-('9:00'::time, '3 hours'::interval, 79, 2),
-('7:00'::time, '2 hours'::interval, 79, 3),
-('8:00'::time, '3 hours'::interval, 79, 5),
-('6:00'::time, '3 hours'::interval, 79, 7),
-('8:00'::time, '3 hours'::interval, 80, 3),
-('10:00'::time, '2 hours'::interval, 80, 4),
-('8:00'::time, '2 hours'::interval, 80, 5),
-('10:00'::time, '2 hours'::interval, 80, 7),
-('8:00'::time, '3 hours'::interval, 81, 2),
-('6:00'::time, '3 hours'::interval, 81, 4),
-('9:00'::time, '3 hours'::interval, 81, 5),
-('9:00'::time, '3 hours'::interval, 82, 2),
-('11:00'::time, '3 hours'::interval, 82, 3),
-('8:00'::time, '3 hours'::interval, 82, 4),
-('6:00'::time, '3 hours'::interval, 83, 1),
-('6:00'::time, '3 hours'::interval, 83, 4),
-('10:00'::time, '3 hours'::interval, 83, 5),
-('7:00'::time, '3 hours'::interval, 83, 7),
-('9:00'::time, '3 hours'::interval, 84, 1),
-('8:00'::time, '3 hours'::interval, 84, 4),
-('7:00'::time, '3 hours'::interval, 84, 7),
-('10:00'::time, '3 hours'::interval, 85, 1),
-('11:00'::time, '3 hours'::interval, 85, 3),
-('9:00'::time, '3 hours'::interval, 85, 4),
-('8:00'::time, '3 hours'::interval, 85, 7),
-('11:00'::time, '3 hours'::interval, 86, 1),
-('8:00'::time, '3 hours'::interval, 86, 2),
-('10:00'::time, '3 hours'::interval, 86, 4),
-('11:00'::time, '3 hours'::interval, 86, 6),
-('7:00'::time, '3 hours'::interval, 87, 3),
-('9:00'::time, '3 hours'::interval, 87, 5),
-('9:00'::time, '3 hours'::interval, 87, 6),
-('11:00'::time, '3 hours'::interval, 88, 1),
-('10:00'::time, '3 hours'::interval, 88, 5),
-('9:00'::time, '3 hours'::interval, 88, 7),
-('6:00'::time, '3 hours'::interval, 89, 1),
-('9:00'::time, '2 hours'::interval, 89, 2),
-('10:00'::time, '2 hours'::interval, 89, 3),
-('9:00'::time, '3 hours'::interval, 89, 6),
-('6:00'::time, '2 hours'::interval, 90, 1),
-('11:00'::time, '2 hours'::interval, 90, 6),
-('6:00'::time, '3 hours'::interval, 90, 7),
-('11:00'::time, '2 hours'::interval, 91, 1),
-('9:00'::time, '2 hours'::interval, 91, 2),
-('8:00'::time, '2 hours'::interval, 91, 7),
-('8:00'::time, '2 hours'::interval, 92, 1),
-('6:00'::time, '2 hours'::interval, 92, 2),
-('8:00'::time, '2 hours'::interval, 92, 5),
-('11:00'::time, '2 hours'::interval, 92, 7),
-('7:00'::time, '3 hours'::interval, 93, 1),
-('9:00'::time, '3 hours'::interval, 93, 3),
-('9:00'::time, '3 hours'::interval, 93, 5),
-('11:00'::time, '3 hours'::interval, 93, 7),
-('9:00'::time, '3 hours'::interval, 94, 1),
-('10:00'::time, '3 hours'::interval, 94, 2),
-('7:00'::time, '3 hours'::interval, 94, 6),
-('10:00'::time, '3 hours'::interval, 94, 7),
-('11:00'::time, '3 hours'::interval, 95, 2),
-('7:00'::time, '3 hours'::interval, 95, 3),
-('6:00'::time, '2 hours'::interval, 95, 4),
-('11:00'::time, '3 hours'::interval, 95, 5),
-('10:00'::time, '2 hours'::interval, 96, 3),
-('6:00'::time, '2 hours'::interval, 96, 5),
-('9:00'::time, '3 hours'::interval, 96, 6),
-('7:00'::time, '3 hours'::interval, 97, 2),
-('9:00'::time, '3 hours'::interval, 97, 3),
-('6:00'::time, '3 hours'::interval, 97, 4),
-('7:00'::time, '3 hours'::interval, 97, 7),
-('9:00'::time, '3 hours'::interval, 98, 2),
-('8:00'::time, '3 hours'::interval, 98, 3),
-('7:00'::time, '3 hours'::interval, 98, 4),
-('7:00'::time, '2 hours'::interval, 99, 1),
-('9:00'::time, '3 hours'::interval, 99, 2),
-('9:00'::time, '3 hours'::interval, 99, 4),
-('10:00'::time, '2 hours'::interval, 99, 5),
-('8:00'::time, '2 hours'::interval, 100, 2),
-('11:00'::time, '2 hours'::interval, 100, 3),
-('7:00'::time, '3 hours'::interval, 100, 4),
-('9:00'::time, '2 hours'::interval, 100, 7),
-('7:00'::time, '0.5 hours'::interval, 101, 3),
-('23:00'::time, '0.5 hours'::interval, 101, 3),
-('7:00'::time, '0.5 hours'::interval, 101, 4),
-('21:00'::time, '1 hours'::interval, 101, 4),
-('10:00'::time, '1 hours'::interval, 101, 6),
-('22:00'::time, '1 hours'::interval, 101, 6),
-('6:00'::time, '0.5 hours'::interval, 102, 1),
-('23:00'::time, '1 hours'::interval, 102, 1),
-('8:00'::time, '1 hours'::interval, 102, 2),
-('22:00'::time, '1 hours'::interval, 102, 2),
-('6:00'::time, '0.5 hours'::interval, 102, 3),
-('23:00'::time, '0.5 hours'::interval, 102, 3),
-('6:00'::time, '0.5 hours'::interval, 102, 5),
-('23:00'::time, '1 hours'::interval, 102, 5),
-('7:00'::time, '1 hours'::interval, 102, 6),
-('18:00'::time, '0.5 hours'::interval, 102, 6),
-('8:00'::time, '1 hours'::interval, 103, 1),
-('9:00'::time, '1 hours'::interval, 103, 3),
-('8:00'::time, '2 hours'::interval, 103, 4),
-('11:00'::time, '2 hours'::interval, 103, 5),
-('9:00'::time, '1 hours'::interval, 103, 7),
-('11:00'::time, '2 hours'::interval, 104, 3),
-('8:00'::time, '1 hours'::interval, 104, 4),
-('10:00'::time, '2 hours'::interval, 104, 5),
-('10:00'::time, '1 hours'::interval, 104, 7),
-('9:00'::time, '2 hours'::interval, 105, 1),
-('11:00'::time, '2 hours'::interval, 105, 2),
-('8:00'::time, '2 hours'::interval, 105, 4),
-('8:00'::time, '2 hours'::interval, 105, 7),
-('8:00'::time, '2 hours'::interval, 106, 4),
-('8:00'::time, '2 hours'::interval, 106, 5),
-('10:00'::time, '2 hours'::interval, 106, 6),
-('11:00'::time, '2 hours'::interval, 106, 7),
-('11:00'::time, '3 hours'::interval, 107, 1),
-('11:00'::time, '3 hours'::interval, 107, 2),
-('10:00'::time, '3 hours'::interval, 107, 3),
-('7:00'::time, '3 hours'::interval, 107, 5),
-('6:00'::time, '3 hours'::interval, 108, 1),
-('11:00'::time, '3 hours'::interval, 108, 4),
-('7:00'::time, '3 hours'::interval, 108, 5),
-('8:00'::time, '1 hours'::interval, 109, 1),
-('8:00'::time, '1 hours'::interval, 109, 5),
-('9:00'::time, '2 hours'::interval, 110, 2),
-('7:00'::time, '2 hours'::interval, 110, 4),
-('7:00'::time, '2 hours'::interval, 110, 5),
-('7:00'::time, '2 hours'::interval, 110, 6),
-('11:00'::time, '2 hours'::interval, 110, 7),
-('11:00'::time, '2 hours'::interval, 111, 3),
-('8:00'::time, '2 hours'::interval, 111, 4),
-('9:00'::time, '2 hours'::interval, 111, 5),
-('9:00'::time, '2 hours'::interval, 111, 7),
-('9:00'::time, '2 hours'::interval, 112, 1),
-('11:00'::time, '2 hours'::interval, 112, 3),
-('7:00'::time, '2 hours'::interval, 112, 4),
-('6:00'::time, '2 hours'::interval, 112, 7),
-('9:00'::time, '1 hours'::interval, 113, 1),
-('10:00'::time, '2 hours'::interval, 113, 2),
-('7:00'::time, '2 hours'::interval, 113, 3),
-('6:00'::time, '1 hours'::interval, 113, 4),
-('8:00'::time, '1 hours'::interval, 113, 6),
-('9:00'::time, '2 hours'::interval, 113, 7),
-('11:00'::time, '1 hours'::interval, 114, 2),
-('10:00'::time, '1 hours'::interval, 114, 4),
-('11:00'::time, '2 hours'::interval, 114, 5),
-('11:00'::time, '1 hours'::interval, 114, 6),
-('9:00'::time, '2 hours'::interval, 114, 7),
-('10:00'::time, '2 hours'::interval, 115, 1),
-('7:00'::time, '2 hours'::interval, 115, 2),
-('8:00'::time, '2 hours'::interval, 115, 3),
-('11:00'::time, '2 hours'::interval, 115, 5),
-('8:00'::time, '1 hours'::interval, 115, 6),
-('8:00'::time, '2 hours'::interval, 116, 2),
-('10:00'::time, '2 hours'::interval, 116, 4),
-('9:00'::time, '2 hours'::interval, 116, 6),
-('6:00'::time, '2 hours'::interval, 116, 7),
-('9:00'::time, '2 hours'::interval, 117, 1),
-('8:00'::time, '3 hours'::interval, 117, 3),
-('11:00'::time, '3 hours'::interval, 117, 4),
-('10:00'::time, '2 hours'::interval, 117, 6),
-('10:00'::time, '2 hours'::interval, 118, 1),
-('6:00'::time, '2 hours'::interval, 118, 2),
-('10:00'::time, '2 hours'::interval, 118, 4),
-('6:00'::time, '3 hours'::interval, 118, 5),
-('9:00'::time, '2 hours'::interval, 119, 2),
-('9:00'::time, '2 hours'::interval, 119, 3),
-('8:00'::time, '2 hours'::interval, 119, 4),
-('9:00'::time, '2 hours'::interval, 119, 6),
-('9:00'::time, '2 hours'::interval, 120, 2),
-('7:00'::time, '2 hours'::interval, 120, 3),
-('6:00'::time, '2 hours'::interval, 120, 4),
-('6:00'::time, '2 hours'::interval, 120, 5),
-('8:00'::time, '1 hours'::interval, 121, 2),
-('8:00'::time, '1 hours'::interval, 121, 3),
-('10:00'::time, '2 hours'::interval, 121, 4),
-('7:00'::time, '2 hours'::interval, 121, 5),
-('9:00'::time, '2 hours'::interval, 121, 7),
-('8:00'::time, '2 hours'::interval, 122, 1),
-('9:00'::time, '1 hours'::interval, 122, 2),
-('10:00'::time, '2 hours'::interval, 122, 3),
-('7:00'::time, '1 hours'::interval, 122, 6),
-('8:00'::time, '2 hours'::interval, 122, 7),
-('8:00'::time, '1 hours'::interval, 123, 1),
-('10:00'::time, '1 hours'::interval, 123, 5),
-('8:00'::time, '2 hours'::interval, 123, 7),
-('7:00'::time, '2 hours'::interval, 124, 2),
-('8:00'::time, '1 hours'::interval, 124, 5),
-('8:00'::time, '1 hours'::interval, 124, 6),
-('10:00'::time, '1 hours'::interval, 124, 7),
-('10:00'::time, '2 hours'::interval, 125, 1),
-('9:00'::time, '3 hours'::interval, 125, 4),
-('7:00'::time, '3 hours'::interval, 125, 5),
-('8:00'::time, '3 hours'::interval, 125, 7),
-('7:00'::time, '2 hours'::interval, 126, 2),
-('11:00'::time, '3 hours'::interval, 126, 4),
-('8:00'::time, '2 hours'::interval, 126, 6),
-('9:00'::time, '2 hours'::interval, 127, 2),
-('10:00'::time, '2 hours'::interval, 127, 3),
-('7:00'::time, '2 hours'::interval, 127, 6),
-('11:00'::time, '2 hours'::interval, 128, 1),
-('6:00'::time, '2 hours'::interval, 128, 3),
-('9:00'::time, '2 hours'::interval, 128, 4),
-('7:00'::time, '2 hours'::interval, 128, 6),
-('8:00'::time, '0.5 hours'::interval, 129, 2),
-('21:00'::time, '0.5 hours'::interval, 129, 2),
-('10:00'::time, '0.5 hours'::interval, 129, 3),
-('23:00'::time, '0.5 hours'::interval, 129, 3),
-('7:00'::time, '0.5 hours'::interval, 129, 4),
-('18:00'::time, '0.5 hours'::interval, 129, 4),
-('8:00'::time, '0.5 hours'::interval, 129, 5),
-('20:00'::time, '0.5 hours'::interval, 129, 5),
-('8:00'::time, '0.5 hours'::interval, 130, 1),
-('19:00'::time, '0.5 hours'::interval, 130, 1),
-('8:00'::time, '0.5 hours'::interval, 130, 2),
-('21:00'::time, '0.5 hours'::interval, 130, 2),
-('9:00'::time, '0.5 hours'::interval, 130, 4),
-('18:00'::time, '0.5 hours'::interval, 130, 4),
-('11:00'::time, '0.5 hours'::interval, 130, 5),
-('23:00'::time, '0.5 hours'::interval, 130, 5),
-('6:00'::time, '0.5 hours'::interval, 130, 6),
-('19:00'::time, '0.5 hours'::interval, 130, 6),
-('7:00'::time, '0.5 hours'::interval, 130, 7),
-('22:00'::time, '0.5 hours'::interval, 130, 7),
-('9:00'::time, '3 hours'::interval, 131, 1),
-('8:00'::time, '3 hours'::interval, 131, 2),
-('8:00'::time, '3 hours'::interval, 131, 7),
-('10:00'::time, '3 hours'::interval, 132, 1),
-('6:00'::time, '3 hours'::interval, 132, 3),
-('10:00'::time, '3 hours'::interval, 132, 7),
-('9:00'::time, '2 hours'::interval, 133, 2),
-('7:00'::time, '2 hours'::interval, 133, 4),
-('11:00'::time, '2 hours'::interval, 133, 5),
-('6:00'::time, '2 hours'::interval, 133, 6),
-('9:00'::time, '2 hours'::interval, 134, 3),
-('6:00'::time, '2 hours'::interval, 134, 5),
-('7:00'::time, '2 hours'::interval, 134, 6);
+('9:00'::time, '2 hours'::interval, 1, 'Wednesday'),
+('9:00'::time, '2 hours'::interval, 1, 'Thursday'),
+('10:00'::time, '2 hours'::interval, 1, 'Friday'),
+('9:00'::time, '2 hours'::interval, 1, 'Saturday'),
+('8:00'::time, '2 hours'::interval, 2, 'Monday'),
+('7:00'::time, '2 hours'::interval, 2, 'Wednesday'),
+('9:00'::time, '2 hours'::interval, 2, 'Thursday'),
+('7:00'::time, '2 hours'::interval, 2, 'Friday'),
+('7:00'::time, '2 hours'::interval, 2, 'Sunday'),
+('6:00'::time, '3 hours'::interval, 3, 'Monday'),
+('10:00'::time, '3 hours'::interval, 3, 'Tuesday'),
+('6:00'::time, '3 hours'::interval, 4, 'Monday'),
+('11:00'::time, '3 hours'::interval, 4, 'Tuesday'),
+('10:00'::time, '3 hours'::interval, 4, 'Sunday'),
+('10:00'::time, '1 hours'::interval, 5, 'Tuesday'),
+('23:00'::time, '0.5 hours'::interval, 5, 'Tuesday'),
+('9:00'::time, '0.5 hours'::interval, 5, 'Thursday'),
+('21:00'::time, '0.5 hours'::interval, 5, 'Thursday'),
+('8:00'::time, '0.5 hours'::interval, 5, 'Saturday'),
+('19:00'::time, '1 hours'::interval, 5, 'Saturday'),
+('8:00'::time, '1 hours'::interval, 6, 'Monday'),
+('18:00'::time, '1 hours'::interval, 6, 'Monday'),
+('8:00'::time, '1 hours'::interval, 6, 'Tuesday'),
+('20:00'::time, '0.5 hours'::interval, 6, 'Tuesday'),
+('10:00'::time, '0.5 hours'::interval, 6, 'Thursday'),
+('20:00'::time, '0.5 hours'::interval, 6, 'Thursday'),
+('10:00'::time, '0.5 hours'::interval, 6, 'Friday'),
+('18:00'::time, '1 hours'::interval, 6, 'Friday'),
+('11:00'::time, '2 hours'::interval, 7, 'Tuesday'),
+('10:00'::time, '2 hours'::interval, 7, 'Saturday'),
+('7:00'::time, '1 hours'::interval, 7, 'Sunday'),
+('11:00'::time, '2 hours'::interval, 8, 'Tuesday'),
+('6:00'::time, '1 hours'::interval, 8, 'Wednesday'),
+('7:00'::time, '1 hours'::interval, 8, 'Friday'),
+('6:00'::time, '3 hours'::interval, 9, 'Monday'),
+('7:00'::time, '3 hours'::interval, 9, 'Thursday'),
+('7:00'::time, '2 hours'::interval, 9, 'Friday'),
+('6:00'::time, '3 hours'::interval, 10, 'Monday'),
+('10:00'::time, '2 hours'::interval, 10, 'Tuesday'),
+('8:00'::time, '2 hours'::interval, 10, 'Friday'),
+('9:00'::time, '2 hours'::interval, 11, 'Tuesday'),
+('11:00'::time, '3 hours'::interval, 11, 'Wednesday'),
+('11:00'::time, '2 hours'::interval, 11, 'Thursday'),
+('7:00'::time, '3 hours'::interval, 11, 'Saturday'),
+('8:00'::time, '2 hours'::interval, 12, 'Monday'),
+('8:00'::time, '3 hours'::interval, 12, 'Wednesday'),
+('6:00'::time, '2 hours'::interval, 12, 'Thursday'),
+('8:00'::time, '2 hours'::interval, 12, 'Friday'),
+('7:00'::time, '3 hours'::interval, 13, 'Monday'),
+('9:00'::time, '3 hours'::interval, 13, 'Tuesday'),
+('8:00'::time, '3 hours'::interval, 13, 'Thursday'),
+('6:00'::time, '2 hours'::interval, 14, 'Tuesday'),
+('9:00'::time, '2 hours'::interval, 14, 'Wednesday'),
+('8:00'::time, '3 hours'::interval, 14, 'Thursday'),
+('9:00'::time, '3 hours'::interval, 14, 'Friday'),
+('8:00'::time, '2 hours'::interval, 14, 'Sunday'),
+('7:00'::time, '2 hours'::interval, 15, 'Tuesday'),
+('9:00'::time, '1 hours'::interval, 15, 'Wednesday'),
+('9:00'::time, '2 hours'::interval, 15, 'Thursday'),
+('9:00'::time, '1 hours'::interval, 15, 'Saturday'),
+('10:00'::time, '2 hours'::interval, 16, 'Tuesday'),
+('6:00'::time, '2 hours'::interval, 16, 'Wednesday'),
+('8:00'::time, '1 hours'::interval, 16, 'Thursday'),
+('10:00'::time, '2 hours'::interval, 16, 'Sunday'),
+('9:00'::time, '2 hours'::interval, 17, 'Monday'),
+('11:00'::time, '2 hours'::interval, 17, 'Tuesday'),
+('9:00'::time, '2 hours'::interval, 17, 'Wednesday'),
+('9:00'::time, '2 hours'::interval, 17, 'Saturday'),
+('7:00'::time, '2 hours'::interval, 17, 'Sunday'),
+('7:00'::time, '2 hours'::interval, 18, 'Wednesday'),
+('10:00'::time, '2 hours'::interval, 18, 'Friday'),
+('9:00'::time, '2 hours'::interval, 18, 'Saturday'),
+('8:00'::time, '2 hours'::interval, 19, 'Monday'),
+('9:00'::time, '2 hours'::interval, 19, 'Tuesday'),
+('8:00'::time, '1 hours'::interval, 19, 'Friday'),
+('9:00'::time, '2 hours'::interval, 20, 'Monday'),
+('9:00'::time, '1 hours'::interval, 20, 'Tuesday'),
+('11:00'::time, '2 hours'::interval, 20, 'Wednesday'),
+('9:00'::time, '1 hours'::interval, 20, 'Sunday'),
+('6:00'::time, '2 hours'::interval, 21, 'Tuesday'),
+('11:00'::time, '2 hours'::interval, 21, 'Thursday'),
+('7:00'::time, '2 hours'::interval, 21, 'Friday'),
+('9:00'::time, '2 hours'::interval, 21, 'Saturday'),
+('9:00'::time, '2 hours'::interval, 22, 'Monday'),
+('10:00'::time, '2 hours'::interval, 22, 'Tuesday'),
+('9:00'::time, '2 hours'::interval, 22, 'Wednesday'),
+('10:00'::time, '2 hours'::interval, 22, 'Saturday'),
+('7:00'::time, '3 hours'::interval, 23, 'Monday'),
+('6:00'::time, '3 hours'::interval, 23, 'Thursday'),
+('9:00'::time, '3 hours'::interval, 23, 'Sunday'),
+('6:00'::time, '3 hours'::interval, 24, 'Tuesday'),
+('7:00'::time, '3 hours'::interval, 24, 'Wednesday'),
+('9:00'::time, '3 hours'::interval, 24, 'Saturday'),
+('8:00'::time, '2 hours'::interval, 25, 'Monday'),
+('9:00'::time, '2 hours'::interval, 25, 'Friday'),
+('8:00'::time, '2 hours'::interval, 25, 'Saturday'),
+('8:00'::time, '2 hours'::interval, 25, 'Sunday'),
+('10:00'::time, '2 hours'::interval, 26, 'Wednesday'),
+('6:00'::time, '2 hours'::interval, 26, 'Thursday'),
+('11:00'::time, '2 hours'::interval, 26, 'Friday'),
+('11:00'::time, '2 hours'::interval, 26, 'Saturday'),
+('10:00'::time, '3 hours'::interval, 27, 'Wednesday'),
+('9:00'::time, '3 hours'::interval, 27, 'Friday'),
+('6:00'::time, '3 hours'::interval, 27, 'Saturday'),
+('9:00'::time, '3 hours'::interval, 28, 'Tuesday'),
+('7:00'::time, '3 hours'::interval, 28, 'Wednesday'),
+('10:00'::time, '3 hours'::interval, 28, 'Sunday'),
+('10:00'::time, '3 hours'::interval, 29, 'Monday'),
+('9:00'::time, '2 hours'::interval, 29, 'Wednesday'),
+('11:00'::time, '3 hours'::interval, 29, 'Thursday'),
+('9:00'::time, '2 hours'::interval, 29, 'Sunday'),
+('6:00'::time, '3 hours'::interval, 30, 'Monday'),
+('7:00'::time, '2 hours'::interval, 30, 'Tuesday'),
+('7:00'::time, '3 hours'::interval, 30, 'Wednesday'),
+('8:00'::time, '2 hours'::interval, 30, 'Friday'),
+('7:00'::time, '2 hours'::interval, 31, 'Monday'),
+('6:00'::time, '2 hours'::interval, 31, 'Tuesday'),
+('9:00'::time, '2 hours'::interval, 31, 'Thursday'),
+('10:00'::time, '2 hours'::interval, 31, 'Saturday'),
+('8:00'::time, '2 hours'::interval, 32, 'Tuesday'),
+('7:00'::time, '2 hours'::interval, 32, 'Wednesday'),
+('8:00'::time, '2 hours'::interval, 32, 'Thursday'),
+('11:00'::time, '2 hours'::interval, 32, 'Friday'),
+('9:00'::time, '2 hours'::interval, 32, 'Sunday'),
+('10:00'::time, '2 hours'::interval, 33, 'Tuesday'),
+('10:00'::time, '3 hours'::interval, 33, 'Thursday'),
+('9:00'::time, '3 hours'::interval, 33, 'Friday'),
+('9:00'::time, '2 hours'::interval, 33, 'Saturday'),
+('11:00'::time, '2 hours'::interval, 33, 'Sunday'),
+('8:00'::time, '3 hours'::interval, 34, 'Monday'),
+('9:00'::time, '3 hours'::interval, 34, 'Tuesday'),
+('8:00'::time, '2 hours'::interval, 34, 'Thursday'),
+('7:00'::time, '2 hours'::interval, 34, 'Sunday'),
+('8:00'::time, '3 hours'::interval, 35, 'Wednesday'),
+('9:00'::time, '3 hours'::interval, 35, 'Saturday'),
+('11:00'::time, '3 hours'::interval, 36, 'Monday'),
+('6:00'::time, '3 hours'::interval, 36, 'Thursday'),
+('10:00'::time, '3 hours'::interval, 36, 'Friday'),
+('9:00'::time, '3 hours'::interval, 36, 'Saturday'),
+('10:00'::time, '2 hours'::interval, 37, 'Monday'),
+('6:00'::time, '2 hours'::interval, 37, 'Tuesday'),
+('9:00'::time, '2 hours'::interval, 37, 'Thursday'),
+('11:00'::time, '2 hours'::interval, 38, 'Monday'),
+('9:00'::time, '2 hours'::interval, 38, 'Friday'),
+('9:00'::time, '2 hours'::interval, 38, 'Sunday'),
+('9:00'::time, '2 hours'::interval, 39, 'Monday'),
+('10:00'::time, '1 hours'::interval, 39, 'Tuesday'),
+('7:00'::time, '2 hours'::interval, 39, 'Thursday'),
+('11:00'::time, '1 hours'::interval, 40, 'Monday'),
+('10:00'::time, '1 hours'::interval, 40, 'Tuesday'),
+('7:00'::time, '2 hours'::interval, 40, 'Thursday'),
+('6:00'::time, '2 hours'::interval, 40, 'Saturday'),
+('8:00'::time, '2 hours'::interval, 40, 'Sunday'),
+('10:00'::time, '2 hours'::interval, 41, 'Monday'),
+('6:00'::time, '1 hours'::interval, 41, 'Wednesday'),
+('6:00'::time, '1 hours'::interval, 41, 'Thursday'),
+('8:00'::time, '1 hours'::interval, 41, 'Sunday'),
+('11:00'::time, '1 hours'::interval, 42, 'Monday'),
+('10:00'::time, '2 hours'::interval, 42, 'Friday'),
+('8:00'::time, '1 hours'::interval, 42, 'Saturday'),
+('9:00'::time, '2 hours'::interval, 42, 'Sunday'),
+('7:00'::time, '2 hours'::interval, 43, 'Monday'),
+('8:00'::time, '2 hours'::interval, 43, 'Tuesday'),
+('10:00'::time, '2 hours'::interval, 43, 'Sunday'),
+('6:00'::time, '2 hours'::interval, 44, 'Tuesday'),
+('8:00'::time, '2 hours'::interval, 44, 'Thursday'),
+('6:00'::time, '2 hours'::interval, 44, 'Saturday'),
+('6:00'::time, '2 hours'::interval, 44, 'Sunday'),
+('8:00'::time, '2 hours'::interval, 45, 'Tuesday'),
+('9:00'::time, '2 hours'::interval, 45, 'Friday'),
+('6:00'::time, '2 hours'::interval, 45, 'Saturday'),
+('6:00'::time, '2 hours'::interval, 46, 'Tuesday'),
+('10:00'::time, '2 hours'::interval, 46, 'Wednesday'),
+('9:00'::time, '2 hours'::interval, 46, 'Thursday'),
+('11:00'::time, '2 hours'::interval, 47, 'Monday'),
+('6:00'::time, '2 hours'::interval, 47, 'Thursday'),
+('10:00'::time, '2 hours'::interval, 47, 'Friday'),
+('6:00'::time, '2 hours'::interval, 48, 'Tuesday'),
+('7:00'::time, '2 hours'::interval, 48, 'Wednesday'),
+('10:00'::time, '2 hours'::interval, 48, 'Thursday'),
+('8:00'::time, '2 hours'::interval, 48, 'Saturday'),
+('10:00'::time, '2 hours'::interval, 49, 'Wednesday'),
+('8:00'::time, '1 hours'::interval, 49, 'Friday'),
+('10:00'::time, '2 hours'::interval, 49, 'Saturday'),
+('10:00'::time, '1 hours'::interval, 49, 'Sunday'),
+('8:00'::time, '1 hours'::interval, 50, 'Monday'),
+('8:00'::time, '1 hours'::interval, 50, 'Tuesday'),
+('9:00'::time, '1 hours'::interval, 50, 'Thursday'),
+('10:00'::time, '2 hours'::interval, 50, 'Saturday'),
+('10:00'::time, '3 hours'::interval, 51, 'Monday'),
+('10:00'::time, '3 hours'::interval, 51, 'Tuesday'),
+('10:00'::time, '3 hours'::interval, 51, 'Saturday'),
+('7:00'::time, '3 hours'::interval, 51, 'Sunday'),
+('9:00'::time, '3 hours'::interval, 52, 'Monday'),
+('8:00'::time, '3 hours'::interval, 52, 'Saturday'),
+('7:00'::time, '3 hours'::interval, 52, 'Sunday'),
+('8:00'::time, '2 hours'::interval, 53, 'Monday'),
+('8:00'::time, '2 hours'::interval, 53, 'Tuesday'),
+('11:00'::time, '2 hours'::interval, 53, 'Saturday'),
+('9:00'::time, '2 hours'::interval, 53, 'Sunday'),
+('8:00'::time, '2 hours'::interval, 54, 'Tuesday'),
+('7:00'::time, '2 hours'::interval, 54, 'Wednesday'),
+('7:00'::time, '2 hours'::interval, 54, 'Saturday'),
+('8:00'::time, '2 hours'::interval, 54, 'Sunday'),
+('6:00'::time, '3 hours'::interval, 55, 'Tuesday'),
+('6:00'::time, '3 hours'::interval, 55, 'Wednesday'),
+('9:00'::time, '3 hours'::interval, 55, 'Saturday'),
+('7:00'::time, '3 hours'::interval, 55, 'Sunday'),
+('8:00'::time, '3 hours'::interval, 56, 'Monday'),
+('9:00'::time, '3 hours'::interval, 56, 'Wednesday'),
+('10:00'::time, '3 hours'::interval, 56, 'Thursday'),
+('9:00'::time, '3 hours'::interval, 56, 'Saturday'),
+('10:00'::time, '3 hours'::interval, 57, 'Monday'),
+('10:00'::time, '3 hours'::interval, 57, 'Tuesday'),
+('11:00'::time, '3 hours'::interval, 57, 'Wednesday'),
+('9:00'::time, '3 hours'::interval, 57, 'Thursday'),
+('8:00'::time, '3 hours'::interval, 58, 'Monday'),
+('10:00'::time, '3 hours'::interval, 58, 'Tuesday'),
+('11:00'::time, '3 hours'::interval, 58, 'Friday'),
+('9:00'::time, '3 hours'::interval, 58, 'Sunday'),
+('11:00'::time, '2 hours'::interval, 59, 'Monday'),
+('7:00'::time, '3 hours'::interval, 59, 'Wednesday'),
+('10:00'::time, '2 hours'::interval, 59, 'Thursday'),
+('6:00'::time, '2 hours'::interval, 59, 'Friday'),
+('10:00'::time, '3 hours'::interval, 59, 'Saturday'),
+('10:00'::time, '3 hours'::interval, 60, 'Tuesday'),
+('8:00'::time, '3 hours'::interval, 60, 'Thursday'),
+('11:00'::time, '2 hours'::interval, 60, 'Saturday'),
+('7:00'::time, '0.5 hours'::interval, 61, 'Monday'),
+('20:00'::time, '0.5 hours'::interval, 61, 'Monday'),
+('8:00'::time, '0.5 hours'::interval, 61, 'Wednesday'),
+('22:00'::time, '0.5 hours'::interval, 61, 'Wednesday'),
+('7:00'::time, '0.5 hours'::interval, 61, 'Thursday'),
+('21:00'::time, '0.5 hours'::interval, 61, 'Thursday'),
+('8:00'::time, '0.5 hours'::interval, 62, 'Tuesday'),
+('20:00'::time, '0.5 hours'::interval, 62, 'Tuesday'),
+('8:00'::time, '0.5 hours'::interval, 62, 'Wednesday'),
+('23:00'::time, '0.5 hours'::interval, 62, 'Wednesday'),
+('7:00'::time, '0.5 hours'::interval, 62, 'Friday'),
+('19:00'::time, '0.5 hours'::interval, 62, 'Friday'),
+('11:00'::time, '0.5 hours'::interval, 62, 'Sunday'),
+('19:00'::time, '0.5 hours'::interval, 62, 'Sunday'),
+('6:00'::time, '3 hours'::interval, 63, 'Monday'),
+('8:00'::time, '3 hours'::interval, 63, 'Thursday'),
+('10:00'::time, '3 hours'::interval, 63, 'Saturday'),
+('8:00'::time, '3 hours'::interval, 64, 'Monday'),
+('7:00'::time, '3 hours'::interval, 64, 'Tuesday'),
+('11:00'::time, '3 hours'::interval, 64, 'Thursday'),
+('11:00'::time, '3 hours'::interval, 64, 'Saturday'),
+('9:00'::time, '3 hours'::interval, 65, 'Tuesday'),
+('6:00'::time, '3 hours'::interval, 65, 'Friday'),
+('6:00'::time, '3 hours'::interval, 65, 'Saturday'),
+('11:00'::time, '3 hours'::interval, 65, 'Sunday'),
+('11:00'::time, '3 hours'::interval, 66, 'Monday'),
+('8:00'::time, '3 hours'::interval, 66, 'Tuesday'),
+('10:00'::time, '3 hours'::interval, 66, 'Wednesday'),
+('6:00'::time, '3 hours'::interval, 66, 'Sunday'),
+('9:00'::time, '3 hours'::interval, 67, 'Thursday'),
+('10:00'::time, '2 hours'::interval, 67, 'Friday'),
+('9:00'::time, '3 hours'::interval, 67, 'Saturday'),
+('8:00'::time, '3 hours'::interval, 68, 'Monday'),
+('10:00'::time, '3 hours'::interval, 68, 'Tuesday'),
+('11:00'::time, '2 hours'::interval, 68, 'Thursday'),
+('10:00'::time, '2 hours'::interval, 68, 'Friday'),
+('6:00'::time, '3 hours'::interval, 68, 'Saturday'),
+('6:00'::time, '2 hours'::interval, 69, 'Monday'),
+('7:00'::time, '2 hours'::interval, 69, 'Tuesday'),
+('7:00'::time, '2 hours'::interval, 69, 'Sunday'),
+('11:00'::time, '2 hours'::interval, 70, 'Monday'),
+('10:00'::time, '2 hours'::interval, 70, 'Tuesday'),
+('7:00'::time, '2 hours'::interval, 70, 'Wednesday'),
+('11:00'::time, '2 hours'::interval, 70, 'Thursday'),
+('8:00'::time, '2 hours'::interval, 70, 'Saturday'),
+('9:00'::time, '2 hours'::interval, 71, 'Friday'),
+('6:00'::time, '2 hours'::interval, 71, 'Saturday'),
+('11:00'::time, '2 hours'::interval, 71, 'Sunday'),
+('9:00'::time, '2 hours'::interval, 72, 'Monday'),
+('6:00'::time, '2 hours'::interval, 72, 'Tuesday'),
+('6:00'::time, '2 hours'::interval, 72, 'Thursday'),
+('11:00'::time, '2 hours'::interval, 72, 'Saturday'),
+('7:00'::time, '2 hours'::interval, 72, 'Sunday'),
+('11:00'::time, '2 hours'::interval, 73, 'Monday'),
+('9:00'::time, '3 hours'::interval, 73, 'Tuesday'),
+('11:00'::time, '3 hours'::interval, 73, 'Wednesday'),
+('9:00'::time, '3 hours'::interval, 73, 'Sunday'),
+('9:00'::time, '2 hours'::interval, 74, 'Monday'),
+('8:00'::time, '3 hours'::interval, 74, 'Thursday'),
+('8:00'::time, '2 hours'::interval, 74, 'Saturday'),
+('9:00'::time, '3 hours'::interval, 74, 'Sunday'),
+('11:00'::time, '3 hours'::interval, 75, 'Tuesday'),
+('9:00'::time, '3 hours'::interval, 75, 'Wednesday'),
+('9:00'::time, '3 hours'::interval, 75, 'Sunday'),
+('6:00'::time, '3 hours'::interval, 76, 'Thursday'),
+('10:00'::time, '3 hours'::interval, 76, 'Saturday'),
+('6:00'::time, '3 hours'::interval, 76, 'Sunday'),
+('8:00'::time, '3 hours'::interval, 77, 'Monday'),
+('7:00'::time, '3 hours'::interval, 77, 'Wednesday'),
+('7:00'::time, '3 hours'::interval, 77, 'Thursday'),
+('11:00'::time, '3 hours'::interval, 77, 'Sunday'),
+('10:00'::time, '3 hours'::interval, 78, 'Monday'),
+('11:00'::time, '3 hours'::interval, 78, 'Thursday'),
+('7:00'::time, '3 hours'::interval, 78, 'Friday'),
+('9:00'::time, '3 hours'::interval, 79, 'Tuesday'),
+('7:00'::time, '2 hours'::interval, 79, 'Wednesday'),
+('8:00'::time, '3 hours'::interval, 79, 'Friday'),
+('6:00'::time, '3 hours'::interval, 79, 'Sunday'),
+('8:00'::time, '3 hours'::interval, 80, 'Wednesday'),
+('10:00'::time, '2 hours'::interval, 80, 'Thursday'),
+('8:00'::time, '2 hours'::interval, 80, 'Friday'),
+('10:00'::time, '2 hours'::interval, 80, 'Sunday'),
+('8:00'::time, '3 hours'::interval, 81, 'Tuesday'),
+('6:00'::time, '3 hours'::interval, 81, 'Thursday'),
+('9:00'::time, '3 hours'::interval, 81, 'Friday'),
+('9:00'::time, '3 hours'::interval, 82, 'Tuesday'),
+('11:00'::time, '3 hours'::interval, 82, 'Wednesday'),
+('8:00'::time, '3 hours'::interval, 82, 'Thursday'),
+('6:00'::time, '3 hours'::interval, 83, 'Monday'),
+('6:00'::time, '3 hours'::interval, 83, 'Thursday'),
+('10:00'::time, '3 hours'::interval, 83, 'Friday'),
+('7:00'::time, '3 hours'::interval, 83, 'Sunday'),
+('9:00'::time, '3 hours'::interval, 84, 'Monday'),
+('8:00'::time, '3 hours'::interval, 84, 'Thursday'),
+('7:00'::time, '3 hours'::interval, 84, 'Sunday'),
+('10:00'::time, '3 hours'::interval, 85, 'Monday'),
+('11:00'::time, '3 hours'::interval, 85, 'Wednesday'),
+('9:00'::time, '3 hours'::interval, 85, 'Thursday'),
+('8:00'::time, '3 hours'::interval, 85, 'Sunday'),
+('11:00'::time, '3 hours'::interval, 86, 'Monday'),
+('8:00'::time, '3 hours'::interval, 86, 'Tuesday'),
+('10:00'::time, '3 hours'::interval, 86, 'Thursday'),
+('11:00'::time, '3 hours'::interval, 86, 'Saturday'),
+('7:00'::time, '3 hours'::interval, 87, 'Wednesday'),
+('9:00'::time, '3 hours'::interval, 87, 'Friday'),
+('9:00'::time, '3 hours'::interval, 87, 'Saturday'),
+('11:00'::time, '3 hours'::interval, 88, 'Monday'),
+('10:00'::time, '3 hours'::interval, 88, 'Friday'),
+('9:00'::time, '3 hours'::interval, 88, 'Sunday'),
+('6:00'::time, '3 hours'::interval, 89, 'Monday'),
+('9:00'::time, '2 hours'::interval, 89, 'Tuesday'),
+('10:00'::time, '2 hours'::interval, 89, 'Wednesday'),
+('9:00'::time, '3 hours'::interval, 89, 'Saturday'),
+('6:00'::time, '2 hours'::interval, 90, 'Monday'),
+('11:00'::time, '2 hours'::interval, 90, 'Saturday'),
+('6:00'::time, '3 hours'::interval, 90, 'Sunday'),
+('11:00'::time, '2 hours'::interval, 91, 'Monday'),
+('9:00'::time, '2 hours'::interval, 91, 'Tuesday'),
+('8:00'::time, '2 hours'::interval, 91, 'Sunday'),
+('8:00'::time, '2 hours'::interval, 92, 'Monday'),
+('6:00'::time, '2 hours'::interval, 92, 'Tuesday'),
+('8:00'::time, '2 hours'::interval, 92, 'Friday'),
+('11:00'::time, '2 hours'::interval, 92, 'Sunday'),
+('7:00'::time, '3 hours'::interval, 93, 'Monday'),
+('9:00'::time, '3 hours'::interval, 93, 'Wednesday'),
+('9:00'::time, '3 hours'::interval, 93, 'Friday'),
+('11:00'::time, '3 hours'::interval, 93, 'Sunday'),
+('9:00'::time, '3 hours'::interval, 94, 'Monday'),
+('10:00'::time, '3 hours'::interval, 94, 'Tuesday'),
+('7:00'::time, '3 hours'::interval, 94, 'Saturday'),
+('10:00'::time, '3 hours'::interval, 94, 'Sunday'),
+('11:00'::time, '3 hours'::interval, 95, 'Tuesday'),
+('7:00'::time, '3 hours'::interval, 95, 'Wednesday'),
+('6:00'::time, '2 hours'::interval, 95, 'Thursday'),
+('11:00'::time, '3 hours'::interval, 95, 'Friday'),
+('10:00'::time, '2 hours'::interval, 96, 'Wednesday'),
+('6:00'::time, '2 hours'::interval, 96, 'Friday'),
+('9:00'::time, '3 hours'::interval, 96, 'Saturday'),
+('7:00'::time, '3 hours'::interval, 97, 'Tuesday'),
+('9:00'::time, '3 hours'::interval, 97, 'Wednesday'),
+('6:00'::time, '3 hours'::interval, 97, 'Thursday'),
+('7:00'::time, '3 hours'::interval, 97, 'Sunday'),
+('9:00'::time, '3 hours'::interval, 98, 'Tuesday'),
+('8:00'::time, '3 hours'::interval, 98, 'Wednesday'),
+('7:00'::time, '3 hours'::interval, 98, 'Thursday'),
+('7:00'::time, '2 hours'::interval, 99, 'Monday'),
+('9:00'::time, '3 hours'::interval, 99, 'Tuesday'),
+('9:00'::time, '3 hours'::interval, 99, 'Thursday'),
+('10:00'::time, '2 hours'::interval, 99, 'Friday'),
+('8:00'::time, '2 hours'::interval, 100, 'Tuesday'),
+('11:00'::time, '2 hours'::interval, 100, 'Wednesday'),
+('7:00'::time, '3 hours'::interval, 100, 'Thursday'),
+('9:00'::time, '2 hours'::interval, 100, 'Sunday'),
+('7:00'::time, '0.5 hours'::interval, 101, 'Wednesday'),
+('23:00'::time, '0.5 hours'::interval, 101, 'Wednesday'),
+('7:00'::time, '0.5 hours'::interval, 101, 'Thursday'),
+('21:00'::time, '1 hours'::interval, 101, 'Thursday'),
+('10:00'::time, '1 hours'::interval, 101, 'Saturday'),
+('22:00'::time, '1 hours'::interval, 101, 'Saturday'),
+('6:00'::time, '0.5 hours'::interval, 102, 'Monday'),
+('23:00'::time, '1 hours'::interval, 102, 'Monday'),
+('8:00'::time, '1 hours'::interval, 102, 'Tuesday'),
+('22:00'::time, '1 hours'::interval, 102, 'Tuesday'),
+('6:00'::time, '0.5 hours'::interval, 102, 'Wednesday'),
+('23:00'::time, '0.5 hours'::interval, 102, 'Wednesday'),
+('6:00'::time, '0.5 hours'::interval, 102, 'Friday'),
+('23:00'::time, '1 hours'::interval, 102, 'Friday'),
+('7:00'::time, '1 hours'::interval, 102, 'Saturday'),
+('18:00'::time, '0.5 hours'::interval, 102, 'Saturday'),
+('8:00'::time, '1 hours'::interval, 103, 'Monday'),
+('9:00'::time, '1 hours'::interval, 103, 'Wednesday'),
+('8:00'::time, '2 hours'::interval, 103, 'Thursday'),
+('11:00'::time, '2 hours'::interval, 103, 'Friday'),
+('9:00'::time, '1 hours'::interval, 103, 'Sunday'),
+('11:00'::time, '2 hours'::interval, 104, 'Wednesday'),
+('8:00'::time, '1 hours'::interval, 104, 'Thursday'),
+('10:00'::time, '2 hours'::interval, 104, 'Friday'),
+('10:00'::time, '1 hours'::interval, 104, 'Sunday'),
+('9:00'::time, '2 hours'::interval, 105, 'Monday'),
+('11:00'::time, '2 hours'::interval, 105, 'Tuesday'),
+('8:00'::time, '2 hours'::interval, 105, 'Thursday'),
+('8:00'::time, '2 hours'::interval, 105, 'Sunday'),
+('8:00'::time, '2 hours'::interval, 106, 'Thursday'),
+('8:00'::time, '2 hours'::interval, 106, 'Friday'),
+('10:00'::time, '2 hours'::interval, 106, 'Saturday'),
+('11:00'::time, '2 hours'::interval, 106, 'Sunday'),
+('11:00'::time, '3 hours'::interval, 107, 'Monday'),
+('11:00'::time, '3 hours'::interval, 107, 'Tuesday'),
+('10:00'::time, '3 hours'::interval, 107, 'Wednesday'),
+('7:00'::time, '3 hours'::interval, 107, 'Friday'),
+('6:00'::time, '3 hours'::interval, 108, 'Monday'),
+('11:00'::time, '3 hours'::interval, 108, 'Thursday'),
+('7:00'::time, '3 hours'::interval, 108, 'Friday'),
+('8:00'::time, '1 hours'::interval, 109, 'Monday'),
+('8:00'::time, '1 hours'::interval, 109, 'Friday'),
+('9:00'::time, '2 hours'::interval, 110, 'Tuesday'),
+('7:00'::time, '2 hours'::interval, 110, 'Thursday'),
+('7:00'::time, '2 hours'::interval, 110, 'Friday'),
+('7:00'::time, '2 hours'::interval, 110, 'Saturday'),
+('11:00'::time, '2 hours'::interval, 110, 'Sunday'),
+('11:00'::time, '2 hours'::interval, 111, 'Wednesday'),
+('8:00'::time, '2 hours'::interval, 111, 'Thursday'),
+('9:00'::time, '2 hours'::interval, 111, 'Friday'),
+('9:00'::time, '2 hours'::interval, 111, 'Sunday'),
+('9:00'::time, '2 hours'::interval, 112, 'Monday'),
+('11:00'::time, '2 hours'::interval, 112, 'Wednesday'),
+('7:00'::time, '2 hours'::interval, 112, 'Thursday'),
+('6:00'::time, '2 hours'::interval, 112, 'Sunday'),
+('9:00'::time, '1 hours'::interval, 113, 'Monday'),
+('10:00'::time, '2 hours'::interval, 113, 'Tuesday'),
+('7:00'::time, '2 hours'::interval, 113, 'Wednesday'),
+('6:00'::time, '1 hours'::interval, 113, 'Thursday'),
+('8:00'::time, '1 hours'::interval, 113, 'Saturday'),
+('9:00'::time, '2 hours'::interval, 113, 'Sunday'),
+('11:00'::time, '1 hours'::interval, 114, 'Tuesday'),
+('10:00'::time, '1 hours'::interval, 114, 'Thursday'),
+('11:00'::time, '2 hours'::interval, 114, 'Friday'),
+('11:00'::time, '1 hours'::interval, 114, 'Saturday'),
+('9:00'::time, '2 hours'::interval, 114, 'Sunday'),
+('10:00'::time, '2 hours'::interval, 115, 'Monday'),
+('7:00'::time, '2 hours'::interval, 115, 'Tuesday'),
+('8:00'::time, '2 hours'::interval, 115, 'Wednesday'),
+('11:00'::time, '2 hours'::interval, 115, 'Friday'),
+('8:00'::time, '1 hours'::interval, 115, 'Saturday'),
+('8:00'::time, '2 hours'::interval, 116, 'Tuesday'),
+('10:00'::time, '2 hours'::interval, 116, 'Thursday'),
+('9:00'::time, '2 hours'::interval, 116, 'Saturday'),
+('6:00'::time, '2 hours'::interval, 116, 'Sunday'),
+('9:00'::time, '2 hours'::interval, 117, 'Monday'),
+('8:00'::time, '3 hours'::interval, 117, 'Wednesday'),
+('11:00'::time, '3 hours'::interval, 117, 'Thursday'),
+('10:00'::time, '2 hours'::interval, 117, 'Saturday'),
+('10:00'::time, '2 hours'::interval, 118, 'Monday'),
+('6:00'::time, '2 hours'::interval, 118, 'Tuesday'),
+('10:00'::time, '2 hours'::interval, 118, 'Thursday'),
+('6:00'::time, '3 hours'::interval, 118, 'Friday'),
+('9:00'::time, '2 hours'::interval, 119, 'Tuesday'),
+('9:00'::time, '2 hours'::interval, 119, 'Wednesday'),
+('8:00'::time, '2 hours'::interval, 119, 'Thursday'),
+('9:00'::time, '2 hours'::interval, 119, 'Saturday'),
+('9:00'::time, '2 hours'::interval, 120, 'Tuesday'),
+('7:00'::time, '2 hours'::interval, 120, 'Wednesday'),
+('6:00'::time, '2 hours'::interval, 120, 'Thursday'),
+('6:00'::time, '2 hours'::interval, 120, 'Friday'),
+('8:00'::time, '1 hours'::interval, 121, 'Tuesday'),
+('8:00'::time, '1 hours'::interval, 121, 'Wednesday'),
+('10:00'::time, '2 hours'::interval, 121, 'Thursday'),
+('7:00'::time, '2 hours'::interval, 121, 'Friday'),
+('9:00'::time, '2 hours'::interval, 121, 'Sunday'),
+('8:00'::time, '2 hours'::interval, 122, 'Monday'),
+('9:00'::time, '1 hours'::interval, 122, 'Tuesday'),
+('10:00'::time, '2 hours'::interval, 122, 'Wednesday'),
+('7:00'::time, '1 hours'::interval, 122, 'Saturday'),
+('8:00'::time, '2 hours'::interval, 122, 'Sunday'),
+('8:00'::time, '1 hours'::interval, 123, 'Monday'),
+('10:00'::time, '1 hours'::interval, 123, 'Friday'),
+('8:00'::time, '2 hours'::interval, 123, 'Sunday'),
+('7:00'::time, '2 hours'::interval, 124, 'Tuesday'),
+('8:00'::time, '1 hours'::interval, 124, 'Friday'),
+('8:00'::time, '1 hours'::interval, 124, 'Saturday'),
+('10:00'::time, '1 hours'::interval, 124, 'Sunday'),
+('10:00'::time, '2 hours'::interval, 125, 'Monday'),
+('9:00'::time, '3 hours'::interval, 125, 'Thursday'),
+('7:00'::time, '3 hours'::interval, 125, 'Friday'),
+('8:00'::time, '3 hours'::interval, 125, 'Sunday'),
+('7:00'::time, '2 hours'::interval, 126, 'Tuesday'),
+('11:00'::time, '3 hours'::interval, 126, 'Thursday'),
+('8:00'::time, '2 hours'::interval, 126, 'Saturday'),
+('9:00'::time, '2 hours'::interval, 127, 'Tuesday'),
+('10:00'::time, '2 hours'::interval, 127, 'Wednesday'),
+('7:00'::time, '2 hours'::interval, 127, 'Saturday'),
+('11:00'::time, '2 hours'::interval, 128, 'Monday'),
+('6:00'::time, '2 hours'::interval, 128, 'Wednesday'),
+('9:00'::time, '2 hours'::interval, 128, 'Thursday'),
+('7:00'::time, '2 hours'::interval, 128, 'Saturday'),
+('8:00'::time, '0.5 hours'::interval, 129, 'Tuesday'),
+('21:00'::time, '0.5 hours'::interval, 129, 'Tuesday'),
+('10:00'::time, '0.5 hours'::interval, 129, 'Wednesday'),
+('23:00'::time, '0.5 hours'::interval, 129, 'Wednesday'),
+('7:00'::time, '0.5 hours'::interval, 129, 'Thursday'),
+('18:00'::time, '0.5 hours'::interval, 129, 'Thursday'),
+('8:00'::time, '0.5 hours'::interval, 129, 'Friday'),
+('20:00'::time, '0.5 hours'::interval, 129, 'Friday'),
+('8:00'::time, '0.5 hours'::interval, 130, 'Monday'),
+('19:00'::time, '0.5 hours'::interval, 130, 'Monday'),
+('8:00'::time, '0.5 hours'::interval, 130, 'Tuesday'),
+('21:00'::time, '0.5 hours'::interval, 130, 'Tuesday'),
+('9:00'::time, '0.5 hours'::interval, 130, 'Thursday'),
+('18:00'::time, '0.5 hours'::interval, 130, 'Thursday'),
+('11:00'::time, '0.5 hours'::interval, 130, 'Friday'),
+('23:00'::time, '0.5 hours'::interval, 130, 'Friday'),
+('6:00'::time, '0.5 hours'::interval, 130, 'Saturday'),
+('19:00'::time, '0.5 hours'::interval, 130, 'Saturday'),
+('7:00'::time, '0.5 hours'::interval, 130, 'Sunday'),
+('22:00'::time, '0.5 hours'::interval, 130, 'Sunday'),
+('9:00'::time, '3 hours'::interval, 131, 'Monday'),
+('8:00'::time, '3 hours'::interval, 131, 'Tuesday'),
+('8:00'::time, '3 hours'::interval, 131, 'Sunday'),
+('10:00'::time, '3 hours'::interval, 132, 'Monday'),
+('6:00'::time, '3 hours'::interval, 132, 'Wednesday'),
+('10:00'::time, '3 hours'::interval, 132, 'Sunday'),
+('9:00'::time, '2 hours'::interval, 133, 'Tuesday'),
+('7:00'::time, '2 hours'::interval, 133, 'Thursday'),
+('11:00'::time, '2 hours'::interval, 133, 'Friday'),
+('6:00'::time, '2 hours'::interval, 133, 'Saturday'),
+('9:00'::time, '2 hours'::interval, 134, 'Wednesday'),
+('6:00'::time, '2 hours'::interval, 134, 'Friday'),
+('7:00'::time, '2 hours'::interval, 134, 'Saturday');
 
 -- all about reservations
 INSERT INTO reservations(id, "user", date_reservation) VALUES
@@ -5145,4 +5477,12 @@ INSERT INTO seat_reservation(seat, transit_reservation_id) VALUES
 (3, 799),
 (1, 800);
 
--- end of file
+select setval('reservation_id_seq', 401);
+
+select setval('transit_reservation_id_seq', 801);
+
+select setval('cities_id_seq', 31);
+
+select setval('span_id', 140);
+
+select setval('stops_id_seq', 100);

@@ -4611,3 +4611,10 @@ select setval('reservation_id_seq', 401);
 select setval('transit_reservation_id_seq', 801);
 
 select setval('cities_id_seq', 31);
+
+select setval('span_id', 140);
+
+select setval('stops_id_seq', 40);
+
+select t.id_transit itr, dbs.stop_name stop1, abs.stop_name stop2
+    from transits t join bus_stops abs on t.arrival_stop = abs.id join bus_stops dbs on t.departure_stop = dbs.id;
