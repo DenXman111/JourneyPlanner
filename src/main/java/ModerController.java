@@ -8,6 +8,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import javax.sound.sampled.Line;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
@@ -126,8 +127,10 @@ public class ModerController implements Initializable{
     private Button DeleteSpanFromLineButton;
 
     @FXML
-
     private Button DeleteLineButton;
+
+    @FXML
+    private Button ShowSpansFromLineButton;
 
     void setPrevStage(Stage stage){
         this.prevStage = stage;
@@ -301,7 +304,8 @@ public class ModerController implements Initializable{
     @FXML
     void ShowLines(){
         try{
-            DbAdapter.getLines();
+            String line=DbAdapter.getLines();
+            new LinesWindow(line);
         }
         catch(Exception e) {
             new ErrorWindow(e.getMessage());
@@ -309,17 +313,18 @@ public class ModerController implements Initializable{
     }
 
     @FXML
-    void deleteBusByParametersPressed() {
-        try{
-            if (CityCChoiceBox.getValue() == null) throw new FieldsDataException("Set departure city");
-            if (CityDChoiceBox.getValue() == null) throw new FieldsDataException("Set arrival city");
-            new ErrorWindow("Deleted!");
-        } catch (FieldsDataException e){
+    void ShowSpansFromLine(){
+        try {
+            if (DTransitField.getText().length() == 0) throw new FieldsDataException("No line chosen");
+            if (!DTransitField.getText().matches("\\d+")) throw new FieldsDataException("Write a number to line field");
+            String spans=DbAdapter.getSpans(Integer.valueOf(DTransitField.getText()));
+            new LinesWindow(spans);
+        }
+        catch (FieldsDataException e){
             new ErrorWindow(e.getMessage());
         }
-        catch (Exception e)
-        {
-            new ErrorWindow("Wrong bus parameters");
+        catch(SQLException e){
+            new ErrorWindow(e.getMessage());
         }
     }
 
@@ -331,4 +336,7 @@ public class ModerController implements Initializable{
     public void ManageCitiesClicked() throws IOException {
         StageChanger.changeStage(StageChanger.ApplicationStage.CITIES_MODER);
     }
+
+
+
 }

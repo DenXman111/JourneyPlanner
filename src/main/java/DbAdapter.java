@@ -403,13 +403,38 @@ public class DbAdapter {
         }
     }
 
-    public static void getLines() throws SQLException {
+    public static String getLines() throws SQLException {
         Statement statement = connection.createStatement();
         String query = "Select id_transit, departure_stop, arrival_stop from transits";
         ResultSet result = statement.executeQuery(query);
+        String res="Line: D. Stop  A.Stop\n";
         while (result.next()) {
-            System.out.println(result.getInt("id_transit")+" "+result.getString("departure_stop")+" "+result.getString("arrival_stop"));
+            System.out.println(result.getInt("id_transit")+"    "+result.getString("departure_stop")+"      "+result.getString("arrival_stop"));
+            String t1=""+result.getInt("id_transit");
+            while(t1.length()<7)
+                t1=t1+" ";
+            t1+=result.getString("departure_stop");
+            while(t1.length()<21)
+                t1=t1+" ";
+            res=res+t1+result.getString("arrival_stop")+"\n";
+
         }
+        return res;
+    }
+
+    public static String getSpans(int id) throws SQLException {
+        Statement statement = connection.createStatement();
+        String query = "Select begin_date, end_date from spans where transit=\'"+id+"\'";
+        ResultSet result = statement.executeQuery(query);
+        String res="Start Date            End Date\n";
+        while (result.next()) {
+            System.out.println(result.getString("begin_date")+"      "+result.getString("end_date"));
+            String t1=result.getString("begin_date");
+            while(t1.length()<20)
+                t1=t1+" ";
+            res=res+t1+result.getString("end_date")+"\n";
+        }
+        return res;
     }
 
     public static boolean userExists(String username, String password) throws SQLException {
