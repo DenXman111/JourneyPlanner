@@ -259,7 +259,7 @@ public class ModerController implements Initializable{
             new ErrorWindow(e.getMessage());
         }
         catch (SQLException e){
-            new ErrorWindow("Wrong input data!");
+            new ErrorWindow(e.getMessage());
         }
     }
 
