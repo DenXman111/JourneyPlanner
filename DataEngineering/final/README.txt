@@ -64,6 +64,7 @@ Krzysztof Mrzigod
 ---- Etap 2 ----
 
 
+https://github.com/DenXman111/JourneyPlanner
 
 
 
@@ -83,13 +84,20 @@ Krzysztof Mrzigod
     3.5 Wyswietlanie wszystkich przedzialow czasowych przypisanych do danej linii
 
 
+Denis Pivovarov:
+1. Całkiem mapa
+2. Log in
+3. Sign up
+4. Inne rzeczy (widać w historii commit'ów na github)
+
+
 Łukasz Selwa
 
 Mechanizm rezerwowania znalezionych podróży
 	1.1 Znajdowanie i rezerwowanie pierwszych k wolnych miejsc
 dla każdego wypranego przejazdu lub rzucanie wyjątkiem jeśli się nie da.
 	1.2 Mechanizm anulowania rezerwacji
-2. System logowania (w tym logowania jako moderator)
+2. poprawiony system logowania (w tym logowania jako moderator)
 3. Strona zarządzania miastami i przystankami
 	3.1 Zmienianie nazw miast, kraju, oceny miast i średniej ceny za noc w hotelu
 	3.2 Usuwanie miast, które jest dozwolone tylko jeśli nie ma przystanku autobusowego w bazie wskazującego na to miast
