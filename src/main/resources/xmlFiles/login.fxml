@@ -23,7 +23,7 @@
       <RowConstraints maxHeight="-Infinity" minHeight="10.0" vgrow="SOMETIMES"/>
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
    </rowConstraints>
-   <Button fx:id="ReturnButton" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxHeight="-Infinity"
+   <Button fx:id="returnButton" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxHeight="-Infinity"
            maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
            onAction="#returnButtonPressed" styleClass="image-button" GridPane.halignment="RIGHT">
       <graphic>
@@ -55,7 +55,7 @@
                <Insets left="20.0"/>
             </VBox.margin>
          </PasswordField>
-         <Button fx:id="ModerLoginButton" mnemonicParsing="false" onAction="#loginAsModeratorPressed"
+         <Button fx:id="moderLoginButton" mnemonicParsing="false" onAction="#loginAsModeratorPressed"
                  style="-fx-background-color: null;" text="Login as moderator" textFill="#11836c">
             <VBox.margin>
                <Insets left="200.0"/>
@@ -65,8 +65,8 @@
             </padding>
          </Button>
       </VBox>
-      <Button fx:id="LoginButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false"
-              onAction="#findButtonPressed" prefHeight="50.0" prefWidth="195.0"
+      <Button fx:id="loginButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false"
+              onAction="#loginButtonPressed" prefHeight="50.0" prefWidth="195.0"
               style="-fx-background-radius: 20; -fx-background-insets: 0, 1, 1;" styleClass="mainButton" text="Find"
               textFill="#14a085">
          <font>
@@ -76,8 +76,8 @@
             <Insets top="70.0"/>
          </VBox.margin>
       </Button>
-      <Button fx:id="ShowHistoryButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false"
-              onAction="#showHistoryButtonPressed" prefHeight="50.0" prefWidth="195.0"
+      <Button fx:id="showHistoryButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false"
+              onAction="#loginButtonPressed" prefHeight="50.0" prefWidth="195.0"
               style="-fx-background-radius: 20; -fx-background-insets: 0, 1, 1;" styleClass="mainButton"
               text="Show history" textFill="#14a085">
          <font>

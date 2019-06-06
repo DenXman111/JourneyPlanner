@@ -1,5 +1,6 @@
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
@@ -12,10 +13,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class LoginController {
-    public Button ReturnButton;
-    public Button ModerLoginButton;
-    public Button ShowHistoryButton;
-    public Button LoginButton;
+    public Button returnButton;
+    public Button moderLoginButton;
+    public Button showHistoryButton;
+    public Button loginButton;
     static String username = null;
 
     @FXML
@@ -31,31 +32,32 @@ public class LoginController {
     private VBox loginBox;
 
     @FXML
-    void returnButtonPressed() throws IOException{
+    void returnButtonPressed() throws IOException {
         StageChanger.changeStage(StageChanger.ApplicationStage.WELCOME);
     }
 
     @FXML
-    void findButtonPressed(){
+    void loginButtonPressed(ActionEvent actionEvent ){
 
         loginBox.setVisible(false);
         Task<Integer> loginTask = new Task<Integer>() {
             @Override
-            protected Integer call() {
-
+            protected Integer call() throws SQLException {
+                boolean loginResult = DbAdapter.userExists(UsernameField.getText(), PasswordField.getText());
                 Platform.runLater(() -> {
                     try {
-                        if (!DbAdapter.userExists(UsernameField.getText(), PasswordField.getText())) throw new FieldsDataException("User data wrong");
+                        if (!loginResult) throw new FieldsDataException("User data wrong");
                         Stage stage = new Stage();
                         stage.setTitle("Main");
                         username = UsernameField.getText();
 
-                        StageChanger.changeStage(StageChanger.ApplicationStage.FORM);
+                        if (actionEvent.getSource().equals(loginButton))
+                            StageChanger.changeStage(StageChanger.ApplicationStage.FORM);
+                        else
+                            StageChanger.changeStage(StageChanger.ApplicationStage.HISTORY);
 
                     } catch (FieldsDataException e){
                         new ErrorWindow(e.getMessage());
-                    } catch (SQLException e) {
-                        new ErrorWindow("Connection error");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -70,28 +72,32 @@ public class LoginController {
     }
 
     @FXML
-    void loginAsModeratorPressed() throws IOException{
-        try{
-            if (!DbAdapter.loginModerator(UsernameField.getText(), PasswordField.getText())) throw new FieldsDataException("User data wrong");
+    void loginAsModeratorPressed() {
+        loginBox.setVisible(false);
+        Task<Integer> loginTask = new Task<Integer>() {
+            @Override
+            protected Integer call() throws SQLException {
+                boolean loginResult = DbAdapter.loginModerator(UsernameField.getText(), PasswordField.getText());
+                Platform.runLater(() -> {
+                    try {
+                        if (!loginResult) throw new FieldsDataException("User data wrong");
+                        Stage stage = new Stage();
+                        stage.setTitle("Main");
+                        username = UsernameField.getText();
 
-            StageChanger.changeStage(StageChanger.ApplicationStage.MODER);
-        } catch (FieldsDataException e){
-            new ErrorWindow(e.getMessage());
-        } catch (SQLException e) {
-            new ErrorWindow("Connection error");
-        }
-    }
+                        StageChanger.changeStage(StageChanger.ApplicationStage.MODER);
 
-    @FXML
-    void showHistoryButtonPressed() throws IOException{
-        try{
-            if (!DbAdapter.userExists(UsernameField.getText(), PasswordField.getText())) throw new FieldsDataException("User data wrong");
-            username=UsernameField.getText();
-            StageChanger.changeStage(StageChanger.ApplicationStage.HISTORY);
-        } catch (FieldsDataException e){
-            new ErrorWindow(e.getMessage());
-        } catch (SQLException e) {
-            new ErrorWindow("Connection error");
-        }
+                    } catch (FieldsDataException e){
+                        new ErrorWindow(e.getMessage());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    loginBox.setVisible(true);
+                });
+                return 100;
+            }
+        };
+        progressIndicator.progressProperty().bind(loginTask.progressProperty());
+        Main.executors.submit(loginTask);
     }
 }

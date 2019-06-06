@@ -55,4 +55,18 @@ public class StageChanger {
     public static void changeStage(ApplicationStage appStage) throws IOException {
         changeStage(currentStage, appStage.url, appStage.title);
     }
+
+    protected static Trip tripToDisplay;
+    public static void displayMapWindow(Trip trip) throws IOException {
+        tripToDisplay = trip;
+
+        FXMLLoader myLoader = new FXMLLoader(Main.class.getResource("/xmlFiles/map.fxml"));
+        Pane myPane = myLoader.load();
+
+        Scene scene = new Scene(myPane);
+        Stage stage = new Stage();
+        stage.setTitle("Map");
+        stage.setScene(scene);
+        stage.show();
+    }
 }
