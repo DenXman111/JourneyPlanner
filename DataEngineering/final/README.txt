@@ -62,6 +62,7 @@ Krzysztof Mrzigod
 ---- Etap 2 ----
 
 
+https://github.com/DenXman111/JourneyPlanner
 
 
 
@@ -79,3 +80,10 @@ Krzysztof Mrzigod
     3.3 Usuwanie rezerwacji zwiazanych z usuwanymi elementami
     3.4 Wyswietlanie wszystkich linii autobusowych obecnie w bazie
     3.5 Wyswietlanie wszystkich przedzialow czasowych przypisanych do danej linii
+
+
+Denis Pivovarov:
+1. Całkiem mapa
+2. Log in
+3. Sign up
+4. Inne rzeczy (widać w historii commit'ów na github)

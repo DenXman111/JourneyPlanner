@@ -23,7 +23,5 @@ https://jdbc.postgresql.org/download.html
     
     --module-path ${PATH_TO_FX} --add-modules=javafx.controls,javafx.web,javafx.fxml
     
-    
-4. If you want use elements from .jar in Scene Builder you should add .jar to Scene Builder.
 
-5. If you work on IntelliJ install cloud code plugin by google
+4. If you work on IntelliJ install cloud code plugin by google
