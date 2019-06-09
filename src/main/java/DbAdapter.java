@@ -400,23 +400,21 @@ public class DbAdapter {
         }
     }
 
-    public static String getLines() throws SQLException {
+    public static List<Line> getLines() throws SQLException {
         Statement statement = connection.createStatement();
         String query = "select * from lines";
         ResultSet result = statement.executeQuery(query);
-        String res="Line:                 Departure Stop                                                                  ArrivalStop\n";
+        List<Line> lines = new ArrayList<>();
         while (result.next()) {
             System.out.println(result.getInt("itr")+"    "+result.getString("stop1")+"      "+result.getString("stop2"));
-            String t1=""+result.getInt("itr");
-            while(t1.length()<7)
-                t1=t1+" ";
-            t1+=result.getString("stop1");
-            while(t1.length()<60)
-                t1=t1+" ";
-            res=res+t1+result.getString("stop2")+"\n";
-
+            Line line = new Line(
+                    result.getInt("itr"),
+                    result.getString("stop1"),
+                    result.getString("stop2")
+            );
+            lines.add(line);
         }
-        return res;
+        return lines;
     }
 
     public static String getSpans(int id) throws SQLException {
