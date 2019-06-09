@@ -1,5 +1,25 @@
 # JourneyPlanner
 
+1. full description tba.
+
+# Starting the application
+
+1. If you're using Linux/macOS you can simply download folder runApp and run the Bash script run.sh. The script will guide you with all the necessary downloads and then it will start the application.
+
+2. Windows tba.
+
+# Using the JourneyPlanner application 
+
+1. To log in as a moderator go to the 'LogIn' window and fill text areas:
+   
+   username: **admin1**
+   
+   password: **admin1**
+   
+   Then press 'login as a moderator'.
+
+# IDE preparations 
+
 to work on this project:
 
 1. Download the appropriate JDK 11 and JavaFX SDK for your operating system.
