@@ -7,6 +7,7 @@ import javafx.scene.layout.VBox;
 
 import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
@@ -112,22 +113,52 @@ public class Planner extends Task<Integer> {
             return tripsList;
         }
 
-        private void dfs(City currentCity, double fund, Timestamp currentDate, Timestamp tripEndingDate) {
+        private boolean isSimple(Trip t1, Trip t2){
+            if (Math.abs(t1.getPlan().size() - t2.getPlan().size()) > 1) return false;
+            int count = 0;
+            for (Edge e1 : t1.getPlan())
+                for (Edge e2 : t2.getPlan())
+                    if (e1.getEndCity().equals(e2.getEndCity())) ++count;
 
+            return Math.max(t1.getPlan().size(), t2.getPlan().size()) - count <= 1;
+        }
+
+        private double getSimpleTripRating(){
+            double rating = -1;
+            for (Trip trip : tripsList) if (isSimple(trip, current)) rating = Math.max(rating, current.getRating());
+            return rating;
+        }
+
+        private void eraseSimpleTrips(){
+            for (Trip trip : tripsList) if (isSimple(trip, current)){
+                tripsList.remove(trip);
+                eraseSimpleTrips();
+                break;
+            }
+        }
+
+
+        private long timeOfLastAdding;
+
+        private void dfs(City currentCity, double fund, Timestamp currentDate, Timestamp tripEndingDate) {
+            if (System.currentTimeMillis() - timeOfLastAdding > 4000) return;
             //if(tripsList.size() >= maxTripsNumber) return; //BAD - don't find best ways
 
             inCurrent.add(currentCity);
-            if (currentCity.getID().equals(start) && !current.isEmpty()){
-               System.out.println("Found trip " + currentCity.getID() + " " + current.getRating() + " " + current.getPlan());
-                tripsList.add(new Trip(current));
-                if(tripsList.size() > maxTripsNumber) tripsList.remove(tripsList.first());
+            if (currentCity.getID().equals(start) && !current.isEmpty())
+                if (getSimpleTripRating() < current.getRating()){
+                    System.out.println("Found trip " + currentCity.getID() + " " + current.getRating() + " " + current.getPlan());
+                    timeOfLastAdding = System.currentTimeMillis();
+                    eraseSimpleTrips();
+                    tripsList.add(new Trip(current));
+                    if(tripsList.size() > maxTripsNumber) tripsList.remove(tripsList.first());
 
-                //used for progress bar
-                updateProgress(tripsList.size(), maxTripsNumber);
+                    //used for progress bar
+                    updateProgress(tripsList.size(), maxTripsNumber);
 
-                inCurrent.remove(currentCity);
-                return;
-            }
+                    inCurrent.remove(currentCity);
+                    return;
+                }
 
             //System.out.println("dfs in " + currentCity.getID() + " " + fund + " " + currentDate + " " + current.getRating());
 
@@ -137,23 +168,27 @@ public class Planner extends Task<Integer> {
             }
 
             if (!map.containsKey(currentCity.getID())){
-                //System.out.println("No neighbours");
                 inCurrent.remove(currentCity);
                 return;
             }
-            List < Edge > neighbours = map.get(currentCity.getID());
-            //System.out.println("list size: :" + neighbours.size());
-            for (Edge e : neighbours){
-                if (e.getEndTime().after(tripEndingDate)) continue;
-                if (!e.getStartTime().after(currentDate)) continue;
-                if (!current.isEmpty() && (int)HOURS.between(currentDate.toLocalDateTime(), e.getStartTime().toLocalDateTime()) < 2) continue; //Time to change bus -- min 1 hour
-                if (e.getPrice() > fund) continue;
-                if (inCurrent.contains(e.getEndCity()) && !e.getEndCity().getID().equals(start)) continue;
-                double livingPrice = current.getLivingPrice(e);
-                if (fund < e.getPrice() + livingPrice) continue;
-                current.pushEdge(e);
-                dfs(e.getEndCity(), fund - e.getPrice() - livingPrice, e.getEndTime(), tripEndingDate);
-                current.removeLastEdge();
+            if (current.getPlan().size() < 7){ // Trips with length > 7 not interesting
+                List<Edge> neighbours = map.get(currentCity.getID());
+                Collections.shuffle(neighbours, new Random());
+                //System.out.println("list size: :" + neighbours.size());
+
+                for (Edge e : neighbours) {
+                    if (e.getEndTime().after(tripEndingDate)) continue;
+                    if (!e.getStartTime().after(currentDate)) continue;
+                    if (!current.isEmpty() && (int) HOURS.between(currentDate.toLocalDateTime(), e.getStartTime().toLocalDateTime()) < 2)
+                        continue; //Time to change bus -- min 1 hour
+                    if (e.getPrice() > fund) continue;
+                    if (inCurrent.contains(e.getEndCity()) && !e.getEndCity().getID().equals(start)) continue;
+                    double livingPrice = current.getLivingPrice(e);
+                    if (fund < e.getPrice() + livingPrice) continue;
+                    current.pushEdge(e);
+                    dfs(e.getEndCity(), fund - e.getPrice() - livingPrice, e.getEndTime(), tripEndingDate);
+                    current.removeLastEdge();
+                }
             }
 
             inCurrent.remove(currentCity);
@@ -161,6 +196,7 @@ public class Planner extends Task<Integer> {
         @SuppressWarnings("WeakerAccess")
         public void findBest(Integer startID, double fund, LocalDate startDate, LocalDate endingDate) throws SQLException, DatabaseException {
             start = startID;
+            timeOfLastAdding = System.currentTimeMillis();
             dfs(DbAdapter.getCityFromID(startID), fund, Timestamp.valueOf(startDate.atStartOfDay()), Timestamp.valueOf(endingDate.atStartOfDay()));
         }
     }
