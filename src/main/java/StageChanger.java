@@ -4,6 +4,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
 public class StageChanger {
@@ -20,7 +21,7 @@ public class StageChanger {
 
         LOGIN("xmlFiles/login.fxml", "login", true),
 
-        MODER("xmlFiles/moder.fxml", "transits management", false),
+        MODER("xmlFiles/moder.fxml", "transits management", true),
 
         SIGN_UP("xmlFiles/signUp.fxml", "sign up", true),
 
@@ -69,6 +70,19 @@ public class StageChanger {
         Scene scene = new Scene(myPane);
         Stage stage = new Stage();
         stage.setTitle("Map");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    public static void displayLinesWindow(List<Line> lines) throws IOException {
+        LinesController.setLines(lines);
+
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource("xmlFiles/lines.fxml"));
+        Pane pane = loader.load();
+
+        Scene scene = new Scene(pane);
+        Stage stage = new Stage();
+        stage.setTitle("lines");
         stage.setScene(scene);
         stage.show();
     }

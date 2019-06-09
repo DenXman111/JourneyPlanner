@@ -9,14 +9,13 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.ResourceBundle;
 
 @SuppressWarnings("unused")
 public class ModerController implements Initializable{
-    private Stage prevStage;
     @FXML
     private Button ReturnButton;
 
@@ -132,7 +131,6 @@ public class ModerController implements Initializable{
     private Button ShowSpansFromLineButton;
 
     void setPrevStage(Stage stage){
-        this.prevStage = stage;
     }
 
     @SuppressWarnings("UnusedAssignment")
@@ -306,8 +304,8 @@ public class ModerController implements Initializable{
     @FXML
     void ShowLines(){
         try{
-            String line=DbAdapter.getLines();
-            new LinesWindow(line);
+            List<Line> lines = DbAdapter.getLines();
+            StageChanger.displayLinesWindow(lines);
         }
         catch(Exception e) {
             new ErrorWindow(e.getMessage());
