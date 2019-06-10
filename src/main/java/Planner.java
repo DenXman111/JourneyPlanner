@@ -144,7 +144,7 @@ public class Planner extends Task<Integer> {
             if (System.currentTimeMillis() - timeOfLastAdding > 4000) return;
 
             inCurrent.add(currentCity);
-            if (currentCity.getID().equals(start) && !current.isEmpty())
+            if (currentCity.getID().equals(start) && !current.isEmpty()){
                 if (getSimpleTripRating() < current.getRating()){
                     System.out.println("Found trip " + currentCity.getID() + " " + current.getRating() + " " + current.getPlan());
                     timeOfLastAdding = System.currentTimeMillis();
@@ -154,10 +154,10 @@ public class Planner extends Task<Integer> {
 
                     //used for progress bar
                     updateProgress(tripsList.size(), maxTripsNumber);
-
-                    inCurrent.remove(currentCity);
-                    return;
                 }
+                inCurrent.remove(currentCity);
+                return;
+            }
 
             //System.out.println("dfs in " + currentCity.getID() + " " + fund + " " + currentDate + " " + current.getRating());
 
