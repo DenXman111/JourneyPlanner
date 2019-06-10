@@ -17,7 +17,7 @@ Taki system można pobrać ze strony: „https://www.postgresql.org/download/”
 	
     Na wejściu pola będą wypełnione danymi bazy, która jest zwykle automatycznie tworzona wraz z zainstalowaniem systemu Postgresql.
 
-    Uwaga! Aplikacja usunie i nadpisze wszystkie potrzebne tabele itd. Dlatego na podana instancja bazy nie powinna przechowywać ważnych dla was danych.
+    Uwaga! Aplikacja usunie i nadpisze wszystkie potrKzebne tabele itd. Dlatego na podana instancja bazy nie powinna przechowywać ważnych dla was danych.
 Dodatkowo użytkownik, który zostanie podany musi mieć wszelkie potrzebne uprawnienia do tworzenia, usuwania, modyfikowania i wyświetlania tabel, funkcji, itp. 
 **oraz rozszerzeń (extensions)**
 
