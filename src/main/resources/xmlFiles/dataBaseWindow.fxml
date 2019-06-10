@@ -18,11 +18,11 @@
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
     </rowConstraints>
     <VBox maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="500.0" spacing="10.0" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-        <Label text="Data Source" />
-        <TextField fx:id="hostField" onAction="#updateUrl" promptText="Host" />
-        <TextField fx:id="portField" onAction="#updateUrl" promptText="Port" />
-        <TextField fx:id="userField" onAction="#updateUrl" promptText="User" />
-        <PasswordField fx:id="passwordField" promptText="Password" />
+        <Label text="Data Source (use proposed data to create local database)" />
+        <TextField fx:id="hostField" onAction="#updateUrl" promptText="Host" text="localhost" />
+        <TextField fx:id="portField" onAction="#updateUrl" promptText="Port" text="5432" />
+        <TextField fx:id="userField" onAction="#updateUrl" promptText="User" text="postgres" />
+        <PasswordField fx:id="passwordField" promptText="Password" text="postgres" />
         <TextField fx:id="databaseField" promptText="Database" />
         <Label fx:id="urlLabel" text="Url: " />
         <GridPane>

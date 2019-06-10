@@ -142,7 +142,6 @@ public class Planner extends Task<Integer> {
 
         private void dfs(City currentCity, double fund, Timestamp currentDate, Timestamp tripEndingDate) {
             if (System.currentTimeMillis() - timeOfLastAdding > 4000) return;
-            //if(tripsList.size() >= maxTripsNumber) return; //BAD - don't find best ways
 
             inCurrent.add(currentCity);
             if (currentCity.getID().equals(start) && !current.isEmpty())
