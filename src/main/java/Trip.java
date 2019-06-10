@@ -319,7 +319,10 @@ public class Trip implements Displayable{
 
                 } catch (Exception e) {
                     System.out.println("failed to reserve");
-                    e.printStackTrace();
+                    Platform.runLater(() -> {
+                        new ErrorWindow("failed to reserve");
+                        load(new ModificationsFinder());
+                    });
                 }
 
                 return 100;
