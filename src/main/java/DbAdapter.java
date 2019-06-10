@@ -448,13 +448,16 @@ public class DbAdapter {
 
     public static String getSpans(int id) throws SQLException {
         Statement statement = connection.createStatement();
-        String query = "Select begin_date, end_date from spans where transit=\'"+id+"\'";
+        String query = "Select id, begin_date, end_date from spans where transit=\'"+id+"\'";
         ResultSet result = statement.executeQuery(query);
-        String res="Start Date            End Date\n";
+        String res="id           Start Date            End Date\n";
         while (result.next()) {
             System.out.println(result.getString("begin_date")+"      "+result.getString("end_date"));
-            String t1=result.getString("begin_date");
-            while(t1.length()<20)
+            String t1=result.getString("id");
+            while(t1.length()<10)
+                t1=t1+" ";
+            t1+=result.getString("begin_date");
+            while(t1.length()<30)
                 t1=t1+" ";
             res=res+t1+result.getString("end_date")+"\n";
         }

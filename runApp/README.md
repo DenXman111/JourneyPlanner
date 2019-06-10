@@ -56,3 +56,29 @@ Aby móc zarezerwować wycieczkę trzeba być zalogowanym użytkownikiem aplikac
 Czasami mapa nie chce się poprawnie załadować (co wynika z biblioteki, z której korzystamy w aplikacji) najlepiej wtedy zamknąć okno z mapą i włączyć ponownie.
 
 Aby móc modyfikować dostępne busy, listę miast i przystanków trzeba w oknie logowania wpisać dane użytkownika ( username: admin1, password: admin1) i nacisnąć napis ‚login as a moderator’
+
+
+Opis przyciskow w menu admina:
+add new line dodaje linie autobusowa miedzy dwoma przystankami, ktorych podajemy id. Id przystankow mozna sprawdzic w menu 'manage cities and bus stops'
+bus type jest od 0 do 4, rozne typy busow maja rozne ilosci miejsc
+price=cena za przejazd
+
+Po dodaniu linii mozemy sprawdzic jaki dostala numer klikajac na show lines
+
+Assign span to line: Przyporzadkowywuje dany przedzial czasowy do konkretnej linii, biorac jej numer
+Zeby sprawdzic jakie spany sa przypisane do danej linii i jakie one maja id, mamy nizej przycisk Show spans from line
+
+Add departure time: bierze godzine odjazdu busa, czas przejazdu, dzien tygodnia oraz id przedzialu czasowego by ustawic cotygodniowego busa w danym przedziale czasowym
+
+Add break: dodaje do danej linii dzien, w ktorym autobusy maja nie jezdzic
+
+Delete break: usuwa z danej linii wyjatek, jezeli istnieje
+
+delete departure time: analogicznie do add, jesli taki departure time istnieje, a takze usuwa wszystkie rezerwacje wykorzystujace ten konkretny departure time
+
+delete span from line: analogidznie do assign, jesli taki span istnieje, a takze usuwa wszystkie rezerwacje wykorzystujace ten konkretny span
+
+delete line: usuwa linie, a takze wszystkie rezerwacje wykorzystujace te linie
+
+manage cities and bus stops: miasta i przystanki mozna edytowac tylko gdy nie maja one zadnych przypisanych do nich linii
+
