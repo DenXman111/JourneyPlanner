@@ -52,7 +52,7 @@ CREATE SEQUENCE reservation_id
 CREATE SEQUENCE cities_id_seq
     INCREMENT BY 1
     MINVALUE 1
-    START WITH 1
+    START WITH 31
 ;
 
 -- Sequence: generates ids for bus_stops
@@ -70,17 +70,17 @@ Create sequence transit_id
 
 Create sequence span_id
     increment by 1
-    start 1
+    start 140
 ;
 
 Create sequence reservation_id_seq
     increment by 1
-    start 1
+    start 401
 ;
 
 Create sequence transit_reservation_id_seq
     increment by 1
-    start 1
+    start 801
 ;
 
 -- tables
@@ -5478,13 +5478,3 @@ INSERT INTO seat_reservation(seat, transit_reservation_id) VALUES
 (2, 799),
 (3, 799),
 (1, 800);
-
-select setval('reservation_id_seq', 401);
-
-select setval('transit_reservation_id_seq', 801);
-
-select setval('cities_id_seq', 31);
-
-select setval('span_id', 140);
-
-select setval('stops_id_seq', 100);

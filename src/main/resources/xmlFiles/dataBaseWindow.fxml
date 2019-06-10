@@ -23,6 +23,7 @@
         <TextField fx:id="portField" onAction="#updateUrl" promptText="Port" />
         <TextField fx:id="userField" onAction="#updateUrl" promptText="User" />
         <PasswordField fx:id="passwordField" promptText="Password" />
+        <TextField fx:id="databaseField" promptText="Database" />
         <Label fx:id="urlLabel" text="Url: " />
         <GridPane>
             <columnConstraints>

@@ -13,13 +13,14 @@ public class DataBaseWindowController {
     public Button createButton;
     public Button startButton;
     public ProgressBar indicator;
+    public TextField databaseField;
 
     private boolean runningProcess;
 
     public void updateUrl() {
         if (runningProcess) return;
-        String url = "jdbc:postgresql://" + hostField.getText() + ":" + portField.getText() + "/" + userField.getText();
-        urlLabel.setText(url);
+        String url = "jdbc:postgresql://" + hostField.getText() + ":" + portField.getText() + "/" + databaseField.getText();
+        urlLabel.setText("Url: " + url);
         DbAdapter.jdbcUrl = url;
         DbAdapter.user = userField.getText();
         DbAdapter.password = passwordField.getText();
@@ -37,7 +38,7 @@ public class DataBaseWindowController {
 
                 try {
                     DbAdapter.connect();
-                    DbAdapter.create();
+                    DbAdapter.dropAll();
                     DbAdapter.createTables();
                 }
                 catch (Exception e){

@@ -7,11 +7,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("all")
 public class DbAdapter {
-    public static String user = "application_user";
+    public static String user = "postgres";
 
-    public static String password = "qjNds5HVPTMTuCy";
+    public static String password = "postgres";
 
-    public static String jdbcUrl = "jdbc:postgresql://google/postgres?cloudSqlInstance=ferrous-phoenix-241520:europe-north1:journey-planer";
+    public static String jdbcUrl = "jdbc:postgresql://localhost:5432/";
 
     private static Connection connection = null;
 
@@ -20,14 +20,18 @@ public class DbAdapter {
         connection = DriverManager.getConnection(jdbcUrl, user, password);
     }
 
-    public static void create(){
+    public static void dropAll(){
         try {
+            System.out.println("Beginning overwriting tables");
             Statement statement = connection.createStatement();
-            statement = connection.createStatement();
-            statement.executeUpdate("DROP DATABASE IF EXISTS JourneyPlanner");
-            statement.executeUpdate("CREATE DATABASE JourneyPlanner");
-            System.out.println("Database created successfully...");
-        }catch(Exception e){
+            Scanner scanner = new Scanner(Main.class.getResourceAsStream("DataBase/clear.sql"));
+            StringBuilder builder = new StringBuilder();
+            while (scanner.hasNext()) {
+                builder.append('\n').append(scanner.nextLine());
+            }
+            statement.executeUpdate(builder.toString());
+            System.out.println("Tables cleared successfully...");
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -38,7 +42,7 @@ public class DbAdapter {
             Scanner scanner = new Scanner(Main.class.getResourceAsStream("DataBase/create.sql"));
             StringBuilder builder = new StringBuilder();
             while (scanner.hasNext()) {
-                 builder.append(scanner.nextLine());
+                 builder.append('\n').append(scanner.nextLine());
             }
             statement.executeUpdate(builder.toString());
             System.out.println("Tables created successfully...");
