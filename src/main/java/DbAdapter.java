@@ -7,19 +7,44 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("all")
 public class DbAdapter {
-    private static String user = "application_user";
+    public static String user = "application_user";
 
-    private static String password = "qjNds5HVPTMTuCy";
+    public static String password = "qjNds5HVPTMTuCy";
 
-    private static String socketFactory = "com.google.cloud.sql.postgres.SocketFactory";
-
-    private static String jdbcUrl = "jdbc:postgresql://google/postgres?cloudSqlInstance=ferrous-phoenix-241520:europe-north1:journey-planer";
+    public static String jdbcUrl = "jdbc:postgresql://google/postgres?cloudSqlInstance=ferrous-phoenix-241520:europe-north1:journey-planer";
 
     private static Connection connection = null;
 
 
     public static synchronized void connect() throws SQLException, IOException {
-        connection = DriverManager.getConnection(jdbcUrl + "&socketFactory=" + socketFactory + "&user=" + user + "&password=" + password);
+        connection = DriverManager.getConnection(jdbcUrl, user, password);
+    }
+
+    public static void create(){
+        try {
+            Statement statement = connection.createStatement();
+            statement = connection.createStatement();
+            statement.executeUpdate("DROP DATABASE IF EXISTS JourneyPlanner");
+            statement.executeUpdate("CREATE DATABASE JourneyPlanner");
+            System.out.println("Database created successfully...");
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public static void createTables() {
+        try {
+            Statement statement = connection.createStatement();
+            Scanner scanner = new Scanner(Main.class.getResourceAsStream("DataBase/create.sql"));
+            StringBuilder builder = new StringBuilder();
+            while (scanner.hasNext()) {
+                 builder.append(scanner.nextLine());
+            }
+            statement.executeUpdate(builder.toString());
+            System.out.println("Tables created successfully...");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static synchronized void disconnect(){

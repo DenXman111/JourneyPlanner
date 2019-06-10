@@ -15,6 +15,8 @@ public class StageChanger {
 
         CITIES_MODER("xmlFiles/citiesModer.fxml", "cities and bus stops management", true),
 
+        DATA_BASE_WINDOW("xmlFiles/dataBaseWindow.fxml", "database settings", false),
+
         FORM("xmlFiles/form.fxml", "form", true),
 
         HISTORY("xmlFiles/history.fxml", "your reservations", true),
